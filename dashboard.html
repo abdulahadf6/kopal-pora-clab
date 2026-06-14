@@ -1,232 +1,97 @@
+ 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPTC Dashboard</title>
-
+<title>KPTC Dashboard V3</title>
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:Segoe UI,sans-serif}
 body{
-background:linear-gradient(135deg,#0f172a,#111827,#1e3a8a);
-min-height:100vh;
-color:white;
-overflow-x:hidden;
+background:#0b1120;color:white;min-height:100vh;overflow-x:hidden;position:relative;
 }
-
-body::before{
-content:"";
-position:fixed;
-width:400px;
-height:400px;
-background:rgba(59,130,246,.15);
-border-radius:50%;
-top:-150px;
-left:-150px;
-filter:blur(80px);
+.blob{
+position:fixed;border-radius:50%;filter:blur(60px);opacity:.55;z-index:-1;
 }
+.b1{width:380px;height:380px;background:#2563eb;animation:m1 8s infinite alternate ease-in-out;}
+.b2{width:320px;height:320px;background:#9333ea;right:0;bottom:0;animation:m2 10s infinite alternate ease-in-out;}
+.b3{width:260px;height:260px;background:#06b6d4;left:40%;top:35%;animation:m3 9s infinite alternate ease-in-out;}
+@keyframes m1{from{transform:translate(-80px,-50px)}to{transform:translate(120px,80px)}}
+@keyframes m2{from{transform:translate(60px,60px)}to{transform:translate(-120px,-80px)}}
+@keyframes m3{from{transform:translate(-100px,40px)}to{transform:translate(120px,-100px)}}
 
-body::after{
-content:"";
-position:fixed;
-width:350px;
-height:350px;
-background:rgba(168,85,247,.15);
-border-radius:50%;
-bottom:-150px;
-right:-150px;
-filter:blur(80px);
+.menu-btn{
+position:fixed;top:18px;left:18px;z-index:1002;
+background:rgba(255,255,255,.08);backdrop-filter:blur(20px);
+padding:12px 16px;border-radius:16px;cursor:pointer;font-size:26px;
 }
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;z-index:1000}
+.overlay.show{display:block}
 
-.header{
-padding:20px;
-text-align:center;
-animation:fadeDown 1s ease;
+.sidebar{
+position:fixed;left:-310px;top:0;width:290px;height:100%;
+background:rgba(15,23,42,.96);backdrop-filter:blur(20px);
+padding:24px;transition:.4s;z-index:1001;
 }
-
-.logo{
-width:130px;
-animation:float 4s ease-in-out infinite;
+.sidebar.show{left:0}
+.close-btn{font-size:28px;cursor:pointer;margin-bottom:20px}
+.sidebar a{
+display:block;text-decoration:none;color:white;
+padding:14px;border-radius:14px;margin-bottom:10px;
+background:rgba(255,255,255,.06);
 }
-
-.club-name{
-font-size:32px;
-font-weight:700;
-margin-top:10px;
+.hero{text-align:center;padding:70px 20px 30px}
+.logo-wrap{
+width:190px;height:190px;margin:auto;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+box-shadow:0 0 50px rgba(59,130,246,.4);
+animation:float 5s infinite ease-in-out;
 }
+.logo{width:135px}
+@keyframes float{50%{transform:translateY(-12px)}}
+h1{margin-top:22px;font-size:clamp(30px,5vw,46px)}
+.slogan{opacity:.85;margin-top:10px}
 
-.subtitle{
-opacity:.8;
-margin-top:5px;
+.cards{
+max-width:1200px;margin:auto;padding:24px;
+display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;
 }
-
-.top-buttons{
-display:flex;
-justify-content:center;
-gap:10px;
-margin-top:15px;
-flex-wrap:wrap;
+.card,.panel{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.08);
+border-radius:24px;
 }
-
-.top-buttons a{
-text-decoration:none;
-padding:10px 18px;
-border-radius:12px;
-background:rgba(255,255,255,.1);
-backdrop-filter:blur(15px);
-color:white;
-transition:.3s;
-}
-
-.top-buttons a:hover{
-transform:translateY(-3px);
-}
-
-.stats{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
-padding:25px;
-max-width:1200px;
-margin:auto;
-}
-
 .card{
-background:rgba(255,255,255,.08);
-backdrop-filter:blur(20px);
-border:1px solid rgba(255,255,255,.1);
-padding:25px;
-border-radius:24px;
-transition:.4s;
-animation:fadeUp 1s ease;
+padding:24px;transition:.3s;
 }
+.card:hover{transform:translateY(-8px)}
+.card h2{margin-top:10px;font-size:30px}
 
-.card:hover{
-transform:translateY(-10px) scale(1.02);
-box-shadow:0 20px 40px rgba(0,0,0,.3);
-}
-
-.card h3{
-font-size:16px;
-opacity:.8;
-margin-bottom:10px;
-}
-
-.card h2{
-font-size:34px;
-}
-
-.section{
-max-width:1200px;
-margin:20px auto;
-padding:0 25px;
-}
-
-.panel{
-background:rgba(255,255,255,.08);
-backdrop-filter:blur(20px);
-padding:25px;
-border-radius:24px;
-border:1px solid rgba(255,255,255,.1);
-animation:fadeUp 1.2s ease;
-}
-
-.panel h2{
-margin-bottom:15px;
-}
-
-.quick{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-margin-top:15px;
-}
-
-.quick a{
-text-decoration:none;
-color:white;
-background:rgba(255,255,255,.08);
-padding:20px;
-border-radius:18px;
-text-align:center;
-transition:.3s;
-}
-
-.quick a:hover{
-transform:translateY(-8px);
-background:rgba(255,255,255,.15);
-}
-
-.activity{
-margin-top:15px;
-}
-
+.section{max-width:1200px;margin:20px auto;padding:0 24px}
+.panel{padding:24px}
 .activity div{
-padding:12px;
-margin-bottom:10px;
-border-radius:12px;
 background:rgba(255,255,255,.05);
+padding:12px;border-radius:12px;margin-top:10px;
 }
-
-.footer{
-text-align:center;
-padding:30px;
-opacity:.7;
-margin-top:20px;
-}
-
-@keyframes float{
-0%,100%{transform:translateY(0);}
-50%{transform:translateY(-12px);}
-}
-
-@keyframes fadeDown{
-from{
-opacity:0;
-transform:translateY(-30px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-
-@keyframes fadeUp{
-from{
-opacity:0;
-transform:translateY(30px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-
+.footer{text-align:center;padding:35px;opacity:.75}
 </style>
 </head>
-
 <body>
 
-<div class="header">
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
 
-<img src="Logo.png" class="logo">
+<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
 
-<div class="club-name">
-কপাল পোড়া ট্রাভেলার্স ক্লাব
-</div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
-<div class="subtitle">
-Club Management Dashboard
-</div>
-
-<div class="top-buttons">
+<div class="sidebar" id="sidebar">
+<div class="close-btn" onclick="closeMenu()">✕</div>
+<a href="dashboard.html">🏠 Dashboard</a>
 <a href="members.html">👥 Members</a>
 <a href="income.html">💰 Income</a>
 <a href="expense.html">💸 Expense</a>
@@ -235,111 +100,54 @@ Club Management Dashboard
 <a href="index.html">🚪 Logout</a>
 </div>
 
+<div class="hero">
+<div class="logo-wrap"><img src="Logo.png" class="logo"></div>
+<h1>কপাল পোড়া ট্রাভেলার্স ক্লাব</h1>
+<div class="slogan">ঘুরতে যান এবং গোয়া মারা খান</div>
 </div>
 
-<div class="stats">
-
-<div class="card">
-<h3>💰 Current Balance</h3>
-<h2>৳ 25,000</h2>
-</div>
-
-<div class="card">
-<h3>📈 Total Income</h3>
-<h2>৳ 40,000</h2>
-</div>
-
-<div class="card">
-<h3>📉 Total Expense</h3>
-<h2>৳ 15,000</h2>
-</div>
-
-<div class="card">
-<h3>👥 Total Members</h3>
-<h2>15</h2>
-</div>
-
+<div class="cards">
+<div class="card"><small>💰 Current Balance</small><h2>৳25,000</h2></div>
+<div class="card"><small>📈 Total Income</small><h2>৳40,000</h2></div>
+<div class="card"><small>📉 Total Expense</small><h2>৳15,000</h2></div>
+<div class="card"><small>👥 Members</small><h2>15</h2></div>
 </div>
 
 <div class="section">
-
 <div class="panel">
-
-<h2>🧳 Next Tour</h2>
-
-<p><strong>Destination:</strong> Mongla</p>
-<br>
-<p><strong>Status:</strong> Planning</p>
-<br>
-<p><strong>Expected Members:</strong> 15</p>
-
+<h2>🧳 Next Tour</h2><br>
+<p>Destination: Mongla</p><br>
+<p>Status: Planning</p><br>
+<p>Expected Members: 15</p>
 </div>
-
 </div>
 
 <div class="section">
-
 <div class="panel">
-
-<h2>⚡ Quick Access</h2>
-
-<div class="quick">
-
-<a href="members.html">
-👥<br><br>Members
-</a>
-
-<a href="income.html">
-💰<br><br>Income
-</a>
-
-<a href="expense.html">
-💸<br><br>Expense
-</a>
-
-<a href="reports.html">
-📊<br><br>Reports
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="section">
-
-<div class="panel">
-
 <h2>📋 Recent Activity</h2>
-
 <div class="activity">
-
-<div>
-✅ Abdul Ahad paid January Fee
+<div>✅ Abdul Ahad paid January Fee</div>
+<div>✅ Rakib paid February Fee</div>
+<div>💸 Transport Expense Added</div>
+<div>🧳 Mongla Tour Planning Started</div>
+</div>
+</div>
 </div>
 
-<div>
-✅ Rakib paid February Fee
-</div>
+<div class="footer">KPTC Dashboard V3</div>
 
-<div>
-💸 Transport Expense Added
-</div>
-
-<div>
-🧳 Mongla Tour Planning Started
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="footer">
-Kopal Pora Travelers Club • Version 1.0 • Active
-</div>
+<script>
+function openMenu(){
+document.getElementById('sidebar').classList.add('show');
+document.getElementById('overlay').classList.add('show');
+document.getElementById('menuBtn').style.display='none';
+}
+function closeMenu(){
+document.getElementById('sidebar').classList.remove('show');
+document.getElementById('overlay').classList.remove('show');
+document.getElementById('menuBtn').style.display='block';
+}
+</script>
 
 </body>
 </html>
