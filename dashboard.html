@@ -54,6 +54,8 @@ background:rgba(255,255,255,.06);
               0 0 60px rgba(59, 130, 246, 0.5),
               0 0 100px rgba(59, 130, 246, 0.3);
   animation: float 5s infinite ease-in-out;
+  /* ভেতরের অতিরিক্ত কালো অংশ কেটে বাদ দেওয়ার জন্য */
+  overflow: hidden; 
 }
 
 .logo {
@@ -61,6 +63,8 @@ background:rgba(255,255,255,.06);
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
+  /* ইমেজটিকে সামান্য বড় করে কালো বর্ডারটি স্ক্রিনের বাইরে পাঠিয়ে দেওয়ার জন্য */
+  transform: scale(1.15); 
 }
 @keyframes float{50%{transform:translateY(-12px)}}
 h1{margin-top:22px;font-size:clamp(30px,5vw,46px)}
