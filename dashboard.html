@@ -1,29 +1,345 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard</title>
+<title>KPTC Dashboard</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#0f172a,#111827,#1e3a8a);
+min-height:100vh;
+color:white;
+overflow-x:hidden;
+}
+
+body::before{
+content:"";
+position:fixed;
+width:400px;
+height:400px;
+background:rgba(59,130,246,.15);
+border-radius:50%;
+top:-150px;
+left:-150px;
+filter:blur(80px);
+}
+
+body::after{
+content:"";
+position:fixed;
+width:350px;
+height:350px;
+background:rgba(168,85,247,.15);
+border-radius:50%;
+bottom:-150px;
+right:-150px;
+filter:blur(80px);
+}
+
+.header{
+padding:20px;
+text-align:center;
+animation:fadeDown 1s ease;
+}
+
+.logo{
+width:130px;
+animation:float 4s ease-in-out infinite;
+}
+
+.club-name{
+font-size:32px;
+font-weight:700;
+margin-top:10px;
+}
+
+.subtitle{
+opacity:.8;
+margin-top:5px;
+}
+
+.top-buttons{
+display:flex;
+justify-content:center;
+gap:10px;
+margin-top:15px;
+flex-wrap:wrap;
+}
+
+.top-buttons a{
+text-decoration:none;
+padding:10px 18px;
+border-radius:12px;
+background:rgba(255,255,255,.1);
+backdrop-filter:blur(15px);
+color:white;
+transition:.3s;
+}
+
+.top-buttons a:hover{
+transform:translateY(-3px);
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+padding:25px;
+max-width:1200px;
+margin:auto;
+}
+
+.card{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.1);
+padding:25px;
+border-radius:24px;
+transition:.4s;
+animation:fadeUp 1s ease;
+}
+
+.card:hover{
+transform:translateY(-10px) scale(1.02);
+box-shadow:0 20px 40px rgba(0,0,0,.3);
+}
+
+.card h3{
+font-size:16px;
+opacity:.8;
+margin-bottom:10px;
+}
+
+.card h2{
+font-size:34px;
+}
+
+.section{
+max-width:1200px;
+margin:20px auto;
+padding:0 25px;
+}
+
+.panel{
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+padding:25px;
+border-radius:24px;
+border:1px solid rgba(255,255,255,.1);
+animation:fadeUp 1.2s ease;
+}
+
+.panel h2{
+margin-bottom:15px;
+}
+
+.quick{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+margin-top:15px;
+}
+
+.quick a{
+text-decoration:none;
+color:white;
+background:rgba(255,255,255,.08);
+padding:20px;
+border-radius:18px;
+text-align:center;
+transition:.3s;
+}
+
+.quick a:hover{
+transform:translateY(-8px);
+background:rgba(255,255,255,.15);
+}
+
+.activity{
+margin-top:15px;
+}
+
+.activity div{
+padding:12px;
+margin-bottom:10px;
+border-radius:12px;
+background:rgba(255,255,255,.05);
+}
+
+.footer{
+text-align:center;
+padding:30px;
+opacity:.7;
+margin-top:20px;
+}
+
+@keyframes float{
+0%,100%{transform:translateY(0);}
+50%{transform:translateY(-12px);}
+}
+
+@keyframes fadeDown{
+from{
+opacity:0;
+transform:translateY(-30px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+@keyframes fadeUp{
+from{
+opacity:0;
+transform:translateY(30px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+</style>
 </head>
 
-<body style="font-family:Arial;text-align:center;padding:50px;">
+<body>
 
-<img src="Logo.png" width="150">
+<div class="header">
 
-<h1>কপাল পোড়া ট্রাভেলার্স ক্লাব</h1>
+<img src="Logo.png" class="logo">
 
-<h2>Dashboard</h2>
+<div class="club-name">
+কপাল পোড়া ট্রাভেলার্স ক্লাব
+</div>
 
-<p>Dashboard Working Successfully</p>
+<div class="subtitle">
+Club Management Dashboard
+</div>
 
-<p>
-<a href="members.html">Members</a> |
-<a href="income.html">Income</a> |
-<a href="expense.html">Expense</a> |
-<a href="reports.html">Reports</a> |
-<a href="about.html">About</a>
-</p>
+<div class="top-buttons">
+<a href="members.html">👥 Members</a>
+<a href="income.html">💰 Income</a>
+<a href="expense.html">💸 Expense</a>
+<a href="reports.html">📊 Reports</a>
+<a href="about.html">📖 About</a>
+<a href="index.html">🚪 Logout</a>
+</div>
+
+</div>
+
+<div class="stats">
+
+<div class="card">
+<h3>💰 Current Balance</h3>
+<h2>৳ 25,000</h2>
+</div>
+
+<div class="card">
+<h3>📈 Total Income</h3>
+<h2>৳ 40,000</h2>
+</div>
+
+<div class="card">
+<h3>📉 Total Expense</h3>
+<h2>৳ 15,000</h2>
+</div>
+
+<div class="card">
+<h3>👥 Total Members</h3>
+<h2>15</h2>
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="panel">
+
+<h2>🧳 Next Tour</h2>
+
+<p><strong>Destination:</strong> Mongla</p>
+<br>
+<p><strong>Status:</strong> Planning</p>
+<br>
+<p><strong>Expected Members:</strong> 15</p>
+
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="panel">
+
+<h2>⚡ Quick Access</h2>
+
+<div class="quick">
+
+<a href="members.html">
+👥<br><br>Members
+</a>
+
+<a href="income.html">
+💰<br><br>Income
+</a>
+
+<a href="expense.html">
+💸<br><br>Expense
+</a>
+
+<a href="reports.html">
+📊<br><br>Reports
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="panel">
+
+<h2>📋 Recent Activity</h2>
+
+<div class="activity">
+
+<div>
+✅ Abdul Ahad paid January Fee
+</div>
+
+<div>
+✅ Rakib paid February Fee
+</div>
+
+<div>
+💸 Transport Expense Added
+</div>
+
+<div>
+🧳 Mongla Tour Planning Started
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+Kopal Pora Travelers Club • Version 1.0 • Active
+</div>
 
 </body>
 </html>
