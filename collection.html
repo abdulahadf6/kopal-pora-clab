@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,13 +6,12 @@
 <title>KPTC Collection</title>
 
 <style>
-
 *{
 margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-transition:.4s;
+transition:.4s ease; /* অ্যানিমেশন আরও স্মুথ করার জন্য ease যুক্ত করা হয়েছে */
 }
 
 body{
@@ -25,7 +23,6 @@ position:relative;
 }
 
 /* New Background */
-
 .bg-container{
 position:fixed;
 inset:0;
@@ -47,14 +44,11 @@ width:180vw;
 height:180vh;
 top:-40%;
 left:-40%;
-
 background:
 radial-gradient(circle at 20% 20%, rgba(34,211,238,.25), transparent 30%),
 radial-gradient(circle at 80% 30%, rgba(16,185,129,.20), transparent 35%),
 radial-gradient(circle at 50% 80%, rgba(168,85,247,.20), transparent 35%);
-
 filter:blur(90px);
-
 animation:
 move1 18s linear infinite,
 move2 24s linear infinite;
@@ -72,8 +66,7 @@ move2 24s linear infinite;
 100%{margin-left:-10%;}
 }
 
-/* Menu */
-
+/* Menu Button Fix */
 .menu-btn{
 position:fixed;
 top:20px;
@@ -86,6 +79,51 @@ padding:12px 18px;
 border-radius:16px;
 cursor:pointer;
 font-size:24px;
+width: 50px;
+height: 50px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+/* Sidebar Menu Button Hover and Water Filling Effect */
+.sidebar a {
+display:block;
+text-decoration:none;
+color:white;
+padding:14px 18px;
+border-radius:14px;
+margin-bottom:12px;
+background:rgba(255,255,255,.03);
+position: relative;
+overflow: hidden;
+z-index: 1;
+border: 1px solid rgba(255,255,255,.05);
+}
+
+/* Water Filling Effect using Before pseudo-element */
+.sidebar a::before {
+content: '';
+position: absolute;
+top: 100%;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(to top, rgba(34, 211, 238, 0.2), rgba(16, 185, 129, 0.1));
+z-index: -1;
+transition: all 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
+border-radius: 14px;
+}
+
+/* Hover State: বাইরের দিকে বেরিয়ে আসা এবং ওয়াটার ইফেক্ট সচল করা */
+.sidebar a:hover {
+transform: translateX(8px); /* হালকা বাইরের দিকে বেরিয়ে আসবে */
+border-color: rgba(34, 211, 238, 0.4);
+box-shadow: 0 5px 15px rgba(34, 211, 238, 0.1);
+}
+
+.sidebar a:hover::before {
+top: 0; /* পানি নিচ থেকে উপরে উঠার মতো ইফেক্ট দিবে */
 }
 
 .overlay{
@@ -109,24 +147,15 @@ left:-320px;
 top:0;
 width:300px;
 height:100%;
-background:rgba(255,255,255,.03);
+background:rgba(11, 19, 43, 0.5); /* একটু ডার্ক করা হয়েছে যেন দেখতে সুন্দর লাগে */
 backdrop-filter:blur(40px);
-padding:30px 24px;
+padding:80px 24px 30px; /* উপরে স্পেস বাড়ানো হয়েছে ক্লোজ বাটনের জন্য */
 z-index:1001;
+border-right: 1px solid rgba(255,255,255,.05);
 }
 
 .sidebar.show{
 transform:translateX(320px);
-}
-
-.sidebar a{
-display:block;
-text-decoration:none;
-color:white;
-padding:14px 18px;
-border-radius:14px;
-margin-bottom:12px;
-background:rgba(255,255,255,.03);
 }
 
 .container{
@@ -147,8 +176,7 @@ background:rgba(255,255,255,.05);
 backdrop-filter:blur(40px);
 border:1px solid rgba(255,255,255,.1);
 border-radius:24px;
-box-shadow:
-0 15px 35px rgba(0,0,0,.3);
+box-shadow: 0 15px 35px rgba(0,0,0,.3);
 }
 
 select,
@@ -159,6 +187,12 @@ outline:none;
 background:rgba(255,255,255,.05);
 color:white;
 border-radius:18px;
+}
+
+/* ড্রপডাউন সালের অপশনগুলোর ফিক্স */
+select.glass option {
+background-color: #0b132b;
+color: #ffffff;
 }
 
 .search{
@@ -204,11 +238,6 @@ font-size:18px;
 color:#ef4444;
 font-size:18px;
 }
-  /* ড্রপডাউন অপশনগুলোর কালার ঠিক করার জন্য */
-select.glass option {
-    background-color: #0b132b; /* আপনার ওয়েবসাইটের থিমের ডার্ক কালার */
-    color: #ffffff; /* লেখার কালার সাদা */
-}
 </style>
 </head>
 
@@ -218,313 +247,110 @@ select.glass option {
 <div class="bg-wave"></div>
 </div>
 
-<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
+<div class="menu-btn" id="menuBtn" onclick="toggleMenu()">☰</div>
 
-<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <div class="sidebar" id="sidebar">
-
 <a href="dashboard.html">🏠 Dashboard</a>
-
 <a href="members.html">👥 Members</a>
-
 <a href="collection.html">📅 Collection</a>
-
 <a href="income.html">💰 Income</a>
-
 <a href="expense.html">💸 Expense</a>
-
 <a href="reports.html">📊 Reports</a>
-
 <a href="about.html">📖 About</a>
-
 <a href="index.html">🚪 Logout</a>
-
 </div>
 
 <div class="container">
-
 <div class="topbar">
-
 <select class="glass">
-
 <option>2026</option>
-
 <option>2027</option>
-
 <option>2028</option>
-
 <option>2029</option>
-  
 <option>2030</option>
-
 <option>2031</option>
-
- <option>2032</option>
-  
- <option>2033</option>
-  
+<option>2032</option>
+<option>2033</option>
 <option>2034</option>
-
 <option>2035</option>
-
 <option>2036</option>
-  
 </select>
 
-<input
-class="search glass"
-type="text"
-placeholder="🔍 Search Member..."
->
-
+<input class="search glass" type="text" placeholder="🔍 Search Member...">
 </div>
 
 <div class="glass table-box">
-
-<h2 style="
-margin-bottom:20px;
-font-size:28px;
-font-weight:700;
-">
+<h2 style="margin-bottom:20px; font-size:28px; font-weight:700;">
 📅 Collection Status
 </h2>
 
 <table>
-
 <tr>
-
 <th>Name</th>
-
-<th>Jan</th>
-
-<th>Feb</th>
-
-<th>Mar</th>
-
-<th>Apr</th>
-
-<th>May</th>
-
-<th>Jun</th>
-
-<th>Jul</th>
-
-<th>Aug</th>
-
-<th>Sep</th>
-
-<th>Oct</th>
-
-<th>Nov</th>
-
-<th>Dec</th>
-
+<th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
+<th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
 </tr>
-
 <tr>
-
 <td>Abdul Ahad</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
+<td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td>
+<td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
 </tr>
-
 <tr>
-
 <td>Rakib</td>
-
-<td class="ok">✅</td>
-
-<td class="no">❌</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="no">❌</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
+<td class="ok">✅</td><td class="no">❌</td><td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td><td class="ok">✅</td>
+<td class="ok">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
 </tr>
-
 <tr>
-
 <td>Sohan</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="ok">✅</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
-<td class="no">❌</td>
-
+<td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td>
+<td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
 </tr>
 <tr>
-
 <td>Hasan</td>
-
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="no">❌</td>
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="no">❌</td>
-<td class="no">❌</td>
-<td class="no">❌</td>
-
+<td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td>
+<td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
 </tr>
-
 <tr>
-
 <td>Imran</td>
-
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="ok">✅</td>
-<td class="no">❌</td>
-<td class="no">❌</td>
-<td class="no">❌</td>
-<td class="no">❌</td>
-<td class="no">❌</td>
-<td class="no">❌</td>
-<td class="no">❌</td>
-
+<td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td>
+<td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
 </tr>
-
 </table>
-
 </div>
 
-<div
-class="glass"
-style="
-margin-top:25px;
-padding:25px;
-">
-
-<h3 style="margin-bottom:15px;">
-📊 Summary
-</h3>
-
-<p>Total Members : 15</p>
-<br>
-
-<p>Paid This Month : 12</p>
-<br>
-
+<div class="glass" style="margin-top:25px; padding:25px;">
+<h3 style="margin-bottom:15px;">📊 Summary</h3>
+<p>Total Members : 15</p><br>
+<p>Paid This Month : 12</p><br>
 <p>Pending Members : 3</p>
-
+</div>
 </div>
 
-</div>
-
-<div
-style="
-text-align:center;
-padding:40px;
-color:#94a3b8;
-">
-
+<div style="text-align:center; padding:40px; color:#94a3b8;">
 KPTC Collection V1
-
 </div>
 
 <script>
-
-function openMenu(){
-
-document
-.getElementById('sidebar')
-.classList
-.add('show');
-
-document
-.getElementById('overlay')
-.classList
-.add('show');
-
-document
-.getElementById('menuBtn')
-.style.opacity='0';
-
+// নতুন জাভাস্ক্রিপ্ট লজিক যা থ্রি-লাইনকে ক্লোজ (X) বাটনে রূপান্তর করবে
+function toggleMenu(){
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const menuBtn = document.getElementById('menuBtn');
+    
+    sidebar.classList.toggle('show');
+    overlay.classList.toggle('show');
+    
+    // যদি সাইডবার ওপেন থাকে তবে বাটনটি '✖️' হবে, বন্ধ থাকলে '☰' হবে
+    if(sidebar.classList.contains('show')){
+        menuBtn.innerHTML = '✖️';
+        menuBtn.style.background = 'rgba(255,255,255,.1)';
+    } else {
+        menuBtn.innerHTML = '☰';
+        menuBtn.style.background = 'rgba(255,255,255,.05)';
+    }
 }
-
-function closeMenu(){
-
-document
-.getElementById('sidebar')
-.classList
-.remove('show');
-
-document
-.getElementById('overlay')
-.classList
-.remove('show');
-
-document
-.getElementById('menuBtn')
-.style.opacity='1';
-
-}
-
 </script>
 
 </body>
