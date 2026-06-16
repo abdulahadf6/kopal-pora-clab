@@ -1,1 +1,369 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPTC Dashboard V3 - Ultra Premium Liquid</title>
+<style>
+/* গ্লোবাল স্টাইল */
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+  background: #030611;
+  color: #f5f5f7;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* সম্পূর্ণ নতুন এবং দ্রুতগতির জীবন্ত ব্যাকগ্রাউন্ড (অরোরা ওয়েভ ইফেক্ট) */
+.bg-container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #02040a;
+}
+
+.bg-wave {
+  position: absolute;
+  width: 150vw;
+  height: 150vh;
+  top: -50vh;
+  left: -25vw;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.45) 0%, transparent 40%),
+    radial-gradient(circle at 80% 40%, rgba(124, 58, 237, 0.45) 0%, transparent 40%),
+    radial-gradient(circle at 40% 80%, rgba(14, 116, 144, 0.45) 0%, transparent 45%),
+    radial-gradient(circle at 70% 10%, rgba(29, 78, 216, 0.35) 0%, transparent 35%);
+  filter: blur(60px); /* ব্লার কিছুটা কমিয়ে মোশন স্পষ্ট করা হয়েছে */
+  animation: fastLiquid 12s infinite linear; /* অ্যানিমেশন অনেক দ্রুত (১২ সেকেন্ড) করা হয়েছে */
+  will-change: transform;
+}
+
+@keyframes fastLiquid {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* আইফোন স্টাইল মেনু বাটন */
+.menu-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1002;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.04);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ওভারলে */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 15, 0.4);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+.overlay.show { opacity: 1; visibility: visible; }
+
+/* সাইডবার */
+.sidebar {
+  position: fixed;
+  left: -320px;
+  top: 0;
+  width: 300px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 30px 24px;
+  z-index: 1001;
+  box-shadow: 20px 0 80px rgba(0,0,0,0.3);
+}
+.sidebar.show { transform: translateX(320px); }
+.close-btn { font-size: 26px; cursor: pointer; margin-bottom: 30px; color: #a1a1aa; }
+.close-btn:hover { color: #fff; transform: rotate(90deg); }
+
+.sidebar a {
+  display: block;
+  text-decoration: none;
+  color: #e4e4e7;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(6px);
+}
+
+/* হিরো এবং বড় লোগো সেকশন */
+.hero { text-align: center; padding: 70px 20px 30px; }
+
+.logo-wrap {
+  width: 240px;
+  height: 240px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  animation: float 5s infinite ease-in-out;
+}
+
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.6))
+          drop-shadow(0 0 45px rgba(59, 130, 246, 0.4))
+          drop-shadow(0 0 80px rgba(59, 130, 246, 0.2));
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-12px) scale(1.02); }
+}
+
+h1 {
+  margin-top: 25px;
+  font-size: clamp(32px, 5vw, 50px);
+  font-weight: 700;
+  background: linear-gradient(180deg, #ffffff 40%, #d4d4d8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+.slogan { opacity: 0.6; margin-top: 12px; font-size: 16px; }
+
+/* কার্ড গ্রিড */
+.cards {
+  max-width: 1200px;
+  margin: auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+/* পারফেক্ট লিকুইড গ্লাস কার্ড এবং প্যানেল */
+.card, .panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(40px); /* ব্লার আরও বাড়ানো হয়েছে নিখুঁত গ্লাস ফিলের জন্য */
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 
+              0 15px 35px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+/* মাউস নিলে গ্লাসের ভেতর তরল/পানি ভরে যাওয়ার দৃশ্যমান ইফেক্ট */
+.card::after, .panel::after {
+  content: '';
+  position: absolute;
+  bottom: -100%;
+  left: -10%;
+  width: 120%;
+  height: 100%;
+  /* হালকা উজ্জ্বল গ্লসি পানির লেয়ার */
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 70%, transparent 100%);
+  border-radius: 40% 40% 0 0; /* পানির উপরিভাগের কার্ভ */
+  transition: transform 1s cubic-bezier(0.1, 0.8, 0.2, 1), bottom 1s cubic-bezier(0.1, 0.8, 0.2, 1);
+  pointer-events: none;
+  transform: translateY(0) rotate(0deg);
+}
+
+.card:hover::after, .panel:hover::after {
+  bottom: 0%; /* মাউস নিলে পানি ভরে ওপরে উঠে আসবে */
+  transform: translateY(0) rotate(8deg); /* আলতো একটু বাঁকা হয়ে পানির ঢেউয়ের অনুভূতি দেবে */
+}
+
+/* গ্লাসের ওপর আলোর ঝিলিক (Reflecting Shine) */
+.card::before, .panel::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  transform: rotate(45deg);
+  transition: 0.8s ease;
+  pointer-events: none;
+}
+.card:hover::before, .panel:hover::before { transform: translate(50%, 50%) rotate(45deg); }
+
+.card { padding: 28px; cursor: pointer; }
+
+.card:hover, .panel:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.3),
+              0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.card small { color: #a1a1aa; font-size: 14px; font-weight: 500; display: block; margin-bottom: 8px;}
+.card h2 { font-size: 32px; font-weight: 600; color: #fff; }
+
+/* সেকশন এবং প্যানেল */
+.section { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
+.panel { padding: 30px; cursor: pointer; }
+.panel h2 { font-size: 24px; font-weight: 600; margin-bottom: 18px; }
+
+/* অ্যাক্টিভিটি লিস্ট */
+.activity div {
+  background: rgba(255, 255, 255, 0.01);
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  position: relative;
+  z-index: 2; /* পানির লেয়ারের উপরে রাখার জন্য */
+}
+.activity div:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateX(4px);
+}
+
+/* ফুটার */
+.footer { text-align: center; padding: 40px; color: #71717a; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="bg-container">
+  <div class="bg-wave"></div>
+</div>
+
+<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
+
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="sidebar" id="sidebar">
+<div class="close-btn" onclick="closeMenu()">✕</div>
+<a href="dashboard.html">🏠 Dashboard</a>
+<a href="members.html">👥 Members</a>
+<a href="income.html">💰 Income</a>
+<a href="expense.html">💸 Expense</a>
+<a href="reports.html">📊 Reports</a>
+<a href="about.html">📖 About</a>
+<a href="index.html">🚪 Logout</a>
+</div>
+
+<div class="hero">
+<div class="logo-wrap"><img src="Logo.png" class="logo"></div>
+<h1>Members Directory </h1>
+<div class="slogan">সকল সদস্যের তথ্য ও তালিকা</div>
+</div>
+
+<div class="cards">
+
+<div class="card">
+<small> Total Members</small>
+<h2>15</h2>
+</div>
+
+<div class="card">
+<small> Member IDs</small>
+<h2>15</h2>
+</div>
+
+<div class="card">
+<small> Locations</small>
+<h2>8</h2>
+</div>
+
+<div class="card">
+<small> Active Members</small>
+<h2>15</h2>
+</div>
+
+</div>
+
+<div class="section">
+<div class="panel">
+
+<h2>Member Directory</h2>
+
+<table style="width:100%;border-collapse:collapse">
+
+<tr>
+<th style="padding:15px">ID</th>
+<th style="padding:15px">Name</th>
+<th style="padding:15px">Address</th>
+</tr>
+
+<tr>
+<td style="padding:15px">KPTC-001</td>
+<td style="padding:15px">Abdul Ahad</td>
+<td style="padding:15px">Tungipara</td>
+</tr>
+
+<tr>
+<td style="padding:15px">KPTC-002</td>
+<td style="padding:15px">Rakib</td>
+<td style="padding:15px">Gopalganj</td>
+</tr>
+
+<tr>
+<td style="padding:15px">KPTC-003</td>
+<td style="padding:15px">Sohan</td>
+<td style="padding:15px">Khulna</td>
+</tr>
+
+</table>
+
+</div>
+</div>
+
+<div class="footer">
+KPTC Members V1
+</div>
+
+<script>
+function openMenu(){
+  document.getElementById('sidebar').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('menuBtn').style.opacity = '0';
+  document.getElementById('menuBtn').style.pointerEvents = 'none';
+}
+function closeMenu(){
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('menuBtn').style.opacity = '1';
+  document.getElementById('menuBtn').style.pointerEvents = 'auto';
+}
+</script>
+
+</body>
+</html>
