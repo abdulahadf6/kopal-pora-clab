@@ -11,7 +11,7 @@ margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-transition:.4s ease; /* অ্যানিমেশন আরও স্মুথ করার জন্য ease যুক্ত করা হয়েছে */
+transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); /* ড্যাশবোর্ডের মতো স্মুথ ট্রানজিশন */
 }
 
 body{
@@ -66,96 +66,77 @@ move2 24s linear infinite;
 100%{margin-left:-10%;}
 }
 
-/* Menu Button Fix */
-.menu-btn{
-position:fixed;
-top:20px;
-left:20px;
-z-index:1002;
-background:rgba(255,255,255,.05);
-backdrop-filter:blur(30px);
-border:1px solid rgba(255,255,255,.12);
-padding:12px 18px;
-border-radius:16px;
-cursor:pointer;
-font-size:24px;
-width: 50px;
-height: 50px;
-display: flex;
-align-items: center;
-justify-content: center;
+/* Menu Button */
+.menu-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1002;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.04);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Sidebar Menu Button Hover and Water Filling Effect */
+/* ওভারলে */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 15, 0.4);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+.overlay.show { opacity: 1; visibility: visible; }
+
+/* সাইডবার (ড্যাশবোর্ডের মতো নিখুঁত আল্ট্রা গ্লাস থিম) */
+.sidebar {
+  position: fixed;
+  left: -320px;
+  top: 0;
+  width: 300px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 30px 24px;
+  z-index: 1001;
+  box-shadow: 20px 0 80px rgba(0,0,0,0.3);
+}
+.sidebar.show { transform: translateX(320px); }
+
+/* সাইডবারের ভেতরের ক্লোজ বাটন */
+.close-btn { font-size: 26px; cursor: pointer; margin-bottom: 30px; color: #a1a1aa; display: inline-block; }
+.close-btn:hover { color: #fff; transform: rotate(90deg); }
+
+/* সাইডবার আইটেম (কোনো ওয়াটার ইফেক্ট ছাড়া, শুধু হালকা ৬ পিক্সেল স্লাইড হোভার) */
 .sidebar a {
-display:block;
-text-decoration:none;
-color:white;
-padding:14px 18px;
-border-radius:14px;
-margin-bottom:12px;
-background:rgba(255,255,255,.03);
-position: relative;
-overflow: hidden;
-z-index: 1;
-border: 1px solid rgba(255,255,255,.05);
+  display: block;
+  text-decoration: none;
+  color: #e4e4e7;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
-
-/* Water Filling Effect using Before pseudo-element */
-.sidebar a::before {
-content: '';
-position: absolute;
-top: 100%;
-left: 0;
-width: 100%;
-height: 100%;
-background: linear-gradient(to top, rgba(34, 211, 238, 0.2), rgba(16, 185, 129, 0.1));
-z-index: -1;
-transition: all 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
-border-radius: 14px;
-}
-
-/* Hover State: বাইরের দিকে বেরিয়ে আসা এবং ওয়াটার ইফেক্ট সচল করা */
 .sidebar a:hover {
-transform: translateX(8px); /* হালকা বাইরের দিকে বেরিয়ে আসবে */
-border-color: rgba(34, 211, 238, 0.4);
-box-shadow: 0 5px 15px rgba(34, 211, 238, 0.1);
-}
-
-.sidebar a:hover::before {
-top: 0; /* পানি নিচ থেকে উপরে উঠার মতো ইফেক্ট দিবে */
-}
-
-.overlay{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.4);
-backdrop-filter:blur(15px);
-opacity:0;
-visibility:hidden;
-z-index:1000;
-}
-
-.overlay.show{
-opacity:1;
-visibility:visible;
-}
-
-.sidebar{
-position:fixed;
-left:-320px;
-top:0;
-width:300px;
-height:100%;
-background:rgba(11, 19, 43, 0.5); /* একটু ডার্ক করা হয়েছে যেন দেখতে সুন্দর লাগে */
-backdrop-filter:blur(40px);
-padding:80px 24px 30px; /* উপরে স্পেস বাড়ানো হয়েছে ক্লোজ বাটনের জন্য */
-z-index:1001;
-border-right: 1px solid rgba(255,255,255,.05);
-}
-
-.sidebar.show{
-transform:translateX(320px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(6px); /* হালকা বাইরের দিকে বেরিয়ে আসার ইফেক্ট */
 }
 
 .container{
@@ -247,12 +228,12 @@ font-size:18px;
 <div class="bg-wave"></div>
 </div>
 
-<div class="menu-btn" id="menuBtn" onclick="toggleMenu()">☰</div>
+<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
 
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
 <div class="sidebar" id="sidebar">
-<a href="dashboard.html">🏠 Dashboard</a>
+<div class="close-btn" onclick="closeMenu()">✕</div> <a href="dashboard.html">🏠 Dashboard</a>
 <a href="members.html">👥 Members</a>
 <a href="collection.html">📅 Collection</a>
 <a href="income.html">💰 Income</a>
@@ -333,23 +314,18 @@ KPTC Collection V1
 </div>
 
 <script>
-// নতুন জাভাস্ক্রিপ্ট লজিক যা থ্রি-লাইনকে ক্লোজ (X) বাটনে রূপান্তর করবে
-function toggleMenu(){
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay');
-    const menuBtn = document.getElementById('menuBtn');
-    
-    sidebar.classList.toggle('show');
-    overlay.classList.toggle('show');
-    
-    // যদি সাইডবার ওপেন থাকে তবে বাটনটি '✖️' হবে, বন্ধ থাকলে '☰' হবে
-    if(sidebar.classList.contains('show')){
-        menuBtn.innerHTML = '✖️';
-        menuBtn.style.background = 'rgba(255,255,255,.1)';
-    } else {
-        menuBtn.innerHTML = '☰';
-        menuBtn.style.background = 'rgba(255,255,255,.05)';
-    }
+// ড্যাশবোর্ডের মতো মেনু ওপেন এবং ক্লোজ করার স্ক্রিপ্ট
+function openMenu(){
+  document.getElementById('sidebar').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('menuBtn').style.opacity = '0';
+  document.getElementById('menuBtn').style.pointerEvents = 'none';
+}
+function closeMenu(){
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('menuBtn').style.opacity = '1';
+  document.getElementById('menuBtn').style.pointerEvents = 'auto';
 }
 </script>
 
