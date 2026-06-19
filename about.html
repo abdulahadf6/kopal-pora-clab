@@ -1,1 +1,505 @@
 
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KPTC Reports</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+transition:.4s;
+}
+
+body{
+background:#020617;
+color:white;
+min-height:100vh;
+overflow-x:hidden;
+position:relative;
+}
+
+/* Animated Background */
+
+.bg{
+position:fixed;
+inset:0;
+z-index:-1;
+overflow:hidden;
+background:#020617;
+}
+
+.bg::before{
+content:"";
+position:absolute;
+width:1400px;
+height:1400px;
+left:-300px;
+top:-300px;
+
+background:
+radial-gradient(circle,
+rgba(16,185,129,.35),
+transparent 60%);
+
+animation:move1 18s linear infinite;
+filter:blur(80px);
+}
+
+.bg::after{
+content:"";
+position:absolute;
+width:1200px;
+height:1200px;
+right:-250px;
+bottom:-250px;
+
+background:
+radial-gradient(circle,
+rgba(6,182,212,.35),
+transparent 60%);
+
+animation:move2 15s linear infinite;
+filter:blur(80px);
+}
+
+@keyframes move1{
+
+0%{
+transform:rotate(0deg);
+}
+
+100%{
+transform:rotate(360deg);
+}
+
+}
+
+@keyframes move2{
+
+0%{
+transform:rotate(360deg);
+}
+
+100%{
+transform:rotate(0deg);
+}
+
+}
+
+/* Menu */
+
+.menu-btn{
+
+position:fixed;
+top:20px;
+left:20px;
+z-index:1002;
+
+background:rgba(255,255,255,.08);
+
+backdrop-filter:blur(20px);
+
+border:1px solid rgba(255,255,255,.15);
+
+padding:12px 18px;
+
+border-radius:15px;
+
+cursor:pointer;
+
+font-size:24px;
+
+}
+
+.menu-btn:hover{
+
+transform:scale(1.05);
+
+}
+
+/* Sidebar */
+
+.sidebar{
+
+position:fixed;
+
+left:-320px;
+
+top:0;
+
+width:300px;
+
+height:100%;
+
+padding:25px;
+
+background:rgba(255,255,255,.05);
+
+backdrop-filter:blur(30px);
+
+border-right:1px solid rgba(255,255,255,.1);
+
+z-index:1001;
+
+}
+
+.sidebar.show{
+
+transform:translateX(320px);
+
+}
+
+.sidebar a{
+
+display:block;
+
+text-decoration:none;
+
+color:white;
+
+padding:14px;
+
+margin-bottom:10px;
+
+border-radius:14px;
+
+background:rgba(255,255,255,.05);
+
+}
+
+.sidebar a:hover{
+
+transform:translateX(6px);
+
+}
+
+.overlay{
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,.4);
+
+backdrop-filter:blur(10px);
+
+opacity:0;
+
+visibility:hidden;
+
+z-index:1000;
+
+}
+
+.overlay.show{
+
+opacity:1;
+
+visibility:visible;
+
+}
+
+/* Main */
+
+.container{
+
+max-width:1200px;
+
+margin:auto;
+
+padding:90px 20px 40px;
+
+}
+
+.page-title{
+
+text-align:center;
+
+font-size:42px;
+
+margin-bottom:35px;
+
+font-weight:700;
+
+}
+
+.cards{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(250px,1fr));
+
+gap:20px;
+
+}
+
+ .card{
+
+padding:25px;
+
+border-radius:28px;
+
+background:
+rgba(255,255,255,.05);
+
+backdrop-filter:blur(25px);
+
+border:1px solid
+rgba(255,255,255,.12);
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.25);
+
+}
+
+.card:hover{
+
+transform:translateY(-6px);
+
+}
+
+.card small{
+
+display:block;
+
+color:#94a3b8;
+
+margin-bottom:10px;
+
+font-size:14px;
+
+}
+
+.card h2{
+
+font-size:34px;
+
+}
+
+/* Panel */
+
+.panel{
+
+margin-top:25px;
+
+padding:25px;
+
+border-radius:28px;
+
+background:
+rgba(255,255,255,.05);
+
+backdrop-filter:blur(25px);
+
+border:1px solid
+rgba(255,255,255,.12);
+
+overflow:auto;
+
+}
+
+.panel h2{
+
+margin-bottom:20px;
+
+}
+
+/* Table */
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+}
+
+th{
+
+text-align:left;
+
+padding:15px;
+
+background:
+rgba(255,255,255,.08);
+
+}
+
+td{
+
+padding:15px;
+
+border-bottom:
+1px solid rgba(255,255,255,.08);
+
+}
+
+tr:hover{
+
+background:
+rgba(255,255,255,.04);
+
+}
+
+.footer{
+
+text-align:center;
+
+padding:40px;
+
+color:#94a3b8;
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bg"></div>
+
+<div
+class="menu-btn"
+id="menuBtn"
+onclick="openMenu()">
+☰
+</div>
+
+<div
+class="overlay"
+id="overlay"
+onclick="closeMenu()">
+</div>
+
+<div
+class="sidebar"
+id="sidebar">
+
+<a href="dashboard.html">
+🏠 Dashboard
+</a>
+
+<a href="members.html">
+👥 Members
+</a>
+
+<a href="collection.html">
+📅 Collection
+</a>
+
+<a href="income.html">
+💰 Income
+</a>
+
+<a href="expense.html">
+💸 Expense
+</a>
+
+<a href="reports.html">
+📊 Reports
+</a>
+
+</div>
+
+<div class="container">
+
+<h1 class="page-title">
+  About
+</h1>
+  <div class="panel">
+
+<h2>📖 About KPTC</h2>
+
+<p>
+
+কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC) একটি ভ্রমণপ্রেমী সংগঠন।
+
+এই ক্লাবের মূল উদ্দেশ্য হলো বন্ধুদের নিয়ে ভ্রমণ করা, নতুন অভিজ্ঞতা অর্জন করা এবং সুন্দর স্মৃতি তৈরি করা।
+
+সদস্যদের মাসিক চাঁদা, আয়-ব্যয় হিসাব এবং ট্যুর পরিকল্পনা পরিচালনার জন্য এই সিস্টেম তৈরি করা হয়েছে।
+
+</p>
+
+</div>
+
+  
+ <div class="panel">
+
+<h2>📜 Club Policy</h2>
+
+<ul>
+
+<li>প্রতিটি সদস্যকে মাসিক চাঁদা প্রদান করতে হবে।</li>
+
+<li>সকল আয়-ব্যয়ের হিসাব সংরক্ষণ করা হবে।</li>
+
+<li>ক্লাবের অর্থ ব্যক্তিগত কাজে ব্যবহার করা যাবে না।</li>
+
+<li>সদস্যদের পারস্পরিক সম্মান বজায় রাখতে হবে।</li>
+
+<li>ট্যুর সংক্রান্ত সিদ্ধান্ত যৌথভাবে নেওয়া হবে।</li>
+
+<li>প্রয়োজনে নীতিমালা পরিবর্তন করা যেতে পারে।</li>
+
+</ul>
+
+</div>
+
+
+
+<div class="footer">
+
+KPTC Reports V1
+
+</div>
+
+<script>
+
+function openMenu(){
+
+document
+.getElementById('sidebar')
+.classList
+.add('show');
+
+document
+.getElementById('overlay')
+.classList
+.add('show');
+
+document
+.getElementById('menuBtn')
+.style.opacity='0';
+
+}
+
+function closeMenu(){
+
+document
+.getElementById('sidebar')
+.classList
+.remove('show');
+
+document
+.getElementById('overlay')
+.classList
+.remove('show');
+
+document
+.getElementById('menuBtn')
+.style.opacity='1';
+
+}
+
+</script>
+
+</body>
+</html> 
