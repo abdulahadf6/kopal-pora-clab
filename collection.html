@@ -11,7 +11,7 @@ margin:0;
 padding:0;
 box-sizing:border-box;
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); /* ড্যাশবোর্ডের মতো স্মুথ ট্রানজিশন */
+transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body{
@@ -22,7 +22,6 @@ overflow-x:hidden;
 position:relative;
 }
 
-/* New Background */
 .bg-container{
 position:fixed;
 inset:0;
@@ -66,7 +65,6 @@ move2 24s linear infinite;
 100%{margin-left:-10%;}
 }
 
-/* Menu Button */
 .menu-btn {
   position: fixed;
   top: 20px;
@@ -88,7 +86,6 @@ move2 24s linear infinite;
   border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* ওভারলে */
 .overlay {
   position: fixed;
   inset: 0;
@@ -101,7 +98,6 @@ move2 24s linear infinite;
 }
 .overlay.show { opacity: 1; visibility: visible; }
 
-/* সাইডবার (ড্যাশবোর্ডের মতো নিখুঁত আল্ট্রা গ্লাস থিম) */
 .sidebar {
   position: fixed;
   left: -320px;
@@ -118,11 +114,9 @@ move2 24s linear infinite;
 }
 .sidebar.show { transform: translateX(320px); }
 
-/* সাইডবারের ভেতরের ক্লোজ বাটন */
 .close-btn { font-size: 26px; cursor: pointer; margin-bottom: 30px; color: #a1a1aa; display: inline-block; }
 .close-btn:hover { color: #fff; transform: rotate(90deg); }
 
-/* সাইডবার আইটেম (কোনো ওয়াটার ইফেক্ট ছাড়া, শুধু হালকা ৬ পিক্সেল স্লাইড হোভার) */
 .sidebar a {
   display: block;
   text-decoration: none;
@@ -136,7 +130,7 @@ move2 24s linear infinite;
 .sidebar a:hover {
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.15);
-  transform: translateX(6px); /* হালকা বাইরের দিকে বেরিয়ে আসার ইফেক্ট */
+  transform: translateX(6px);
 }
 
 .container{
@@ -170,7 +164,6 @@ color:white;
 border-radius:18px;
 }
 
-/* ড্রপডাউন সালের অপশনগুলোর ফিক্স */
 select.glass option {
 background-color: #0b132b;
 color: #ffffff;
@@ -229,11 +222,11 @@ font-size:18px;
 </div>
 
 <div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
-
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
 <div class="sidebar" id="sidebar">
-<div class="close-btn" onclick="closeMenu()">✕</div> <a href="dashboard.html">🏠 Dashboard</a>
+<div class="close-btn" onclick="closeMenu()">✕</div> 
+<a href="dashboard.html">🏠 Dashboard</a>
 <a href="members.html">👥 Members</a>
 <a href="collection.html">📅 Collection</a>
 <a href="income.html">💰 Income</a>
@@ -245,21 +238,15 @@ font-size:18px;
 
 <div class="container">
 <div class="topbar">
-<select class="glass">
-<option>2026</option>
-<option>2027</option>
-<option>2028</option>
-<option>2029</option>
-<option>2030</option>
-<option>2031</option>
-<option>2032</option>
-<option>2033</option>
-<option>2034</option>
-<option>2035</option>
-<option>2036</option>
+<select class="glass" id="yearSelect">
+<option value="2026">2026</option>
+<option value="2027">2027</option>
+<option value="2028">2028</option>
+<option value="2029">2029</option>
+<option value="2030">2030</option>
 </select>
 
-<input class="search glass" type="text" placeholder="🔍 Search Member...">
+<input class="search glass" type="text" id="searchInput" placeholder="🔍 Search Member...">
 </div>
 
 <div class="glass table-box">
@@ -267,45 +254,24 @@ font-size:18px;
 📅 Collection Status
 </h2>
 
-<table>
+<table id="collectionTable">
+<thead>
 <tr>
 <th>Name</th>
 <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
 <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
 </tr>
-<tr>
-<td>Abdul Ahad</td>
-<td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td>
-<td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
-</tr>
-<tr>
-<td>Rakib</td>
-<td class="ok">✅</td><td class="no">❌</td><td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td><td class="ok">✅</td>
-<td class="ok">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
-</tr>
-<tr>
-<td>Sohan</td>
-<td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td>
-<td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
-</tr>
-<tr>
-<td>Hasan</td>
-<td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td>
-<td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
-</tr>
-<tr>
-<td>Imran</td>
-<td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="ok">✅</td><td class="no">❌</td>
-<td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td><td class="no">❌</td>
-</tr>
+</thead>
+<tbody id="tableBody">
+</tbody>
 </table>
 </div>
 
 <div class="glass" style="margin-top:25px; padding:25px;">
 <h3 style="margin-bottom:15px;">📊 Summary</h3>
-<p>Total Members : 15</p><br>
-<p>Paid This Month : 12</p><br>
-<p>Pending Members : 3</p>
+<p>Total Members : <span id="totalMembers">0</span></p><br>
+<p>Paid This Month (<span id="currentMonthName">Month</span>) : <span id="paidMembers">0</span></p><br>
+<p>Pending Members : <span id="pendingMembers">0</span></p>
 </div>
 </div>
 
@@ -313,8 +279,102 @@ font-size:18px;
 KPTC Collection V1
 </div>
 
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
+
+  // আপনার ফায়ারবেজ কনফিগারেশন
+  const firebaseConfig = {
+    apiKey: "AIzaSyBDeCnZysIu3_H162qMsWZaZ3Ba09Hwhxg",
+    authDomain: "kopal-pora-travelers-club.firebaseapp.com",
+    databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "kopal-pora-travelers-club",
+    storageBucket: "kopal-pora-travelers-club.firebasestorage.app",
+    messagingSenderId: "399226201547",
+    appId: "1:399226201547:web:98676a92f689edc45d824e",
+    measurementId: "G-JS3E9QMPJ6"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  let allMembersData = {}; 
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  // কারেন্ট মাসের নাম দেখানোর জন্য
+  const currentMonthIdx = new Date().getMonth();
+  document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
+
+  // ডাটাবেজ থেকে ডাটা লোড করার ফাংশন
+  function loadCollectionData(year) {
+    const dbRef = ref(db, 'collections/' + year);
+    onValue(dbRef, (snapshot) => {
+      allMembersData = snapshot.val() || {};
+      renderTable(allMembersData);
+    });
+  }
+
+  // টেবিলে ডাটা সাজানোর ফাংশন
+  function renderTable(data, filterText = "") {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = "";
+
+    let total = 0;
+    let paid = 0;
+    let pending = 0;
+
+    Object.keys(data).forEach(memberId => {
+      const member = data[memberId];
+      const memberName = member.name || memberId;
+
+      // সার্চ ফিল্টার চেক
+      if (filterText && !memberName.toLowerCase().includes(filterText.toLowerCase())) {
+        return;
+      }
+
+      total++;
+
+      let rowHtml = <tr><td>${memberName}</td>;
+      months.forEach((month, idx) => {
+        const isPaid = member[month] === true;
+        rowHtml += isPaid ? <td class="ok">✅</td> : <td class="no">❌</td>;
+        
+        // রানিং বা চলতি মাসের হিসাব বের করার জন্য
+        if (idx === currentMonthIdx) {
+          if (isPaid) paid++; else pending++;
+        }
+      });
+      rowHtml += </tr>;
+      tbody.innerHTML += rowHtml;
+    });
+
+    if (total === 0) {
+      tbody.innerHTML = <tr><td colspan="13" style="padding:30px; color:#94a3b8;">No data found in database!</td></tr>;
+    }
+
+    // সামারি কার্ড আপডেট
+    document.getElementById('totalMembers').innerText = total;
+    document.getElementById('paidMembers').innerText = paid;
+    document.getElementById('pendingMembers').innerText = pending;
+  }
+
+  // সাল পরিবর্তন করলে ডাটা চেঞ্জ হবে
+  const yearSelect = document.getElementById('yearSelect');
+  yearSelect.addEventListener('change', (e) => {
+    loadCollectionData(e.target.value);
+  });
+
+  // সার্চ বক্সে নাম লিখলে লাইভ ফিল্টার হবে
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', (e) => {
+    renderTable(allMembersData, e.target.value);
+  });
+
+  // প্রথমবার পেজ লোড হলে ডিফল্ট সাল লোড হবে
+  loadCollectionData(yearSelect.value);
+</script>
+
 <script>
-// ড্যাশবোর্ডের মতো মেনু ওপেন এবং ক্লোজ করার স্ক্রিপ্ট
 function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
