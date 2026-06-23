@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+[11:55 am, 23/06/2026] Abdul Ahad: ফাইনাল
+[11:55 am, 23/06/2026] Abdul Ahad: <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -283,7 +284,6 @@ KPTC Collection V1
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
 
-  // আপনার ফায়ারবেজ কনফিগারেশন
   const firebaseConfig = {
     apiKey: "AIzaSyBDeCnZysIu3_H162qMsWZaZ3Ba09Hwhxg",
     authDomain: "kopal-pora-travelers-club.firebaseapp.com",
@@ -301,11 +301,9 @@ KPTC Collection V1
   let allMembersData = {}; 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  // কারেন্ট মাসের নাম দেখানোর জন্য
   const currentMonthIdx = new Date().getMonth();
   document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
 
-  // ডাটাবেজ থেকে ডাটা লোড করার ফাংশন
   function loadCollectionData(year) {
     const dbRef = ref(db, 'collections/' + year);
     onValue(dbRef, (snapshot) => {
@@ -314,7 +312,6 @@ KPTC Collection V1
     });
   }
 
-  // টেবিলে ডাটা সাজানোর ফাংশন
   function renderTable(data, filterText = "") {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = "";
@@ -327,7 +324,6 @@ KPTC Collection V1
       const member = data[memberId];
       const memberName = member.name || memberId;
 
-      // সার্চ ফিল্টার চেক
       if (filterText && !memberName.toLowerCase().includes(filterText.toLowerCase())) {
         return;
       }
@@ -339,7 +335,6 @@ KPTC Collection V1
         const isPaid = member[month] === true;
         rowHtml += isPaid ? <td class="ok">✅</td> : <td class="no">❌</td>;
         
-        // রানিং বা চলতি মাসের হিসাব বের করার জন্য
         if (idx === currentMonthIdx) {
           if (isPaid) paid++; else pending++;
         }
@@ -352,25 +347,21 @@ KPTC Collection V1
       tbody.innerHTML = <tr><td colspan="13" style="padding:30px; color:#94a3b8;">No data found in database!</td></tr>;
     }
 
-    // সামারি কার্ড আপডেট
     document.getElementById('totalMembers').innerText = total;
     document.getElementById('paidMembers').innerText = paid;
     document.getElementById('pendingMembers').innerText = pending;
   }
 
-  // সাল পরিবর্তন করলে ডাটা চেঞ্জ হবে
   const yearSelect = document.getElementById('yearSelect');
   yearSelect.addEventListener('change', (e) => {
     loadCollectionData(e.target.value);
   });
 
-  // সার্চ বক্সে নাম লিখলে লাইভ ফিল্টার হবে
   const searchInput = document.getElementById('searchInput');
   searchInput.addEventListener('input', (e) => {
     renderTable(allMembersData, e.target.value);
   });
 
-  // প্রথমবার পেজ লোড হলে ডিফল্ট সাল লোড হবে
   loadCollectionData(yearSelect.value);
 </script>
 
@@ -379,7 +370,7 @@ function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
   document.getElementById('menuBtn').style.opacity = '0';
-  document.getElementById('menuBtn').style.pointerEvents = 'none';
+  document.getElementById('menuBtnEvents') = 'none';
 }
 function closeMenu(){
   document.getElementById('sidebar').classList.remove('show');
