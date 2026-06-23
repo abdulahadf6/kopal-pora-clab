@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +22,7 @@ body {
   position: relative;
 }
 
-/* সম্পূর্ণ নতুন এবং দ্রুতগতির জীবন্ত ব্যাকগ্রাউন্ড (অরোরা ওয়েভ ইফেক্ট) */
+/* অরোরা ওয়েভ ইফেক্ট ব্যাকগ্রাউন্ড */
 .bg-container {
   position: fixed;
   inset: 0;
@@ -43,8 +42,8 @@ body {
     radial-gradient(circle at 80% 40%, rgba(124, 58, 237, 0.45) 0%, transparent 40%),
     radial-gradient(circle at 40% 80%, rgba(14, 116, 144, 0.45) 0%, transparent 45%),
     radial-gradient(circle at 70% 10%, rgba(29, 78, 216, 0.35) 0%, transparent 35%);
-  filter: blur(60px); /* ব্লার কিছুটা কমিয়ে মোশন স্পষ্ট করা হয়েছে */
-  animation: fastLiquid 12s infinite linear; /* অ্যানিমেশন অনেক দ্রুত (১২ সেকেন্ড) করা হয়েছে */
+  filter: blur(60px); 
+  animation: fastLiquid 12s infinite linear; 
   will-change: transform;
 }
 
@@ -124,103 +123,27 @@ body {
   transform: translateX(6px);
 }
 
-/* হিরো এবং বড় লোগো সেকশন */
-.hero { text-align: center; padding: 70px 20px 30px; }
-
-.logo-wrap {
-  width: 240px;
-  height: 240px;
-  margin: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  animation: float 5s infinite ease-in-out;
-}
-
-.logo {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.6))
-          drop-shadow(0 0 45px rgba(59, 130, 246, 0.4))
-          drop-shadow(0 0 80px rgba(59, 130, 246, 0.2));
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-12px) scale(1.02); }
-}
-
-h1 {
-  margin-top: 25px;
-  font-size: clamp(32px, 5vw, 50px);
-  font-weight: 700;
-  background: linear-gradient(180deg, #ffffff 40%, #d4d4d8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -0.5px;
-}
-.slogan { opacity: 0.6; margin-top: 12px; font-size: 16px; }
-
 /* কার্ড গ্রিড */
 .cards {
   max-width: 1200px;
   margin: auto;
-  padding: 24px;
+  padding: 80px 24px 24px 24px; /* মেনু বাটনের জন্য টপ প্যাডিং বাড়ানো হয়েছে */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 22px;
 }
 
-/* পারফেক্ট লিকুইড গ্লাস কার্ড এবং প্যানেল */
+/* ফ্রেশ ক্লিন গ্লাস কার্ড এবং প্যানেল */
 .card, .panel {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  backdrop-filter: blur(40px); /* ব্লার আরও বাড়ানো হয়েছে নিখুঁত গ্লাস ফিলের জন্য */
+  backdrop-filter: blur(40px); 
   -webkit-backdrop-filter: blur(40px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 28px;
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 
               0 15px 35px rgba(0, 0, 0, 0.4);
   position: relative;
-  overflow: hidden;
 }
-
-/* মাউস নিলে গ্লাসের ভেতর তরল/পানি ভরে যাওয়ার দৃশ্যমান ইফেক্ট */
-.card::after, .panel::after {
-  content: '';
-  position: absolute;
-  bottom: -100%;
-  left: -10%;
-  width: 120%;
-  height: 100%;
-  /* হালকা উজ্জ্বল গ্লসি পানির লেয়ার */
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 70%, transparent 100%);
-  border-radius: 40% 40% 0 0; /* পানির উপরিভাগের কার্ভ */
-  transition: transform 1s cubic-bezier(0.1, 0.8, 0.2, 1), bottom 1s cubic-bezier(0.1, 0.8, 0.2, 1);
-  pointer-events: none;
-  transform: translateY(0) rotate(0deg);
-}
-
-.card:hover::after, .panel:hover::after {
-  bottom: 0%; /* মাউস নিলে পানি ভরে ওপরে উঠে আসবে */
-  transform: translateY(0) rotate(8deg); /* আলতো একটু বাঁকা হয়ে পানির ঢেউয়ের অনুভূতি দেবে */
-}
-
-/* গ্লাসের ওপর আলোর ঝিলিক (Reflecting Shine) */
-.card::before, .panel::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.04), transparent);
-  transform: rotate(45deg);
-  transition: 0.8s ease;
-  pointer-events: none;
-}
-.card:hover::before, .panel:hover::before { transform: translate(50%, 50%) rotate(45deg); }
 
 .card { padding: 28px; cursor: pointer; }
 
@@ -236,28 +159,21 @@ h1 {
 
 /* সেকশন এবং প্যানেল */
 .section { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
-.panel { padding: 30px; cursor: pointer; }
+.panel { padding: 30px; }
 .panel h2 { font-size: 24px; font-weight: 600; margin-bottom: 18px; }
 
-/* অ্যাক্টিভিটি লিস্ট */
-.activity div {
-  background: rgba(255, 255, 255, 0.01);
-  padding: 14px 18px;
-  border-radius: 14px;
-  margin-top: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  position: relative;
-  z-index: 2; /* পানির লেয়ারের উপরে রাখার জন্য */
-}
-.activity div:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateX(4px);
-}
+/* টেবিল স্টাইল */
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 /* ফুটার */
 .footer { text-align: center; padding: 40px; color: #71717a; font-size: 14px; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 </head>
 <body>
 
@@ -266,78 +182,125 @@ h1 {
 </div>
 
 <div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
-
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
 <div class="sidebar" id="sidebar">
 <div class="close-btn" onclick="closeMenu()">✕</div>
 <a href="dashboard.html">🏠 Dashboard</a>
 <a href="members.html">👥 Members</a>
-<a href="collection.html">📅 colloection</a>
+<a href="collection.html">📅 Collection</a>
 <a href="income.html">💰 Income</a>
 <a href="expense.html">💸 Expense</a>
 <a href="reports.html">📊 Reports</a>
 <a href="about.html">📖 About</a>
 <a href="index.html">🚪 Logout</a>
 </div>
+
 <div class="cards">
+  <div class="card">
+    <small>💰 This Month Income</small>
+    <h2 id="monthIncome">৳0</h2>
+  </div>
 
-<div class="card">
-<small>💰 This Month Income</small>
-<h2>৳8,500</h2>
-</div>
-
-<div class="card">
-<small>📈 This Year Income</small>
-<h2>৳45,000</h2>
-</div>
-
+  <div class="card">
+    <small>📈 This Year Income</small>
+    <h2 id="yearIncome">৳0</h2>
+  </div>
 </div>
 
 <div class="section">
-<div class="panel">
-
-<h2>💰 Income History</h2>
-
-<table style="width:100%;border-collapse:collapse;">
-
-<tr>
-<th>Source</th>
-<th>From</th>
-<th>Amount</th>
-<th>Date</th>
-</tr>
-
-<tr>
-<td>Monthly Collection</td>
-<td>Abdul Ahad</td>
-<td>৳500</td>
-<td>05-01-2026</td>
-</tr>
-
-<tr>
-<td>Monthly Collection</td>
-<td>Rakib</td>
-<td>৳500</td>
-<td>05-01-2026</td>
-</tr>
-
-<tr>
-<td>Donation</td>
-<td>Local Sponsor</td>
-<td>৳2000</td>
-<td>10-01-2026</td>
-</tr>
-
-</table>
-
+  <div class="panel">
+    <h2>💰 Income History</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>From</th>
+          <th>Amount</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="incomeTableBody">
+        <tr>
+          <td colspan="4" style="text-align: center; color: #71717a;">Loading income history...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
-</div>
-
 
 <div class="footer">KPTC Dashboard V3</div>
 
 <script>
+// ফায়ারবেজ কনফিগারেশন
+const firebaseConfig = {
+  databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+// ফায়ারবেজ ইনিশিয়ালাইজ
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ডাটাবেজ থেকে ইনকাম ডাটা রিড করা
+const incomeRef = db.ref('income');
+incomeRef.on('value', (snapshot) => {
+  const data = snapshot.val() || {};
+  const tbody = document.getElementById('incomeTableBody');
+  tbody.innerHTML = ""; // টেবিল ক্লিয়ার করা
+
+  let totalMonth = 0;
+  let totalYear = 0;
+  let hasData = false;
+
+  // কারেন্ট মাস ও বছর বের করা
+  const currentDate = new Date();
+  const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // MM
+  const currentYearStr = String(currentDate.getFullYear()); // YYYY
+
+  Object.keys(data).forEach(key => {
+    const item = data[key];
+    hasData = true;
+
+    const amount = parseFloat(item.amount) || 0;
+    const dateStr = item.date || ""; // আশা করা হচ্ছে ফরম্যাট DD-MM-YYYY হবে
+
+    // মাস এবং বছর ম্যাচিং লজিক
+    if (dateStr) {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const itemMonth = parts[1];
+        const itemYear = parts[2];
+
+        if (itemYear === currentYearStr) {
+          totalYear += amount;
+          if (itemMonth === currentMonthStr) {
+            totalMonth += amount;
+          }
+        }
+      }
+    }
+
+    // টেবিলে রো যোগ করা
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${item.source || 'N/A'}</td>
+      <td>${item.from || 'N/A'}</td>
+      <td>৳${amount.toLocaleString()}</td>
+      <td>${dateStr || 'N/A'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (!hasData) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a;">No income records found!</td></tr>`;
+  }
+
+  // কার্ডের ভ্যালু আপডেট করা
+  document.getElementById('monthIncome').innerText = `৳${totalMonth.toLocaleString()}`;
+  document.getElementById('yearIncome').innerText = `৳${totalYear.toLocaleString()}`;
+});
+
+// মেনু স্ক্রিপ্ট
 function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
