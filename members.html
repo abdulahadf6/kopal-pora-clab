@@ -22,7 +22,7 @@ body {
   position: relative;
 }
 
-/* সম্পূর্ণ নতুন এবং দ্রুতগতির জীবন্ত ব্যাকগ্রাউন্ড (অরোরা ওয়েভ ইফেক্ট) */
+/* অরোরা ওয়েভ ইফেক্ট ব্যাকগ্রাউন্ড */
 .bg-container {
   position: fixed;
   inset: 0;
@@ -150,7 +150,7 @@ h1 {
   gap: 22px;
 }
 
-/* পারফেক্ট লিকুইড গ্লাস কার্ড এবং প্যানেল */
+/* গ্লাস কার্ড এবং প্যানেল (অতিরিক্ত মাউস ইফেক্ট ছাড়া ফ্রেশ লুক) */
 .card, .panel {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
   backdrop-filter: blur(40px); 
@@ -160,42 +160,7 @@ h1 {
   box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 
               0 15px 35px rgba(0, 0, 0, 0.4);
   position: relative;
-  overflow: hidden;
 }
-
-/* মাউস হোভার ইফেক্ট */
-.card::after, .panel::after {
-  content: '';
-  position: absolute;
-  bottom: -100%;
-  left: -10%;
-  width: 120%;
-  height: 100%;
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 70%, transparent 100%);
-  border-radius: 40% 40% 0 0; 
-  transition: transform 1s cubic-bezier(0.1, 0.8, 0.2, 1), bottom 1s cubic-bezier(0.1, 0.8, 0.2, 1);
-  pointer-events: none;
-  transform: translateY(0) rotate(0deg);
-}
-
-.card:hover::after, .panel:hover::after {
-  bottom: 0%; 
-  transform: translateY(0) rotate(8deg); 
-}
-
-.card::before, .panel::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.04), transparent);
-  transform: rotate(45deg);
-  transition: 0.8s ease;
-  pointer-events: none;
-}
-.card:hover::before, .panel:hover::before { transform: translate(50%, 50%) rotate(45deg); }
 
 .card { padding: 28px; cursor: pointer; }
 
@@ -211,7 +176,7 @@ h1 {
 
 /* সেকশন এবং প্যানেল */
 .section { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
-.panel { padding: 30px; overflow: auto; }
+.panel { padding: 30px; }
 .panel h2 { font-size: 24px; font-weight: 600; margin-bottom: 18px; }
 
 /* টেবিল স্টাইল */
@@ -315,27 +280,25 @@ const membersRef = db.ref('members');
 membersRef.on('value', (snapshot) => {
   const data = snapshot.val() || {};
   const tbody = document.getElementById('memberTableBody');
-  tbody.innerHTML = ""; // আগের ডাটা ক্লিয়ার করা
+  tbody.innerHTML = ""; 
 
   let memberCount = 0;
   let activeCount = 0;
-  let locationsSet = new Set(); // ইউনিক লোকেশন বের করার জন্য Set ব্যবহার
+  let locationsSet = new Set(); 
 
   Object.keys(data).forEach(memberKey => {
     const member = data[memberKey];
     memberCount++;
 
-    // স্ট্যাটাস একটিভ চেক করা
     if(member.status === "Active" || member.status === "active") {
       activeCount++;
     }
 
-    // লোকেশন কাউন্ট করার জন্য অ্যাড করা
     if(member.location) {
       locationsSet.add(member.location.trim().toLowerCase());
     }
 
-    // টেবিলে ডাটা পুশ করা
+    // টেবিলে ডাটা পুশ করা (যা ডাটাবেজের location কে আপনার Address কলামে বসাবে)
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${member.id || memberKey}</td>
@@ -346,12 +309,10 @@ membersRef.on('value', (snapshot) => {
     tbody.appendChild(tr);
   });
 
-  // মেম্বার একদম না থাকলে মেসেজ দেখানো
   if(memberCount === 0) {
     tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a;">No registered members found!</td></tr>`;
   }
 
-  // কার্ডগুলোতে রিয়েল-টাইম ডাটা আপডেট করা
   document.getElementById('totalMembers').innerText = memberCount;
   document.getElementById('totalIds').innerText = memberCount;
   document.getElementById('totalLocations').innerText = locationsSet.size;
@@ -366,7 +327,6 @@ function openMenu(){
   document.getElementById('menuBtn').style.pointerEvents = 'none';
 }
 function closeMenu(){
-  document.getElementById('sidebar').classList.remove('remove'); // ভুল ফিক্স
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity = '1';
