@@ -319,7 +319,7 @@ KPTC Collection V1
     let paid = 0;
     let pending = 0;
 
-    Object.keys(data).forEach(memberId => {
+   Object.keys(data).forEach(memberId => {
       const member = data[memberId];
       const memberName = member.name || memberId;
 
@@ -369,7 +369,7 @@ function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
   document.getElementById('menuBtn').style.opacity = '0';
-  document.getElementById('menuBtnEvents') = 'none';
+  document.getElementById('menuBtn').style.pointerEvents = 'none';
 }
 function closeMenu(){
   document.getElementById('sidebar').classList.remove('show');
