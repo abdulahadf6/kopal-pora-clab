@@ -123,14 +123,14 @@ body {
   transform: translateX(6px);
 }
 
-/* হিরো এবং হেডার সেকশন (লোগো ছাড়া উপরে শিফট করা হয়েছে) */
+/* হিরো এবং হেডার সেকশন */
 .hero { 
   text-align: center; 
-  padding: 40px 20px 20px; /* প্যাডিং কমিয়ে উপরে উঠানো হয়েছে */
+  padding: 40px 20px 20px;
 }
 
 h1 {
-  margin-top: 0; /* মার্জিন জিরো করা হয়েছে */
+  margin-top: 0;
   font-size: clamp(32px, 5vw, 50px);
   font-weight: 700;
   background: linear-gradient(180deg, #ffffff 40%, #d4d4d8 100%);
@@ -211,28 +211,21 @@ h1 {
 
 /* সেকশন এবং প্যানেল */
 .section { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
-.panel { padding: 30px; cursor: pointer; }
+.panel { padding: 30px; overflow: auto; }
 .panel h2 { font-size: 24px; font-weight: 600; margin-bottom: 18px; }
 
-/* অ্যাক্টিভিটি লিস্ট */
-.activity div {
-  background: rgba(255, 255, 255, 0.01);
-  padding: 14px 18px;
-  border-radius: 14px;
-  margin-top: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  position: relative;
-  z-index: 2; 
-}
-.activity div:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateX(4px);
-}
+/* টেবিল স্টাইল */
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 /* ফুটার */
 .footer { text-align: center; padding: 40px; color: #71717a; font-size: 14px; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 </head>
 <body>
 
@@ -241,14 +234,13 @@ h1 {
 </div>
 
 <div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
-
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
 <div class="sidebar" id="sidebar">
 <div class="close-btn" onclick="closeMenu()">✕</div>
 <a href="dashboard.html">🏠 Dashboard</a>
 <a href="members.html">👥 Members</a>
-<a href="collection.html">collection</a>
+<a href="collection.html">📅 Collection</a>
 <a href="income.html">💰 Income</a>
 <a href="expense.html">💸 Expense</a>
 <a href="reports.html">📊 Reports</a>
@@ -262,63 +254,46 @@ h1 {
 </div>
 
 <div class="cards">
+  <div class="card">
+    <small>Total Members</small>
+    <h2 id="totalMembers">0</h2>
+  </div>
 
-<div class="card">
-<small> Total Members</small>
-<h2>15</h2>
-</div>
+  <div class="card">
+    <small>Member IDs</small>
+    <h2 id="totalIds">0</h2>
+  </div>
 
-<div class="card">
-<small> Member IDs</small>
-<h2>15</h2>
-</div>
+  <div class="card">
+    <small>Locations</small>
+    <h2 id="totalLocations">0</h2>
+  </div>
 
-<div class="card">
-<small> Locations</small>
-<h2>8</h2>
-</div>
-
-<div class="card">
-<small> Active Members</small>
-<h2>15</h2>
-</div>
-
+  <div class="card">
+    <small>Active Members</small>
+    <h2 id="activeMembers">0</h2>
+  </div>
 </div>
 
 <div class="section">
-<div class="panel">
-
-<h2>Member Directory</h2>
-
-<table style="width:100%;border-collapse:collapse">
-
-<tr>
-<th style="padding:15px">ID</th>
-<th style="padding:15px">Name</th>
-<th style="padding:15px">Address</th>
-</tr>
-
-<tr>
-<td style="padding:15px">KPTC-001</td>
-<td style="padding:15px">Abdul Ahad</td>
-<td style="padding:15px">Tungipara</td>
-</tr>
-
-<tr>
-<td style="padding:15px">KPTC-002</td>
-<td style="padding:15px">Rakib</td>
-<td style="padding:15px">Gopalganj</td>
-</tr>
-
-<tr>
-<td style="padding:15px">KPTC-003</td>
-<td style="padding:15px">Sohan</td>
-<td style="padding:15px">Khulna</td>
-</tr>
-
-</table>
-
-</div>
+  <div class="panel">
+    <h2>Member Dictionary</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="memberTableBody">
+        <tr>
+          <td colspan="4" style="text-align: center; color: #71717a;">Loading members data...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 
 <div class="footer">
@@ -326,6 +301,64 @@ KPTC Members V1
 </div>
 
 <script>
+// ফায়ারবেজ কনফিগারেশন
+const firebaseConfig = {
+  databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+// ফায়ারবেজ ইনিশিয়ালাইজ
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ডাটাবেজ থেকে মেম্বার ডাটা রিড করা
+const membersRef = db.ref('members');
+membersRef.on('value', (snapshot) => {
+  const data = snapshot.val() || {};
+  const tbody = document.getElementById('memberTableBody');
+  tbody.innerHTML = ""; // আগের ডাটা ক্লিয়ার করা
+
+  let memberCount = 0;
+  let activeCount = 0;
+  let locationsSet = new Set(); // ইউনিক লোকেশন বের করার জন্য Set ব্যবহার
+
+  Object.keys(data).forEach(memberKey => {
+    const member = data[memberKey];
+    memberCount++;
+
+    // স্ট্যাটাস একটিভ চেক করা
+    if(member.status === "Active" || member.status === "active") {
+      activeCount++;
+    }
+
+    // লোকেশন কাউন্ট করার জন্য অ্যাড করা
+    if(member.location) {
+      locationsSet.add(member.location.trim().toLowerCase());
+    }
+
+    // টেবিলে ডাটা পুশ করা
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${member.id || memberKey}</td>
+      <td>${member.name || 'N/A'}</td>
+      <td>${member.location || 'N/A'}</td>
+      <td style="color: ${member.status === 'Active' ? '#22c55e' : '#ef4444'}">${member.status || 'Inactive'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // মেম্বার একদম না থাকলে মেসেজ দেখানো
+  if(memberCount === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a;">No registered members found!</td></tr>`;
+  }
+
+  // কার্ডগুলোতে রিয়েল-টাইম ডাটা আপডেট করা
+  document.getElementById('totalMembers').innerText = memberCount;
+  document.getElementById('totalIds').innerText = memberCount;
+  document.getElementById('totalLocations').innerText = locationsSet.size;
+  document.getElementById('activeMembers').innerText = activeCount;
+});
+
+// মেনু স্ক্রিপ্ট
 function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
@@ -333,6 +366,7 @@ function openMenu(){
   document.getElementById('menuBtn').style.pointerEvents = 'none';
 }
 function closeMenu(){
+  document.getElementById('sidebar').classList.remove('remove'); // ভুল ফিক্স
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity = '1';
