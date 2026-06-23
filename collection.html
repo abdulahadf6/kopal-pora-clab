@@ -213,6 +213,10 @@ color:#ef4444;
 font-size:18px;
 }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 </head>
 
 <body>
@@ -263,6 +267,7 @@ font-size:18px;
 </tr>
 </thead>
 <tbody id="tableBody">
+<tr><td colspan="13" style="padding:30px; color:#94a3b8;">Loading data from database...</td></tr>
 </tbody>
 </table>
 </div>
@@ -279,38 +284,33 @@ font-size:18px;
 KPTC Collection V1
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-database.js";
-
+<script>
+  // ফায়ারবেজ কনফিগারেশন
   const firebaseConfig = {
-    apiKey: "AIzaSyBDeCnZysIu3_H162qMsWZaZ3Ba09Hwhxg",
-    authDomain: "kopal-pora-travelers-club.firebaseapp.com",
-    databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/",
-    projectId: "kopal-pora-travelers-club",
-    storageBucket: "kopal-pora-travelers-club.firebasestorage.app",
-    messagingSenderId: "399226201547",
-    appId: "1:399226201547:web:98676a92f689edc45d824e",
-    measurementId: "G-JS3E9QMPJ6"
+    databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  // ফায়ারবেজ ইনিশিয়ালাইজ
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
   let allMembersData = {}; 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+  // চলতি মাস বের করা
   const currentMonthIdx = new Date().getMonth();
   document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
 
+  // ডাটাবেজ থেকে ডাটা আনা
   function loadCollectionData(year) {
-    const dbRef = ref(db, 'collections/' + year);
-    onValue(dbRef, (snapshot) => {
+    const dbRef = db.ref('collections/' + year);
+    dbRef.on('value', (snapshot) => {
       allMembersData = snapshot.val() || {};
       renderTable(allMembersData);
     });
   }
 
+  // টেবিলে ডাটা দেখানো
   function renderTable(data, filterText = "") {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = "";
@@ -319,7 +319,7 @@ KPTC Collection V1
     let paid = 0;
     let pending = 0;
 
-   Object.keys(data).forEach(memberId => {
+    Object.keys(data).forEach(memberId => {
       const member = data[memberId];
       const memberName = member.name || memberId;
 
@@ -329,21 +329,22 @@ KPTC Collection V1
 
       total++;
 
-      let rowHtml = <tr><td>${memberName}</td>;
+      let rowHtml = '<tr><td>' + memberName + '</td>';
       months.forEach((month, idx) => {
-        const isPaid = member[month] === true;
-        rowHtml += isPaid ? <td class="ok">✅</td> : <td class="no">❌</td>;
+        // ডাটাবেজে ছোট হাতের jan বা বড় হাতের Jan দুইটাই যেন সাপোর্ট করে তার ফিক্স
+        const isPaid = member[month] === true || member[month.toLowerCase()] === true;
+        rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">❌</td>';
         
         if (idx === currentMonthIdx) {
           if (isPaid) paid++; else pending++;
         }
       });
-      rowHtml += </tr>;
+      rowHtml += '</tr>';
       tbody.innerHTML += rowHtml;
     });
 
     if (total === 0) {
-      tbody.innerHTML = <tr><td colspan="13" style="padding:30px; color:#94a3b8;">No data found in database!</td></tr>;
+      tbody.innerHTML = '<tr><td colspan="13" style="padding:30px; color:#94a3b8;">No data found in database!</td></tr>';
     }
 
     document.getElementById('totalMembers').innerText = total;
@@ -351,32 +352,34 @@ KPTC Collection V1
     document.getElementById('pendingMembers').innerText = pending;
   }
 
+  // বছর পরিবর্তন ফিল্টার
   const yearSelect = document.getElementById('yearSelect');
   yearSelect.addEventListener('change', (e) => {
     loadCollectionData(e.target.value);
   });
 
+  // সার্চ ফিল্টার
   const searchInput = document.getElementById('searchInput');
   searchInput.addEventListener('input', (e) => {
     renderTable(allMembersData, e.target.value);
   });
 
+  // প্রথমবার ডাটা লোড
   loadCollectionData(yearSelect.value);
-</script>
 
-<script>
-function openMenu(){
-  document.getElementById('sidebar').classList.add('show');
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('menuBtn').style.opacity = '0';
-  document.getElementById('menuBtn').style.pointerEvents = 'none';
-}
-function closeMenu(){
-  document.getElementById('sidebar').classList.remove('show');
-  document.getElementById('overlay').classList.remove('show');
-  document.getElementById('menuBtn').style.opacity = '1';
-  document.getElementById('menuBtn').style.pointerEvents = 'auto';
-}
+  // মেনু স্ক্রিপ্ট
+  function openMenu(){
+    document.getElementById('sidebar').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('menuBtn').style.opacity = '0';
+    document.getElementById('menuBtn').style.pointerEvents = 'none';
+  }
+  function closeMenu(){
+    document.getElementById('sidebar').classList.remove('show');
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('menuBtn').style.opacity = '1';
+    document.getElementById('menuBtn').style.pointerEvents = 'auto';
+  }
 </script>
 
 </body>
