@@ -3,211 +3,460 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPTC - Ultimate Admin Control</title>
+<title>KPTC Admin Dashboard - Ultra Premium Liquid</title>
 <style>
-  *{ margin:0; padding:0; box-sizing:border-box; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; transition: all 0.3s ease; }
-  body{ background:#081018; color:#fff; padding:40px 20px; display:flex; flex-direction:column; align-items:center; min-height:100vh; background: linear-gradient(135deg, #051923, #0b132b); }
-  .admin-container{ width:100%; max-width:700px; }
-  h2{ text-align:center; margin-bottom:30px; font-size:32px; background: linear-gradient(135deg, #22d3ee, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  
-  /* Tabs System */
-  .tabs{ display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
-  .tab-btn{ flex: 1; min-width: 120px; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 14px; text-align: center; }
-  .tab-btn.active{ background: linear-gradient(135deg, #22d3ee, #10b981); color: white; border: none; box-shadow: 0 5px 15px rgba(34,211,238,0.2); }
-  
-  .glass-box{ background:rgba(255,255,255,.04); backdrop-filter:blur(40px); border:1px solid rgba(255,255,255,.08); border-radius:24px; padding:30px; box-shadow:0 15px 35px rgba(0,0,0,.4); display: none; }
-  .glass-box.active{ display: block; animation: fadeIn 0.4s ease; }
-  @keyframes fadeIn { from{opacity:0; transform: translateY(10px);} to{opacity:1; transform: translateY(0);} }
-  
-  h3{ color:#22d3ee; margin-bottom:20px; font-size:20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px; display: flex; align-items: center; gap: 8px; }
-  .form-group{ margin-bottom:18px; display:flex; flex-direction:column; gap:8px; }
-  label{ font-size:14px; color:#94a3b8; font-weight: 500; }
-  input, select, textarea{ padding:14px; border:none; outline:none; background:rgba(255,255,255,.07); color:white; border-radius:12px; font-size:16px; width: 100%; }
-  textarea{ resize: vertical; min-height: 80px; }
-  select option{ background:#0b132b; color:#fff; }
-  
-  .btn{ padding:16px; border:none; background:linear-gradient(135deg, #22d3ee, #10b981); color:white; border-radius:12px; font-weight:bold; cursor:pointer; font-size:16px; margin-top:10px; width:100%; }
-  .btn:hover{ transform:translateY(-2px); box-shadow:0 5px 15px rgba(34,211,238,0.3); }
+/* গ্লোবাল স্টাইল */
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body {
+  background: #030611;
+  color: #f5f5f7;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* অরোরা ওয়েভ ইফেক্ট ব্যাকগ্রাউন্ড */
+.bg-container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #02040a;
+}
+
+.bg-wave {
+  position: absolute;
+  width: 150vw;
+  height: 150vh;
+  top: -50vh;
+  left: -25vw;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(37, 99, 235, 0.45) 0%, transparent 40%),
+    radial-gradient(circle at 80% 40%, rgba(124, 58, 237, 0.45) 0%, transparent 40%),
+    radial-gradient(circle at 40% 80%, rgba(14, 116, 144, 0.45) 0%, transparent 45%),
+    radial-gradient(circle at 70% 10%, rgba(29, 78, 216, 0.35) 0%, transparent 35%);
+  filter: blur(60px); 
+  animation: fastLiquid 12s infinite linear; 
+  will-change: transform;
+}
+
+@keyframes fastLiquid {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* আইফোন স্টাইল মেনু বাটন */
+.menu-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1002;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.04);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ওভারলে */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 15, 0.4);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+.overlay.show { opacity: 1; visibility: visible; }
+
+/* সাইডবার */
+.sidebar {
+  position: fixed;
+  left: -320px;
+  top: 0;
+  width: 300px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 30px 24px;
+  z-index: 1001;
+  box-shadow: 20px 0 80px rgba(0,0,0,0.3);
+}
+.sidebar.show { transform: translateX(320px); }
+.close-btn { font-size: 26px; cursor: pointer; margin-bottom: 30px; color: #a1a1aa; }
+.close-btn:hover { color: #fff; transform: rotate(90deg); }
+
+.sidebar a {
+  display: block;
+  text-decoration: none;
+  color: #e4e4e7;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(6px);
+}
+
+/* হিরো সেকশন */
+.hero { text-align: center; padding: 70px 20px 30px; }
+.logo-wrap {
+  width: 240px;
+  height: 240px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  animation: float 5s infinite ease-in-out;
+}
+.logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.6))
+          drop-shadow(0 0 45px rgba(59, 130, 246, 0.4))
+          drop-shadow(0 0 80px rgba(59, 130, 246, 0.2));
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-12px) scale(1.02); }
+}
+
+h1 {
+  margin-top: 25px;
+  font-size: clamp(32px, 5vw, 50px);
+  font-weight: 700;
+  background: linear-gradient(180deg, #ffffff 40%, #d4d4d8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+.slogan { opacity: 0.6; margin-top: 12px; font-size: 16px; }
+
+/* কার্ড গ্রিড */
+.cards {
+  max-width: 1200px;
+  margin: auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 22px;
+}
+
+/* ফ্রেশ ক্লিন গ্লাস কার্ড এবং প্যানেল */
+.card, .panel {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(40px); 
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 
+              0 15px 35px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+.card { padding: 28px; cursor: pointer; }
+.card:hover, .panel:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.3), 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+.card small { color: #a1a1aa; font-size: 14px; font-weight: 500; display: block; margin-bottom: 8px;}
+.card h2 { font-size: 32px; font-weight: 600; color: #fff; }
+
+/* সেকশন এবং প্যানেল */
+.section { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
+.panel { padding: 30px; }
+.panel h2 { font-size: 24px; font-weight: 600; margin-bottom: 18px; }
+
+/* অ্যাডমিন ফর্ম স্টাইল */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 15px;
+}
+.form-group {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 20px;
+}
+.form-group h3 { font-size: 18px; margin-bottom: 15px; color: #3b82f6; }
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #fff;
+  margin-bottom: 12px;
+  outline: none;
+}
+.form-group input:focus, .form-group select:focus {
+  border-color: #3b82f6;
+}
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+}
+.submit-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+/* নোটিফিকেশন টোস্ট */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  z-index: 2000;
+  display: none;
+}
+
+/* অ্যাক্টিভিটি লিস্ট */
+.activity div {
+  background: rgba(255, 255, 255, 0.01);
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ফুটার */
+.footer { text-align: center; padding: 40px; color: #71717a; font-size: 14px; }
 </style>
+
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
-<div class="admin-container">
-  <h2>🔐 KPTC Central Control Panel</h2>
-  
-  <div class="tabs">
-    <div class="tab-btn active" onclick="switchTab('collection-sec', this)">📅 Collection</div>
-    <div class="tab-btn" onclick="switchTab('member-sec', this)">👥 Add Member</div>
-    <div class="tab-btn" onclick="switchTab('income-sec', this)">💰 Add Income</div>
-    <div class="tab-btn" onclick="switchTab('expense-sec', this)">💸 Add Expense</div>
-  </div>
-
-  <div id="collection-sec" class="glass-box active">
-    <h3>📅 Update Member Monthly Collection</h3>
-    <form id="collectionForm">
-      <div class="form-group"><label>Member ID</label><input type="text" id="colId" placeholder="e.g., m001" required></div>
-      <div class="form-group"><label>Member Name</label><input type="text" id="colName" placeholder="Full Name" required></div>
-      <div class="form-group">
-        <label>Year</label>
-        <select id="colYear"><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select>
-      </div>
-      <div class="form-group">
-        <label>Month</label>
-        <select id="colMonth">
-          <option value="Jan">January</option><option value="Feb">February</option><option value="Mar">March</option><option value="Apr">April</option>
-          <option value="May">May</option><option value="Jun">June</option><option value="Jul">July</option><option value="Aug">August</option>
-          <option value="Sep">September</option><option value="Oct">October</option><option value="Nov">November</option><option value="Dec">December</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="colStatus"><option value="true">Paid (✅)</option><option value="false">Unpaid (❌)</option></select>
-      </div>
-      <button type="submit" class="btn">Save Collection Status</button>
-    </form>
-  </div>
-
-  <div id="member-sec" class="glass-box">
-    <h3>👥 Register New Member</h3>
-    <form id="memberForm">
-      <div class="form-group"><label>Assign Member ID</label><input type="text" id="mId" placeholder="e.g., m001" required></div>
-      <div class="form-group"><label>Full Name</label><input type="text" id="mName" placeholder="Enter full name" required></div>
-      <div class="form-group"><label>Location/Address</label><input type="text" id="mLoc" placeholder="e.g., Khulna, Dhaka" required></div>
-      <div class="form-group">
-        <label>Status</label>
-        <select id="mStatus"><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
-      </div>
-      <button type="submit" class="btn">Register Member</button>
-    </form>
-  </div>
-
-  <div id="income-sec" class="glass-box">
-    <h3>💰 Record Extra Income (Except Monthly Collection)</h3>
-    <form id="incomeForm">
-      <div class="form-group"><label>Source / Reason</label><input type="text" id="incSource" placeholder="e.g., Sponsor, Bank Interest" required></div>
-      <div class="form-group"><label>Received From</label><input type="text" id="incFrom" placeholder="e.g., Abir Hasan, XYZ Group" required></div>
-      <div class="form-group"><label>Amount (৳)</label><input type="number" id="incAmount" placeholder="Amount in BDT" required></div>
-      <div class="form-group"><label>Date</label><input type="date" id="incDate" required></div>
-      <button type="submit" class="btn">Add Income Entry</button>
-    </form>
-  </div>
-
-  <div id="expense-sec" class="glass-box">
-    <h3>💸 Record Tour & Club Expenses</h3>
-    <form id="expenseForm">
-      <div class="form-group"><label>Main Category / Tour Name</label><input type="text" id="expCat" placeholder="e.g., Mongla Tour, Picnic 2026" required></div>
-      <div class="form-group"><label>Total Amount Spent (৳)</label><input type="number" id="expAmount" placeholder="Total Category Expense" required></div>
-      <div class="form-group"><label>Date</label><input type="date" id="expDate" required></div>
-      
-      <div class="form-group">
-        <label>Detailed Breakdown (Tour Expense Details)</label>
-        <textarea id="expDetails" placeholder="e.g., Bus fare: 5000, Food: 4000, Resort: 8000" required></textarea>
-      </div>
-      <button type="submit" class="btn">Add Expense Entry</button>
-    </form>
-  </div>
-
+<div class="bg-container">
+  <div class="bg-wave"></div>
 </div>
 
+<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="sidebar" id="sidebar">
+<div class="close-btn" onclick="closeMenu()">✕</div>
+<a href="adminF6.html">👑 Admin Dashboard</a>
+<a href="members.ad.html">👥 Manage Members</a>
+<a href="collection.ad.html">📅 Manage Collection</a>
+<a href="income.ad.html">💰 Manage Income</a>
+<a href="expense.ad.html">💸 Manage Expense</a>
+<a href="reports.ad.html">📊 View Reports</a>
+<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);">🚪 Exit Admin</a>
+</div>
+
+<div class="hero">
+<div class="logo-wrap"><img src="Logo.png" class="logo"></div>
+<h1>KPTC Admin Panel</h1>
+<div class="slogan" style="color: #f87171;">⚠️ সিক্রেট ম্যানেজমেন্ট মোড সক্রিয়</div>
+</div>
+
+<div class="cards">
+<div class="card"><small>💰 Current Balance</small><h2 id="currentBalance">৳0</h2></div>
+<div class="card"><small>📈 Total Income</small><h2 id="totalIncome">৳0</h2></div>
+<div class="card"><small>📉 Total Expense</small><h2 id="totalExpense">৳0</h2></div>
+<div class="card"><small>👥 Members</small><h2 id="totalMembers">0</h2></div>
+</div>
+
+<div class="section">
+  <div class="panel">
+    <h2>⚡ Quick Database Terminal (Data Ingestion)</h2>
+    <div class="admin-grid">
+      
+      <div class="form-group">
+        <h3>👥 Add New Member</h3>
+        <input type="text" id="mName" placeholder="Full Name">
+        <input type="text" id="mId" placeholder="Member ID (e.g., KPTC-01)">
+        <select id="mStatus">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <button class="submit-btn" onclick="addMember()">Push Member</button>
+      </div>
+
+      <div class="form-group">
+        <h3>💰 Log Club Income</h3>
+        <input type="text" id="incSource" placeholder="Source / Member Name">
+        <input type="number" id="incAmount" placeholder="Amount (৳)">
+        <input type="text" id="incDate" placeholder="Date (DD-MM-YYYY)">
+        <button class="submit-btn" onclick="addIncome()">Push Income</button>
+      </div>
+
+      <div class="form-group">
+        <h3>💸 Log Club Expense</h3>
+        <input type="text" id="expDetails" placeholder="Expense Details">
+        <input type="number" id="expAmount" placeholder="Amount (৳)">
+        <input type="text" id="expCategory" placeholder="Category (e.g., Tour)">
+        <input type="text" id="expDate" placeholder="Date (DD-MM-YYYY)">
+        <button class="submit-btn" onclick="addExpense()">Push Expense</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section">
+<div class="panel">
+<h2>📋 Console & Synced Activity</h2>
+<div class="activity" id="activityList">
+  <div>🔄 Listening database transactions...</div>
+</div>
+</div>
+</div>
+
+<div id="toast" class="toast">✅ Data pushed successfully to Firebase!</div>
+
+<div class="footer">KPTC Admin Core V3</div>
+
 <script>
-  // ফায়ারবেজ ইনিশিয়ালাইজ
-  const firebaseConfig = {
-    databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+const firebaseConfig = {
+  databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
 
-  // আজকের ডেট ডিফল্ট সেট করার ফাংশন
-  document.getElementById('incDate').valueToDate = new Date();
-  document.getElementById('expDate').valueToDate = new Date();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-  // ট্যাব পরিবর্তন লজিক
-  function switchTab(sectionId, btn) {
-    document.querySelectorAll('.glass-box').forEach(box => box.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(tBtn => tBtn.classList.remove('active'));
-    document.getElementById(sectionId).classList.add('active');
-    btn.classList.add('active');
-  }
+let globalIncome = 0;
+let globalExpense = 0;
 
-  // ১. কালেকশন সাবমিট
-  document.getElementById('collectionForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const id = document.getElementById('colId').value.trim();
-    const name = document.getElementById('colName').value.trim();
-    const year = document.getElementById('colYear').value;
-    const month = document.getElementById('colMonth').value;
-    const status = document.getElementById('colStatus').value === "true";
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+}
 
-    db.ref('collections/' + year + '/' + id).update({
-      name: name,
-      [month]: status
-    }).then(() => { alert("Collection updated successfully!"); })
-      .catch(err => alert("Error: " + err.message));
+function updateFinancials() {
+  const balance = globalIncome - globalExpense;
+  document.getElementById('totalIncome').innerText = `৳${globalIncome.toLocaleString()}`;
+  document.getElementById('totalExpense').innerText = `৳${globalExpense.toLocaleString()}`;
+  document.getElementById('currentBalance').innerText = `৳${balance.toLocaleString()}`;
+}
+
+// ডাটা রিড মেথডসমূহ
+db.ref('members').on('value', (snapshot) => {
+  const count = Object.keys(snapshot.val() || {}).length;
+  document.getElementById('totalMembers').innerText = count;
+});
+
+db.ref('income').on('value', (snapshot) => {
+  let total = 0;
+  snapshot.forEach(child => { total += parseFloat(child.val().amount) || 0; });
+  globalIncome = total;
+  updateFinancials();
+});
+
+db.ref('expense').on('value', (snapshot) => {
+  let total = 0;
+  snapshot.forEach(child => { total += parseFloat(child.val().amount) || 0; });
+  globalExpense = total;
+  updateFinancials();
+  
+  document.getElementById('activityList').innerHTML = `
+    <div>🔒 Admin Core: Secure Real-time Pipeline Operational</div>
+    <div>📡 Nodes Synced: 'members', 'income', 'expense'</div>
+    <div>📈 Current Live Expense Threshold: ৳${total.toLocaleString()}</div>
+  `;
+});
+
+// ডাটা রাইট (Write/Push) মেথডসমূহ
+function addMember() {
+  const name = document.getElementById('mName').value;
+  const id = document.getElementById('mId').value;
+  const status = document.getElementById('mStatus').value;
+  if(!name || !id) return alert('ফাইল খালি রাখা যাবে না!');
+
+  db.ref('members').push({ name, id, status }, () => {
+    showToast('👥 New Member Registered!');
+    document.getElementById('mName').value = '';
+    document.getElementById('mId').value = '';
   });
+}
 
-  // ২. নতুন মেম্বার সাবমিট
-  document.getElementById('memberForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const id = document.getElementById('mId').value.trim();
-    const name = document.getElementById('mName').value.trim();
-    const loc = document.getElementById('mLoc').value.trim();
-    const status = document.getElementById('mStatus').value;
+function addIncome() {
+  const source = document.getElementById('incSource').value;
+  const amount = document.getElementById('incAmount').value;
+  const date = document.getElementById('incDate').value;
+  if(!source || !amount || !date) return alert('সব তথ্য পূরণ করুন!');
 
-    db.ref('members/' + id).set({
-      id: id,
-      name: name,
-      location: loc,
-      status: status
-    }).then(() => { alert("Member registered successfully!"); document.getElementById('memberForm').reset(); })
-      .catch(err => alert("Error: " + err.message));
+  db.ref('income').push({ source, amount, date }, () => {
+    showToast('💰 Income Logged Successfully!');
+    document.getElementById('incSource').value = '';
+    document.getElementById('incAmount').value = '';
+    document.getElementById('incDate').value = '';
   });
+}
 
-  // ৩. ইনকাম সাবমিট
-  document.getElementById('incomeForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const source = document.getElementById('incSource').value.trim();
-    const from = document.getElementById('incFrom').value.trim();
-    const amount = Number(document.getElementById('incAmount').value);
-    const date = document.getElementById('incDate').value;
+function addExpense() {
+  const details = document.getElementById('expDetails').value;
+  const amount = document.getElementById('expAmount').value;
+  const category = document.getElementById('expCategory').value;
+  const date = document.getElementById('expDate').value;
+  if(!details || !amount || !category || !date) return alert('সব তথ্য পূরণ করুন!');
 
-    // নতুন ইনকাম আইডি অটো জেনারেট হবে push() এর মাধ্যমে
-    db.ref('income/history').push({
-      source: source,
-      from: from,
-      amount: amount,
-      date: date
-    }).then(() => { alert("Income recorded successfully!"); document.getElementById('incomeForm').reset(); })
-      .catch(err => alert("Error: " + err.message));
+  db.ref('expense').push({ details, amount, category, date }, () => {
+    showToast('💸 Expense Pushed to Core!');
+    document.getElementById('expDetails').value = '';
+    document.getElementById('expAmount').value = '';
+    document.getElementById('expCategory').value = '';
+    document.getElementById('expDate').value = '';
   });
+}
 
-  // ৪. খরচ সাবমিট
-  document.getElementById('expenseForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const category = document.getElementById('expCat').value.trim();
-    const amount = Number(document.getElementById('expAmount').value);
-    const date = document.getElementById('expDate').value;
-    const details = document.getElementById('expDetails').value.trim();
-
-    // হিস্ট্রিতে মেইন ক্যাটাগরি পুশ হবে
-    const newExpRef = db.ref('expense/history').push();
-    newExpRef.set({
-      category: category,
-      amount: amount,
-      date: date
-    }).then(() => {
-      // ট্যুরের ভেতরের খতিয়ান (Tour Expense Details) আলাদা নোডে সেভ হবে ওই একই আইডিতে
-      return db.ref('expense/details/' + newExpRef.key).set({
-        date: date,
-        details: details,
-        amount: amount
-      });
-    }).then(() => { 
-      alert("Expense and Details recorded successfully!"); 
-      document.getElementById('expenseForm').reset(); 
-    }).catch(err => alert("Error: " + err.message));
-  });
+function openMenu(){
+  document.getElementById('sidebar').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('menuBtn').style.opacity = '0';
+}
+function closeMenu(){
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('menuBtn').style.opacity = '1';
+}
 </script>
 </body>
 </html>
