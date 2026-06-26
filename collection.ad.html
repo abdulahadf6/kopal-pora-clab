@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPTC Admin - Collection Management</title>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body{
+  background:#081018;
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+
+.bg-container{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  overflow:hidden;
+  background: linear-gradient(135deg, #051923, #0b132b, #1c2541, #0f172a);
+}
+
+.bg-wave{
+  position:absolute;
+  width:180vw;
+  height:180vh;
+  top:-40%;
+  left:-40%;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(34,211,238,.25), transparent 30%),
+    radial-gradient(circle at 80% 30%, rgba(16,185,129,.20), transparent 35%),
+    radial-gradient(circle at 50% 80%, rgba(168,85,247,.20), transparent 35%);
+  filter:blur(90px);
+  animation: move1 18s linear infinite, move2 24s linear infinite;
+}
+
+@keyframes move1{
+  0%{transform:rotate(0deg) scale(1);}
+  50%{transform:rotate(180deg) scale(1.2);}
+  100%{transform:rotate(360deg) scale(1);}
+}
+@keyframes move2{
+  0%{margin-left:-10%;}
+  50%{margin-left:10%;}
+  100%{margin-left:-10%;}
+}
+
+.menu-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1002;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px 18px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 24px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.04);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 15, 0.4);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 1000;
+}
+.overlay.show { opacity: 1; visibility: visible; }
+
+.sidebar {
+  position: fixed;
+  left: -320px;
+  top: 0;
+  width: 300px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 30px 24px;
+  z-index: 1001;
+  box-shadow: 20px 0 80px rgba(0,0,0,0.3);
+}
+.sidebar.show { transform: translateX(320px); }
+.close-btn { font-size: 26px; cursor: pointer; margin-bottom: 30px; color: #a1a1aa; display: inline-block; }
+.close-btn:hover { color: #fff; transform: rotate(90deg); }
+
+.sidebar a {
+  display: block;
+  text-decoration: none;
+  color: #e4e4e7;
+  padding: 14px 18px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(6px);
+}
+
+.container{
+  max-width:1400px;
+  margin:auto;
+  padding:90px 20px 40px;
+}
+
+.topbar{
+  display:flex;
+  gap:20px;
+  margin-bottom:25px;
+  flex-wrap:wrap;
+}
+
+.glass{
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(40px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,.3);
+}
+
+select, input, button {
+  padding:16px;
+  border:none;
+  outline:none;
+  background:rgba(255,255,255,.05);
+  color:white;
+  border-radius:18px;
+}
+
+select.glass option {
+  background-color: #0b132b;
+  color: #ffffff;
+}
+
+.search{
+  flex:1;
+  min-width:250px;
+}
+
+/* ফর্ম মডিউল */
+.form-container {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+.btn-update {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-update:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+.table-box{
+  padding:25px;
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th, td{
+  padding:18px;
+  text-align:center;
+}
+tr{
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+tr:hover{
+  background:rgba(255,255,255,.03);
+}
+
+.ok{ color:#22c55e; font-size:18px; }
+.no{ color:#ef4444; font-size:18px; }
+
+/* নোটিফিকেশন টোস্ট */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  z-index: 2000;
+  display: none;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+
+<div class="bg-container">
+  <div class="bg-wave"></div>
+</div>
+
+<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="sidebar" id="sidebar">
+<div class="close-btn" onclick="closeMenu()">✕</div> 
+<a href="adminF6.html">👑 Admin Dashboard</a>
+<a href="members.ad.html">👥 Manage Members</a>
+<a href="collection.ad.html">📅 Manage Collection</a>
+<a href="income.ad.html">💰 Manage Income</a>
+<a href="expense.ad.html">💸 Manage Expense</a>
+<a href="reports.ad.html">📊 View Reports</a>
+<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);">🚪 Exit Admin</a>
+</div>
+
+<div class="container">
+<div class="hero" style="text-align:center; margin-bottom: 30px;">
+  <h1 style="font-size: clamp(32px, 5vw, 50px); font-weight:700; background: linear-gradient(180deg, #ffffff 40%, #d4d4d8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Collection Manager (Admin)</h1>
+  <div style="opacity: 0.6; margin-top: 8px; font-size: 16px;">মাসিক চাঁদা বা কালেকশন ডাটা এন্ট্রি টার্মিনাল</div>
+</div>
+
+<div class="glass form-container">
+  <select class="glass" id="inputYear">
+    <option value="2026">2026</option>
+    <option value="2027">2027</option>
+    <option value="2028">2028</option>
+    <option value="2029">2029</option>
+    <option value="2030">2030</option>
+  </select>
+
+  <input type="text" id="inputMemberId" placeholder="Member Node Key/Name (e.g., KPTC-01)" style="flex:1; min-width:200px;">
+
+  <select class="glass" id="inputMonth">
+    <option value="Jan">January</option>
+    <option value="Feb">February</option>
+    <option value="Mar">March</option>
+    <option value="Apr">April</option>
+    <option value="May">May</option>
+    <option value="Jun">June</option>
+    <option value="Jul">July</option>
+    <option value="Aug">August</option>
+    <option value="Sep">September</option>
+    <option value="Oct">October</option>
+    <option value="Nov">November</option>
+    <option value="Dec">December</option>
+  </select>
+
+  <select class="glass" id="inputStatus">
+    <option value="true">Paid (✅)</option>
+    <option value="false">Unpaid (❌)</option>
+  </select>
+
+  <button class="btn-update" onclick="updateCollectionStatus()">Update Status</button>
+</div>
+
+<div class="topbar">
+  <select class="glass" id="yearSelect">
+    <option value="2026">2026</option>
+    <option value="2027">2027</option>
+    <option value="2028">2028</option>
+    <option value="2029">2029</option>
+    <option value="2030">2030</option>
+  </select>
+  <input class="search glass" type="text" id="searchInput" placeholder="🔍 Search Member...">
+</div>
+
+<div class="glass table-box">
+  <h2 style="margin-bottom:20px; font-size:28px; font-weight:700;">📅 Live Collection Ledger</h2>
+  <table id="collectionTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
+        <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      <tr><td colspan="13" style="padding:30px; color:#94a3b8;">Loading data from database...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="glass" style="margin-top:25px; padding:25px;">
+  <h3 style="margin-bottom:15px;">📊 Summary</h3>
+  <p>Total Members : <span id="totalMembers">0</span></p><br>
+  <p>Paid This Month (<span id="currentMonthName">Month</span>) : <span id="paidMembers">0</span></p><br>
+  <p>Pending Members : <span id="pendingMembers">0</span></p>
+</div>
+</div>
+
+<div id="toast" class="toast">✅ Collection Matrix Updated!</div>
+
+<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V1</div>
+
+<script>
+  const firebaseConfig = {
+    databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  let allMembersData = {}; 
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+  const currentMonthIdx = new Date().getMonth();
+  document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
+
+  function showToast() {
+    const t = document.getElementById('toast');
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+  }
+
+  // ফায়ারবেজে কালেকশন রেকর্ড তৈরি/আপডেট করা
+  function updateCollectionStatus() {
+    const year = document.getElementById('inputYear').value;
+    const mId = document.getElementById('inputMemberId').value.trim();
+    const month = document.getElementById('inputMonth').value;
+    const status = document.getElementById('inputStatus').value === "true";
+
+    if(!mId) return alert('মেম্বার আইডি বা নাম ইনপুট দিন!');
+
+    // মেম্বারের নাম কি আগে থেকেই নোডে আছে কিনা তা ট্র্যাক করে আপডেট করা
+    const nodeRef = db.ref(`collections/${year}/${mId}`);
+    
+    nodeRef.once('value').then((snapshot) => {
+      let currentData = snapshot.val() || {};
+      
+      // যদি নতুন এন্ট্রি হয়, তবে নাম হিসেবে নোড আইডিকেই সেট করবে ডিফল্ট হিসেবে
+      if (!currentData.name) {
+        currentData.name = mId;
+      }
+      
+      currentData[month] = status; // মাস সেট করা (true/false)
+      
+      nodeRef.set(currentData, (error) => {
+        if(!error) {
+          showToast();
+          document.getElementById('inputMemberId').value = '';
+        }
+      });
+    });
+  }
+
+  function loadCollectionData(year) {
+    const dbRef = db.ref('collections/' + year);
+    dbRef.on('value', (snapshot) => {
+      allMembersData = snapshot.val() || {};
+      renderTable(allMembersData);
+    });
+  }
+
+  function renderTable(data, filterText = "") {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = "";
+
+    let total = 0;
+    let paid = 0;
+    let pending = 0;
+
+    Object.keys(data).forEach(memberId => {
+      const member = data[memberKey = memberId];
+      const memberName = member.name || memberId;
+
+      if (filterText && !memberName.toLowerCase().includes(filterText.toLowerCase())) {
+        return;
+      }
+
+      total++;
+
+      let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
+      months.forEach((month, idx) => {
+        const isPaid = member[month] === true || member[month.toLowerCase()] === true;
+        rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">❌</td>';
+        
+        if (idx === currentMonthIdx) {
+          if (isPaid) paid++; else pending++;
+        }
+      });
+      rowHtml += '</tr>';
+      tbody.innerHTML += rowHtml;
+    });
+
+    if (total === 0) {
+      tbody.innerHTML = '<tr><td colspan="13" style="padding:30px; color:#94a3b8;">No data found in database!</td></tr>';
+    }
+
+    document.getElementById('totalMembers').innerText = total;
+    document.getElementById('paidMembers').innerText = paid;
+    document.getElementById('pendingMembers').innerText = pending;
+  }
+
+  const yearSelect = document.getElementById('yearSelect');
+  yearSelect.addEventListener('change', (e) => {
+    loadCollectionData(e.target.value);
+  });
+
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', (e) => {
+    renderTable(allMembersData, e.target.value);
+  });
+
+  loadCollectionData(yearSelect.value);
+
+  function openMenu(){
+    document.getElementById('sidebar').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('menuBtn').style.opacity = '0';
+  }
+  function closeMenu(){
+    document.getElementById('sidebar').classList.remove('show');
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('menuBtn').style.opacity = '1';
+  }
+</script>
+</body>
+</html>
