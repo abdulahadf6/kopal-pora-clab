@@ -230,14 +230,14 @@ font-size:18px;
 
 <div class="sidebar" id="sidebar">
 <div class="close-btn" onclick="closeMenu()">✕</div> 
-<a href="dashboard.html">🏠 Dashboard</a>
-<a href="members.html">👥 Members</a>
-<a href="collection.html">📅 Collection</a>
-<a href="income.html">💰 Income</a>
-<a href="expense.html">💸 Expense</a>
-<a href="reports.html">📊 Reports</a>
-<a href="about.html">📖 About</a>
-<a href="index.html">🚪 Logout</a>
+<a href="dashboard.html"> Dashboard</a>
+<a href="members.html"> Members</a>
+<a href="collection.html"> Collection</a>
+<a href="income.html"> Income</a>
+<a href="expense.html"> Expense</a>
+<a href="reports.html"> Reports</a>
+<a href="about.html"> About</a>
+<a href="index.html"> Logout</a>
 </div>
 
 <div class="container">
@@ -255,7 +255,7 @@ font-size:18px;
 
 <div class="glass table-box">
 <h2 style="margin-bottom:20px; font-size:28px; font-weight:700;">
-📅 Collection Status
+ Collection Status
 </h2>
 
 <table id="collectionTable">
@@ -273,7 +273,7 @@ font-size:18px;
 </div>
 
 <div class="glass" style="margin-top:25px; padding:25px;">
-<h3 style="margin-bottom:15px;">📊 Summary</h3>
+<h3 style="margin-bottom:15px;"> Summary</h3>
 <p>Total Members : <span id="totalMembers">0</span></p><br>
 <p>Paid This Month (<span id="currentMonthName">Month</span>) : <span id="paidMembers">0</span></p><br>
 <p>Pending Members : <span id="pendingMembers">0</span></p>
@@ -333,7 +333,7 @@ KPTC Collection V1
       months.forEach((month, idx) => {
         // ডাটাবেজে ছোট হাতের jan বা বড় হাতের Jan দুইটাই যেন সাপোর্ট করে তার ফিক্স
         const isPaid = member[month] === true || member[month.toLowerCase()] === true;
-        rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">❌</td>';
+        rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
         if (idx === currentMonthIdx) {
           if (isPaid) paid++; else pending++;
