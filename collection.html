@@ -281,25 +281,41 @@ font-size:18px;
 </div>
 
 <div style="text-align:center; padding:40px; color:#94a3b8;">
-KPTC Collection V1
+KPTC Collection V1.1
 </div>
 
 <script>
-  // ফায়ারবেজ কনফিগারেশন
   const firebaseConfig = {
     databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
   };
 
-  // ফায়ারবেজ ইনিশিয়ালাইজ
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
   let allMembersData = {}; 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  // চলতি মাস বের করা
+  // ১. ডাইনামিক কারেন্ট টাইম ও বছর ক্যালকুলেশন
+  const currentYear = new Date().getFullYear().toString();
   const currentMonthIdx = new Date().getMonth();
   document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
+
+  // ড্রপডাউন এলিমেন্ট রেফারেন্স
+  const yearSelect = document.getElementById('yearSelect');
+
+  // ২. সিস্টেমেটিক বছর ম্যাচিং (চলতি বছর অটো ড্রপডাউনে সেট করার মেকানিজম)
+  let yearFound = false;
+  for (let i = 0; i < yearSelect.options.length; i++) {
+    if (yearSelect.options[i].value === currentYear) {
+      yearSelect.selectedIndex = i;
+      yearFound = true;
+      break;
+    }
+  }
+  // যদি কোনো কারণে চলতি বছর লিস্টে না থাকে, তবে ডিফল্ট হিসেবে প্রথম অপশনটিই লোড হবে
+  if(!yearFound) {
+    yearSelect.selectedIndex = 0;
+  }
 
   // ডাটাবেজ থেকে ডাটা আনা
   function loadCollectionData(year) {
@@ -331,7 +347,6 @@ KPTC Collection V1
 
       let rowHtml = '<tr><td>' + memberName + '</td>';
       months.forEach((month, idx) => {
-        // ডাটাবেজে ছোট হাতের jan বা বড় হাতের Jan দুইটাই যেন সাপোর্ট করে তার ফিক্স
         const isPaid = member[month] === true || member[month.toLowerCase()] === true;
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
@@ -353,7 +368,6 @@ KPTC Collection V1
   }
 
   // বছর পরিবর্তন ফিল্টার
-  const yearSelect = document.getElementById('yearSelect');
   yearSelect.addEventListener('change', (e) => {
     loadCollectionData(e.target.value);
   });
@@ -364,7 +378,7 @@ KPTC Collection V1
     renderTable(allMembersData, e.target.value);
   });
 
-  // প্রথমবার ডাটা লোড
+  // পেজ ওপেন হওয়ার সাথে সাথেই সিলেক্টেড বছরের কালেকশন ডাটা অটো লোড হবে
   loadCollectionData(yearSelect.value);
 
   // মেনু স্ক্রিপ্ট
