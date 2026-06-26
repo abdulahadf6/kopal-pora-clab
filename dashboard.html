@@ -234,14 +234,14 @@ h1 {
 
 <div class="sidebar" id="sidebar">
 <div class="close-btn" onclick="closeMenu()">✕</div>
-<a href="dashboard.html">🏠 Dashboard</a>
-<a href="members.html">👥 Members</a>
-<a href="collection.html">📅 Collection</a>
-<a href="income.html">💰 Income</a>
-<a href="expense.html">💸 Expense</a>
-<a href="reports.html">📊 Reports</a>
-<a href="about.html">📖 About</a>
-<a href="index.html">🚪 Logout</a>
+<a href="dashboard.html"> Dashboard</a>
+<a href="members.html"> Members</a>
+<a href="collection.html"> Collection</a>
+<a href="income.html"> Income</a>
+<a href="expense.html"> Expense</a>
+<a href="reports.html"> Reports</a>
+<a href="about.html"> About</a>
+<a href="index.html"> Logout</a>
 </div>
 
 <div class="hero">
@@ -251,10 +251,10 @@ h1 {
 </div>
 
 <div class="cards">
-<div class="card"><small>💰 Current Balance</small><h2 id="currentBalance">৳0</h2></div>
-<div class="card"><small>📈 Total Income</small><h2 id="totalIncome">৳0</h2></div>
-<div class="card"><small>📉 Total Expense</small><h2 id="totalExpense">৳0</h2></div>
-<div class="card"><small>👥 Members</small><h2 id="totalMembers">0</h2></div>
+<div class="card"><small> Current Balance</small><h2 id="currentBalance">৳0</h2></div>
+<div class="card"><small> Total Income</small><h2 id="totalIncome">৳0</h2></div>
+<div class="card"><small> Total Expense</small><h2 id="totalExpense">৳0</h2></div>
+<div class="card"><small> Members</small><h2 id="totalMembers">0</h2></div>
 </div>
 
 <div class="section">
@@ -268,9 +268,9 @@ h1 {
 
 <div class="section">
 <div class="panel">
-<h2>📋 Recent Activity</h2>
+<h2> Recent Activity</h2>
 <div class="activity" id="activityList">
-  <div>🔄 Loading latest dashboard summary...</div>
+  <div> Loading latest dashboard summary...</div>
 </div>
 </div>
 </div>
@@ -330,10 +330,10 @@ db.ref('expense').on('value', (snapshot) => {
   // রিসেন্ট অ্যাক্টিভিটি জেনারেট করা (ডেমো হিসেবে সাজানো)
   const activityDiv = document.getElementById('activityList');
   activityDiv.innerHTML = `
-    <div>✅ Members real-time synchronization active</div>
-    <div>✅ Total Financial log synced with database</div>
-    <div>💸 Latest Expense: ৳${total.toLocaleString()} monitored</div>
-    <div>🧳 Mongla Tour Planning Started</div>
+    <div> Members real-time synchronization active</div>
+    <div> Total Financial log synced with database</div>
+    <div> Latest Expense: ৳${total.toLocaleString()} monitored</div>
+    <div> Mongla Tour Planning Started</div>
   `;
 });
 
