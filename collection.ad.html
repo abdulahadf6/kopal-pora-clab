@@ -318,7 +318,7 @@ tr:hover{
 
 <div id="toast" class="toast">✅ Collection Matrix Updated!</div>
 
-<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V1</div>
+<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V1.1</div>
 
 <script>
   const firebaseConfig = {
@@ -331,8 +331,33 @@ tr:hover{
   let allMembersData = {}; 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+  // ১. চলতি মাস এবং চলতি বছর অটো ক্যালকুলেশন
+  const currentYear = new Date().getFullYear().toString();
   const currentMonthIdx = new Date().getMonth();
   document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
+
+  // ড্রপডাউন এলিমেন্ট রেফারেন্স জোড়া
+  const inputYear = document.getElementById('inputYear');
+  const yearSelect = document.getElementById('yearSelect');
+
+  // ২. চলতি বছর অনুযায়ী ড্রপডাউন দুইটির ইন্টেলিজেন্ট সিলেকশন অটো-ম্যাচিং
+  function setDropdownToCurrentYear(dropdownElement) {
+    let yearFound = false;
+    for (let i = 0; i < dropdownElement.options.length; i++) {
+      if (dropdownElement.options[i].value === currentYear) {
+        dropdownElement.selectedIndex = i;
+        yearFound = true;
+        break;
+      }
+    }
+    if (!yearFound) dropdownElement.selectedIndex = 0;
+  }
+
+  setDropdownToCurrentYear(inputYear);
+  setDropdownToCurrentYear(yearSelect);
+
+  // ইনপুট ফর্মে কারেন্ট মাসটি অটো সিলেক্ট করে দেওয়া যাতে এন্ট্রি সহজ হয়
+  inputMonth.selectedIndex = currentMonthIdx;
 
   function showToast() {
     const t = document.getElementById('toast');
@@ -349,18 +374,16 @@ tr:hover{
 
     if(!mId) return alert('মেম্বার আইডি বা নাম ইনপুট দিন!');
 
-    // মেম্বারের নাম কি আগে থেকেই নোডে আছে কিনা তা ট্র্যাক করে আপডেট করা
     const nodeRef = db.ref(`collections/${year}/${mId}`);
     
     nodeRef.once('value').then((snapshot) => {
       let currentData = snapshot.val() || {};
       
-      // যদি নতুন এন্ট্রি হয়, তবে নাম হিসেবে নোড আইডিকেই সেট করবে ডিফল্ট হিসেবে
       if (!currentData.name) {
         currentData.name = mId;
       }
       
-      currentData[month] = status; // মাস সেট করা (true/false)
+      currentData[month] = status;
       
       nodeRef.set(currentData, (error) => {
         if(!error) {
@@ -388,7 +411,7 @@ tr:hover{
     let pending = 0;
 
     Object.keys(data).forEach(memberId => {
-      const member = data[memberKey = memberId];
+      const member = data[memberId];
       const memberName = member.name || memberId;
 
       if (filterText && !memberName.toLowerCase().includes(filterText.toLowerCase())) {
@@ -419,7 +442,6 @@ tr:hover{
     document.getElementById('pendingMembers').innerText = pending;
   }
 
-  const yearSelect = document.getElementById('yearSelect');
   yearSelect.addEventListener('change', (e) => {
     loadCollectionData(e.target.value);
   });
@@ -429,6 +451,7 @@ tr:hover{
     renderTable(allMembersData, e.target.value);
   });
 
+  // পেজ লোড হওয়ামাত্রই অটো-ডিটেক্টেড চলতি বছরের ডাটা লাইভ সিঙ্ক হবে
   loadCollectionData(yearSelect.value);
 
   function openMenu(){
