@@ -280,13 +280,13 @@ h1 {
 
 <div class="sidebar" id="sidebar">
 <div class="close-btn" onclick="closeMenu()">✕</div>
-<a href="adminF6.html">👑 Admin Dashboard</a>
-<a href="members.ad.html">👥 Manage Members</a>
-<a href="collection.ad.html">📅 Manage Collection</a>
-<a href="income.ad.html">💰 Manage Income</a>
-<a href="expense.ad.html">💸 Manage Expense</a>
-<a href="reports.ad.html">📊 View Reports</a>
-<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);">🚪 Exit Admin</a>
+<a href="adminF6.html"> Admin Dashboard</a>
+<a href="members.ad.html"> Manage Members</a>
+<a href="collection.ad.html"> Manage Collection</a>
+<a href="income.ad.html"> Manage Income</a>
+<a href="expense.ad.html"> Manage Expense</a>
+<a href="reports.ad.html"> View Reports</a>
+<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);"> Exit Admin</a>
 </div>
 
 <div class="hero">
@@ -296,19 +296,19 @@ h1 {
 </div>
 
 <div class="cards">
-<div class="card"><small>💰 Current Balance</small><h2 id="currentBalance">৳0</h2></div>
-<div class="card"><small>📈 Total Income</small><h2 id="totalIncome">৳0</h2></div>
-<div class="card"><small>📉 Total Expense</small><h2 id="totalExpense">৳0</h2></div>
-<div class="card"><small>👥 Members</small><h2 id="totalMembers">0</h2></div>
+<div class="card"><small> Current Balance</small><h2 id="currentBalance">৳0</h2></div>
+<div class="card"><small> Total Income</small><h2 id="totalIncome">৳0</h2></div>
+<div class="card"><small> Total Expense</small><h2 id="totalExpense">৳0</h2></div>
+<div class="card"><small> Members</small><h2 id="totalMembers">0</h2></div>
 </div>
 
 <div class="section">
   <div class="panel">
-    <h2>⚡ Quick Database Terminal (Data Ingestion)</h2>
+    <h2> Quick Database Terminal (Data Ingestion)</h2>
     <div class="admin-grid">
       
       <div class="form-group">
-        <h3>👥 Add New Member</h3>
+        <h3> Add New Member</h3>
         <input type="text" id="mName" placeholder="Full Name">
         <input type="text" id="mId" placeholder="Member ID (e.g., KPTC-01)">
         <select id="mStatus">
@@ -319,7 +319,7 @@ h1 {
       </div>
 
       <div class="form-group">
-        <h3>💰 Log Club Income</h3>
+        <h3> Log Club Income</h3>
         <input type="text" id="incSource" placeholder="Source / Member Name">
         <input type="number" id="incAmount" placeholder="Amount (৳)">
         <input type="text" id="incDate" placeholder="Date (DD-MM-YYYY)">
@@ -327,7 +327,7 @@ h1 {
       </div>
 
       <div class="form-group">
-        <h3>💸 Log Club Expense</h3>
+        <h3> Log Club Expense</h3>
         <input type="text" id="expDetails" placeholder="Expense Details">
         <input type="number" id="expAmount" placeholder="Amount (৳)">
         <input type="text" id="expCategory" placeholder="Category (e.g., Tour)">
@@ -341,9 +341,9 @@ h1 {
 
 <div class="section">
 <div class="panel">
-<h2>📋 Console & Synced Activity</h2>
+<h2> Console & Synced Activity</h2>
 <div class="activity" id="activityList">
-  <div>🔄 Listening database transactions...</div>
+  <div> Listening database transactions...</div>
 </div>
 </div>
 </div>
@@ -397,9 +397,9 @@ db.ref('expense').on('value', (snapshot) => {
   updateFinancials();
   
   document.getElementById('activityList').innerHTML = `
-    <div>🔒 Admin Core: Secure Real-time Pipeline Operational</div>
-    <div>📡 Nodes Synced: 'members', 'income', 'expense'</div>
-    <div>📈 Current Live Expense Threshold: ৳${total.toLocaleString()}</div>
+    <div> Admin Core: Secure Real-time Pipeline Operational</div>
+    <div> Nodes Synced: 'members', 'income', 'expense'</div>
+    <div> Current Live Expense Threshold: ৳${total.toLocaleString()}</div>
   `;
 });
 
@@ -411,7 +411,7 @@ function addMember() {
   if(!name || !id) return alert('ফাইল খালি রাখা যাবে না!');
 
   db.ref('members').push({ name, id, status }, () => {
-    showToast('👥 New Member Registered!');
+    showToast(' New Member Registered!');
     document.getElementById('mName').value = '';
     document.getElementById('mId').value = '';
   });
@@ -424,7 +424,7 @@ function addIncome() {
   if(!source || !amount || !date) return alert('সব তথ্য পূরণ করুন!');
 
   db.ref('income').push({ source, amount, date }, () => {
-    showToast('💰 Income Logged Successfully!');
+    showToast(' Income Logged Successfully!');
     document.getElementById('incSource').value = '';
     document.getElementById('incAmount').value = '';
     document.getElementById('incDate').value = '';
@@ -439,7 +439,7 @@ function addExpense() {
   if(!details || !amount || !category || !date) return alert('সব তথ্য পূরণ করুন!');
 
   db.ref('expense').push({ details, amount, category, date }, () => {
-    showToast('💸 Expense Pushed to Core!');
+    showToast(' Expense Pushed to Core!');
     document.getElementById('expDetails').value = '';
     document.getElementById('expAmount').value = '';
     document.getElementById('expCategory').value = '';
