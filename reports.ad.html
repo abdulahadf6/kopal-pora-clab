@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPTC Reports</title>
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  transition:.4s;
+}
+
+body{
+  background:#020617;
+  color:white;
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+
+/* Animated Background */
+.bg{
+  position:fixed;
+  inset:0;
+  z-index:-1;
+  overflow:hidden;
+  background:#020617;
+}
+
+.bg::before{
+  content:"";
+  position:absolute;
+  width:1400px;
+  height:1400px;
+  left:-300px;
+  top:-300px;
+  background: radial-gradient(circle, rgba(16,185,129,.35), transparent 60%);
+  animation:move1 18s linear infinite;
+  filter:blur(80px);
+}
+
+.bg::after{
+  content:"";
+  position:absolute;
+  width:1200px;
+  height:1200px;
+  right:-250px;
+  bottom:-250px;
+  background: radial-gradient(circle, rgba(6,182,212,.35), transparent 60%);
+  animation:move2 15s linear infinite;
+  filter:blur(80px);
+}
+
+@keyframes move1{
+  0%{ transform:rotate(0deg); }
+  100%{ transform:rotate(360deg); }
+}
+@keyframes move2{
+  0%{ transform:rotate(360deg); }
+  100%{ transform:rotate(0deg); }
+}
+
+/* Menu */
+.menu-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  z-index:1002;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.15);
+  padding:12px 18px;
+  border-radius:15px;
+  cursor:pointer;
+  font-size:24px;
+}
+.menu-btn:hover{ transform:scale(1.05); }
+
+/* Sidebar */
+.sidebar{
+  position:fixed;
+  left:-320px;
+  top:0;
+  width:300px;
+  height:100%;
+  padding:25px;
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(30px);
+  border-right:1px solid rgba(255,255,255,.1);
+  z-index:1001;
+}
+.sidebar.show{ transform:translateX(320px); }
+.sidebar a{
+  display:block;
+  text-decoration:none;
+  color:white;
+  padding:14px;
+  margin-bottom:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.05);
+}
+.sidebar a:hover{ transform:translateX(6px); }
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(10px);
+  opacity:0;
+  visibility:hidden;
+  z-index:1000;
+}
+.overlay.show{ opacity:1; visibility:visible; }
+
+/* Main */
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:90px 20px 40px;
+}
+.page-title{
+  text-align:center;
+  font-size:42px;
+  margin-bottom:35px;
+  font-weight:700;
+}
+.cards{
+  display:grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+}
+.card{
+  padding:25px;
+  border-radius:28px;
+  background: rgba(255,255,255,.05);
+  backdrop-filter:blur(25px);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+.card:hover{ transform:translateY(-6px); }
+.card small{
+  display:block;
+  color:#94a3b8;
+  margin-bottom:10px;
+  font-size:14px;
+}
+.card h2{ font-size:34px; }
+
+/* Panel */
+.panel{
+  margin-top:25px;
+  padding:25px;
+  border-radius:28px;
+  background: rgba(255,255,255,.05);
+  backdrop-filter:blur(25px);
+  border:1px solid rgba(255,255,255,.12);
+  overflow:auto;
+}
+.panel h2{ margin-bottom:20px; }
+
+/* Table */
+table{ width:100%; border-collapse:collapse; }
+th{ text-align:left; padding:15px; background: rgba(255,255,255,.08); }
+td{ padding:15px; border-bottom: 1px solid rgba(255,255,255,.08); }
+tr:hover { background: rgba(255,255,255,.04); }
+.footer{ text-align:center; padding:40px; color:#94a3b8; }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="sidebar" id="sidebar">
+  <div style="font-size: 26px; cursor: pointer; margin-bottom: 30px; color: #a1a1aa;" onclick="closeMenu()">✕</div>
+  <a href="dashboard.html">Dashboard</a>
+  <a href="members.html">Members</a>
+  <a href="collection.html">Collection</a>
+  <a href="income.html">Income</a>
+  <a href="expense.html">Expense</a>
+  <a href="reports.html">Reports</a>
+  <a href="about.html">About</a>
+</div>
+
+<div class="container">
+  <h1 class="page-title">Reports</h1>
+
+  <div class="cards">
+    <div class="card">
+      <small>Total Income</small>
+      <h2 id="totalIncome">৳0</h2>
+    </div>
+    <div class="card">
+      <small>Total Expense</small>
+      <h2 id="totalExpense">৳0</h2>
+    </div>
+    <div class="card">
+      <small>Current Balance</small>
+      <h2 id="currentBalance">৳0</h2>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Monthly Report</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Income</th>
+          <th>Expense</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="monthlyTableBody">
+        <tr>
+          <td colspan="4" style="text-align:center; color:#94a3b8;">Loading monthly reports...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel">
+    <h2>Yearly Report</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Total Income</th>
+          <th>Total Expense</th>
+          <th>Balance</th>
+        </tr>
+      </thead>
+      <tbody id="yearlyTableBody">
+        <tr>
+          <td colspan="4" style="text-align:center; color:#94a3b8;">Loading yearly reports...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="footer">KPTC Reports V3.2</div>
+
+<script>
+const firebaseConfig = {
+  databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+let incomeData = {};
+let generalExpenseData = {};
+let tourExpenseData = {};
+
+function processReports() {
+  let totalIncome = 0;
+  let totalExpense = 0;
+  
+  const reportTree = {};
+
+  // ১. ইনকাম ক্যালকুলেশন
+  Object.keys(incomeData).forEach(key => {
+    const item = incomeData[key];
+    const amount = parseFloat(item.amount) || 0;
+    totalIncome += amount;
+
+    const dateStr = item.date || "";
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const year = parts[2];
+
+      if (!reportTree[year]) reportTree[year] = Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
+      if (monthIdx >= 0 && monthIdx < 12) {
+        reportTree[year][monthIdx].income += amount;
+      }
+    }
+  });
+
+  // ২. জেনারেল এক্সপেন্স ক্যালকুলেশন
+  Object.keys(generalExpenseData).forEach(key => {
+    const item = generalExpenseData[key];
+    const amount = parseFloat(item.amount) || 0;
+    totalExpense += amount;
+
+    const dateStr = item.date || "";
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const year = parts[2];
+
+      if (!reportTree[year]) reportTree[year] = Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
+      if (monthIdx >= 0 && monthIdx < 12) {
+        reportTree[year][monthIdx].expense += amount;
+      }
+    }
+  });
+
+  // ৩. ট্যুর এক্সপেন্স ক্যালকুলেশন
+  Object.keys(tourExpenseData).forEach(key => {
+    const item = tourExpenseData[key];
+    const amount = parseFloat(item.amount) || 0;
+    totalExpense += amount;
+
+    const dateStr = item.date || "";
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const year = parts[2];
+
+      if (!reportTree[year]) reportTree[year] = Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
+      if (monthIdx >= 0 && monthIdx < 12) {
+        reportTree[year][monthIdx].expense += amount;
+      }
+    }
+  });
+
+  // ড্যাশবোর্ড কার্ড কার্ড সিঙ্ক
+  document.getElementById('totalIncome').innerText = `৳${totalIncome.toLocaleString()}`;
+  document.getElementById('totalExpense').innerText = `৳${totalExpense.toLocaleString()}`;
+  document.getElementById('currentBalance').innerText = `৳${(totalIncome - totalExpense).toLocaleString()}`;
+
+  const monthlyTbody = document.getElementById('monthlyTableBody');
+  const yearlyTbody = document.getElementById('yearlyTableBody');
+  
+  monthlyTbody.innerHTML = "";
+  yearlyTbody.innerHTML = "";
+
+  const years = Object.keys(reportTree).sort().reverse();
+
+  if (years.length === 0) {
+    monthlyTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No data available</td></tr>`;
+    yearlyTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No data available</td></tr>`;
+    return;
+  }
+
+  years.forEach(year => {
+    let yearlyIncomeSum = 0;
+    let yearlyExpenseSum = 0;
+
+    reportTree[year].forEach((monthData, idx) => {
+      if (monthData.income > 0 || monthData.expense > 0) {
+        yearlyIncomeSum += monthData.income;
+        yearlyExpenseSum += monthData.expense;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${monthNames[idx]} (${year})</td>
+          <td>৳${monthData.income.toLocaleString()}</td>
+          <td>৳${monthData.expense.toLocaleString()}</td>
+          <td style="color: ${monthData.income >= monthData.expense ? '#34d399' : '#f87171'}">
+            ৳${(monthData.income - monthData.expense).toLocaleString()}
+          </td>
+        `;
+        monthlyTbody.appendChild(tr);
+      }
+    });
+
+    const trYear = document.createElement('tr');
+    trYear.innerHTML = `
+      <td>${year}</td>
+      <td>৳${yearlyIncomeSum.toLocaleString()}</td>
+      <td>৳${yearlyExpenseSum.toLocaleString()}</td>
+      <td style="color: ${yearlyIncomeSum >= yearlyExpenseSum ? '#34d399' : '#f87171'}">
+        ৳${(yearlyIncomeSum - yearlyExpenseSum).toLocaleString()}
+      </td>
+    `;
+    yearlyTbody.appendChild(trYear);
+  });
+}
+
+// ফায়ারবেজ লাইভ সিঙ্ক লিসেনার্স
+db.ref('income').on('value', (snapshot) => {
+  incomeData = snapshot.val() || {};
+  processReports();
+});
+
+db.ref('expense/general').on('value', (snapshot) => {
+  generalExpenseData = snapshot.val() || {};
+  processReports();
+});
+
+db.ref('expense/tour').on('value', (snapshot) => {
+  tourExpenseData = snapshot.val() || {};
+  processReports();
+});
+
+function openMenu(){
+  document.getElementById('sidebar').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('menuBtn').style.opacity='0';
+}
+function closeMenu(){
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('menuBtn').style.opacity='1';
+}
+</script>
+</body>
+</html>
