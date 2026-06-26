@@ -167,7 +167,7 @@ body {
   gap: 15px;
   margin-bottom: 10px;
 }
-.form-container input, .form-container select {
+.form-container input {
   padding: 12px 16px;
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -175,7 +175,7 @@ body {
   color: #fff;
   outline: none;
 }
-.form-container input:focus, .form-container select:focus {
+.form-container input:focus {
   border-color: #3b82f6;
 }
 .btn-add {
@@ -263,7 +263,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   <div class="panel">
     <h2>➕ Log New Expense</h2>
     <div class="form-container">
-      <input type="text" id="expCategory" placeholder="Category (e.g., Tour, Food, General)">
+      <input type="text" id="expCategory" placeholder="Category (e.g., Tour, Food)">
       <input type="text" id="expDetails" placeholder="Details (e.g., Hotel Booking)">
       <input type="number" id="expAmount" placeholder="Amount (৳)">
       <input type="text" id="expDate" placeholder="Date (DD-MM-YYYY)">
@@ -333,7 +333,7 @@ function showToast(msg) {
   setTimeout(() => { t.style.display = 'none'; }, 3000);
 }
 
-// ডাটাবেজে নতুন এক্সপেন্স এন্ট্রি করা
+// ডাটাবেজে খরচ পুশ করা (যা অটোমেটিক ডেট অনুযায়ী দুই কার্ড হিসাব করবে)
 function pushExpense() {
   const category = document.getElementById('expCategory').value.trim();
   const details = document.getElementById('expDetails').value.trim();
@@ -344,6 +344,7 @@ function pushExpense() {
     return alert('অনুগ্রহ করে সবগুলো ঘর পূরণ করুন!');
   }
 
+  // সিঙ্গেল নোড 'expense'-এ পুশ
   db.ref('expense').push({ category, details, amount: parseFloat(amount), date }, (error) => {
     if(error) {
       alert('ডাটা যোগ করতে সমস্যা হয়েছে!');
@@ -357,16 +358,15 @@ function pushExpense() {
   });
 }
 
-// ডাটাবেজ থেকে এক্সপেন্স ডিলিট করা
 function deleteExpense(key) {
-  if(confirm('আপনি কি নিশ্চিতভাবে এই খরচ রেকর্ডটি মুছে ফেলতে চান?')) {
+  if(confirm('আপনি কি নিশ্চিতভাবে এই খরচটি মুছে ফেলতে চান?')) {
     db.ref(`expense/${key}`).remove(() => {
       showToast('🗑️ Log Deleted Successfully!');
     });
   }
 }
 
-// ডাটাবেজ থেকে ডাটা রিড করা
+// ফায়ারবেজ থেকে লাইভ রিড এবং রিয়েল-টাইম বোথ কার্ড ও টেবিল আপডেট
 const expenseRef = db.ref('expense');
 expenseRef.on('value', (snapshot) => {
   const data = snapshot.val() || {};
@@ -396,6 +396,7 @@ expenseRef.on('value', (snapshot) => {
     const category = item.category || "General";
     const details = item.details || "N/A";
 
+    // তারিখ ম্যাচিং লজিক যা ২ কার্ডের টোটাল আলাদা করে ফেলে
     if (dateStr) {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
@@ -403,9 +404,9 @@ expenseRef.on('value', (snapshot) => {
         const itemYear = parts[2];
 
         if (itemYear === currentYearStr) {
-          totalYear += amount;
+          totalYear += amount; // বছরের কার্ডের জন্য যোগফল
           if (itemMonth === currentMonthStr) {
-            totalMonth += amount;
+            totalMonth += amount; // মাসের কার্ডের জন্য যোগফল
           }
         }
       }
@@ -417,7 +418,6 @@ expenseRef.on('value', (snapshot) => {
       categoryTotals[category] = amount;
     }
 
-    // ডিটেইলস টেবিলে রো জেনারেট + ডিলিট বাটন বসানো
     const trDetail = document.createElement('tr');
     trDetail.innerHTML = `
       <td>${dateStr || 'N/A'}</td>
@@ -445,17 +445,16 @@ expenseRef.on('value', (snapshot) => {
     detailsTbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #71717a;">No records found!</td></tr>`;
   }
 
+  // দুই কার্ডের ডাটা রিয়েল-টাইমে আপডেট করা
   document.getElementById('monthExpense').innerText = `৳${totalMonth.toLocaleString()}`;
   document.getElementById('yearExpense').innerText = `৳${totalYear.toLocaleString()}`;
 });
 
-// মেনু স্ক্রিপ্ট
 function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
   document.getElementById('menuBtn').style.opacity = '0';
 }
-/* ক্লোজ মেনু */
 function closeMenu(){
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
