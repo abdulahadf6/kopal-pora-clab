@@ -198,8 +198,14 @@ h1 {
 
 /* সেকশন এবং প্যানেল */
 .section { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
-.panel { padding: 30px; }
+.panel { padding: 30px; overflow-x: auto; }
 .panel h2 { font-size: 24px; font-weight: 600; margin-bottom: 18px; }
+
+/* টেবিল স্টাইল */
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
+th { text-align: left; padding: 15px; background: rgba(255, 255, 255, 0.06); color: #a1a1aa; font-weight: 600; }
+td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); color: #e4e4e7; vertical-align: top; }
+tr:hover { background: rgba(255, 255, 255, 0.03); }
 
 /* অ্যাক্টিভিটি লিস্ট */
 .activity div {
@@ -259,13 +265,23 @@ h1 {
 
 <div class="section">
 <div class="panel">
-<h2>🧳 Last Tour History</h2>
-<p style="margin-bottom: 8px; color: #a1a1aa;">ভ্রমণের স্থান: <span id="histLocation" style="color: #fff; font-weight: 500;">Loading...</span></p>
-<p style="margin-bottom: 8px; color: #a1a1aa;">ভ্রমণের তারিখ: <span id="histDate" style="color: #fff; font-weight: 500;">Loading...</span></p>
-<p style="margin-bottom: 8px; color: #a1a1aa;">মোট সদস্য সংখ্যা: <span id="histMembers" style="color: #fff; font-weight: 500;">Loading...</span></p>
-<p style="margin-bottom: 12px; color: #a1a1aa;">মোট ট্যুর খরচ: <span id="histCost" style="color: #2563eb; font-weight: 600;">Loading...</span></p>
-<hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px;">
-<p style="color: #a1a1aa; font-size: 15px; line-height: 1.6;">💬 বিবরণ: <br><span id="histDescription" style="color: #e4e4e7; font-style: italic;">Loading...</span></p>
+<h2>🧳 Tour History List</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Destination</th>
+      <th>Date</th>
+      <th>Members</th>
+      <th>Total Cost</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody id="tourHistoryBody">
+    <tr>
+      <td colspan="5" style="text-align: center; color: #a1a1aa;">Loading tour history...</td>
+    </tr>
+  </tbody>
+</table>
 </div>
 </div>
 
@@ -278,7 +294,7 @@ h1 {
 </div>
 </div>
 
-<div class="footer">KPTC Dashboard V3.3</div>
+<div class="footer">KPTC Dashboard V3.4</div>
 
 <script>
 // ফায়ারবেজ কনফিগারেশন
@@ -323,7 +339,6 @@ db.ref('expense').on('value', (snapshot) => {
   const data = snapshot.val() || {};
   let total = 0;
   
-  // জেনারেল এবং ট্যুর স্প্লিট ডেটা সামঞ্জস্য রাখতে লুপ চেক
   if(data.general || data.tour) {
     Object.keys(data.general || {}).forEach(k => total += parseFloat(data.general[k].amount) || 0);
     Object.keys(data.tour || {}).forEach(k => total += parseFloat(data.tour[k].amount) || 0);
@@ -343,21 +358,34 @@ db.ref('expense').on('value', (snapshot) => {
   `;
 });
 
-// ৪. অ্যাডমিন প্যানেল থেকে পাঠানো ট্যুর হিস্ট্রি লোড (কোনো অটো-হিসাব ছাড়া)
+// ৪. অ্যাডমিন প্যানেল থেকে পাঠানো মাল্টিপল ট্যুর হিস্ট্রি লোড (কোনো অটো-হিসাব ছাড়া)
 db.ref('tour_history').on('value', (snapshot) => {
-  const data = snapshot.val() || {
-    location: "N/A",
-    date: "N/A",
-    members: "0",
-    cost: "0",
-    description: "অ্যাডমিন প্যানেল থেকে কোনো ইতিহাস সেট করা হয়নি।"
-  };
+  const tbody = document.getElementById('tourHistoryBody');
+  tbody.innerHTML = "";
   
-  document.getElementById('histLocation').innerText = data.location || "N/A";
-  document.getElementById('histDate').innerText = data.date || "N/A";
-  document.getElementById('histMembers').innerText = data.members || "0 জন";
-  document.getElementById('histCost').innerText = `৳${(parseFloat(data.cost) || 0).toLocaleString()}`;
-  document.getElementById('histDescription').innerText = data.description || "কোনো বিবরণ নেই।";
+  const data = snapshot.val();
+  
+  if (!data) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #a1a1aa;">No tour history found.</td></tr>`;
+    return;
+  }
+  
+  // লুপ চালিয়ে সব ট্যুরের ডাটা টেবিলে লম্বালম্বিভাবে প্রিন্ট করা হচ্ছে
+  Object.keys(data).forEach(key => {
+    const tour = data[key];
+    const tr = document.createElement('tr');
+    
+    const costAmount = parseFloat(tour.cost) || 0;
+    
+    tr.innerHTML = `
+      <td style="font-weight: 500; color: #fff;">${tour.location || 'N/A'}</td>
+      <td>${tour.date || 'N/A'}</td>
+      <td>${tour.members || '0'} Persons</td>
+      <td style="color: #3b82f6; font-weight: 600;">৳${costAmount.toLocaleString()}</td>
+      <td style="max-width: 250px; white-space: normal; font-size: 14px; color: #d4d4d8;">${tour.description || 'No description provided.'}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 });
 
 // মেনু স্ক্রিপ্ট
