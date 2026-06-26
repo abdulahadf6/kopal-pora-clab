@@ -239,29 +239,29 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 <div class="sidebar" id="sidebar">
 <div class="close-btn" onclick="closeMenu()">✕</div>
-<a href="adminF6.html">👑 Admin Dashboard</a>
-<a href="members.ad.html">👥 Manage Members</a>
-<a href="collection.ad.html">📅 Manage Collection</a>
-<a href="income.ad.html">💰 Manage Income</a>
-<a href="expense.ad.html">💸 Manage Expense</a>
-<a href="reports.ad.html">📊 View Reports</a>
-<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);">🚪 Exit Admin</a>
+<a href="adminF6.html"> Admin Dashboard</a>
+<a href="members.ad.html"> Manage Members</a>
+<a href="collection.ad.html"> Manage Collection</a>
+<a href="income.ad.html"> Manage Income</a>
+<a href="expense.ad.html"> Manage Expense</a>
+<a href="reports.ad.html"> View Reports</a>
+<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);"> Exit Admin</a>
 </div>
 
 <div class="cards">
   <div class="card">
-    <small>💰 This Month Income</small>
+    <small> This Month Income</small>
     <h2 id="monthIncome">৳0</h2>
   </div>
   <div class="card">
-    <small>📈 This Year Income</small>
+    <small> This Year Income</small>
     <h2 id="yearIncome">৳0</h2>
   </div>
 </div>
 
 <div class="section">
   <div class="panel">
-    <h2>➕ Log New Income</h2>
+    <h2> + Log New Income</h2>
     <div class="form-container">
       <input type="text" id="incSource" placeholder="Source (e.g., Monthly Subscription)">
       <input type="text" id="incFrom" placeholder="From (e.g., John Doe)">
@@ -274,7 +274,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 <div class="section">
   <div class="panel">
-    <h2>💰 Income History & Operations</h2>
+    <h2> Income History & Operations</h2>
     <table>
       <thead>
         <tr>
@@ -294,7 +294,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   </div>
 </div>
 
-<div id="toast" class="toast">✅ Income Log Pushed Successfully!</div>
+<div id="toast" class="toast"> Income Log Pushed Successfully!</div>
 
 <div class="footer">KPTC Income Admin V3</div>
 
@@ -329,7 +329,7 @@ function pushIncome() {
     if(error) {
       alert('ডাটা যোগ করতে সমস্যা হয়েছে!');
     } else {
-      showToast('💰 Income Record Added!');
+      showToast(' Income Record Added!');
       document.getElementById('incSource').value = '';
       document.getElementById('incFrom').value = '';
       document.getElementById('incAmount').value = '';
@@ -342,7 +342,7 @@ function pushIncome() {
 function deleteIncome(key) {
   if(confirm('আপনি কি নিশ্চিতভাবে এই ইনকাম রেকর্ডটি মুছে ফেলতে চান?')) {
     db.ref(`income/${key}`).remove(() => {
-      showToast('🗑️ Record Deleted Successfully!');
+      showToast(' Record Deleted Successfully!');
     });
   }
 }
