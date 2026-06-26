@@ -159,7 +159,7 @@ body {
 
 /* সেকশন এবং প্যানেল */
 .section { max-width: 1200px; margin: 24px auto; padding: 0 24px; }
-.panel { padding: 30px; overflow-x: auto; }
+.panel { padding: 30px; }
 .panel h2 { font-size: 24px; font-weight: 600; margin-bottom: 18px; }
 
 /* টেবিল স্টাইল */
@@ -203,24 +203,24 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   </div>
 
   <div class="card">
-    <small>📈 This Year Expense</small>
+    <small> This Year Expense</small>
     <h2 id="yearExpense">৳0</h2>
   </div>
 </div>
 
 <div class="section">
   <div class="panel">
-    <h2> Expense History Summary</h2>
+    <h2> Expense History</h2>
     <table>
       <thead>
         <tr>
           <th>Category</th>
           <th>Total Amount</th>
-        </tr>
+          <th>Date</th> </tr>
       </thead>
       <tbody id="categoryTableBody">
         <tr>
-          <td colspan="2" style="text-align: center; color: #71717a;">Loading summary...</td>
+          <td colspan="3" style="text-align: center; color: #71717a;">Loading summary...</td>
         </tr>
       </tbody>
     </table>
@@ -229,35 +229,37 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 <div class="section">
   <div class="panel">
-    <h2> Detailed Expense Ledger</h2>
+    <h2> Tour Expense Details</h2>
     <table>
       <thead>
         <tr>
           <th>Date</th>
-          <th>Category</th>
           <th>Details</th>
           <th>Amount</th>
         </tr>
       </thead>
       <tbody id="expenseDetailsBody">
         <tr>
-          <td colspan="4" style="text-align: center; color: #71717a;">Loading details...</td>
+          <td colspan="3" style="text-align: center; color: #71717a;">Loading details...</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<div class="footer">KPTC Dashboard V3.1</div>
+<div class="footer">KPTC Dashboard V3</div>
 
 <script>
+// ফায়ারবেজে কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
+// ফায়ারবেজ ইনিশিয়ালাইজ
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// ডাটাবেজ থেকে এক্সপেন্স ডাটা রিড করা
 const expenseRef = db.ref('expense');
 expenseRef.on('value', (snapshot) => {
   const data = snapshot.val() || {};
@@ -271,23 +273,21 @@ expenseRef.on('value', (snapshot) => {
   let totalMonth = 0;
   let totalYear = 0;
   let hasData = false;
-  
-  const categoryTotals = {};
 
   const currentDate = new Date();
   const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // MM
   const currentYearStr = String(currentDate.getFullYear()); // YYYY
 
-  // ফায়ারবেজের সাব-নোড (general/tour) প্রসেস করার জন্য অবজেক্ট ম্যাপিং লজিক
-  function processExpenseItem(item) {
+  // আইটেম প্রসেসিং ফাংশন
+  function processItem(item) {
     hasData = true;
     const amount = parseFloat(item.amount) || 0;
-    const dateStr = item.date || ""; 
+    const dateStr = item.date || "N/A"; 
     const category = item.category || "General";
     const details = item.details || "N/A";
 
-    // মাস এবং বছর ফিল্টারিং
-    if (dateStr) {
+    // মাস এবং বছর ম্যাচিং লজিক (গ্লোবাল কার্ড ক্যালকুলেশন)
+    if (dateStr && dateStr !== "N/A") {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
         const itemMonth = parts[1];
@@ -302,56 +302,44 @@ expenseRef.on('value', (snapshot) => {
       }
     }
 
-    // ক্যাটাগরি সামারি তৈরি
-    if(categoryTotals[category]) {
-      categoryTotals[category] += amount;
-    } else {
-      categoryTotals[category] = amount;
-    }
+    // টেবিল ১: Expense History (Category, Total Amount, Date) ৩টি কলাম ডাটা পুশ
+    const trCat = document.createElement('tr');
+    trCat.innerHTML = `
+      <td>${category}</td>
+      <td>৳${amount.toLocaleString()}</td>
+      <td>${dateStr}</td>
+    `;
+    catTbody.appendChild(trCat);
 
-    // ডিটেইলড লেজার টেবিলে সঠিক অর্ডারে রো পুশ করা
+    // টেবিল ২: Detailed Expense রো যোগ করা
     const trDetail = document.createElement('tr');
     trDetail.innerHTML = `
-      <td><strong>${dateStr || 'N/A'}</strong></td>
-      <td><span style="background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 8px; font-size: 13px;">${category}</span></td>
+      <td>${dateStr}</td>
       <td>${details}</td>
-      <td style="color: #ef4444; font-weight: 600;">৳${amount.toLocaleString()}</td>
+      <td>৳${amount.toLocaleString()}</td>
     `;
     detailsTbody.appendChild(trDetail);
   }
 
-  // অ্যাডমিন প্যানেল নেস্টেড নোড (general/tour) ব্যবহার করলে তা হ্যান্ডেল করার কন্ডিশন
+  // স্ট্রাকচার চেক (Nested বনাম Flat)
   if (data.general || data.tour) {
-    if (data.general) {
-      Object.keys(data.general).forEach(k => processExpenseItem(data.general[k]));
-    }
-    if (data.tour) {
-      Object.keys(data.tour).forEach(k => processExpenseItem(data.tour[k]));
-    }
+    if (data.general) Object.keys(data.general).forEach(k => processItem(data.general[k]));
+    if (data.tour) Object.keys(data.tour).forEach(k => processItem(data.tour[k]));
   } else {
-    // ফ্ল্যাট স্ট্রাকচার থাকলে তার জন্য ব্যাকআপ লুপ
-    Object.keys(data).forEach(key => processExpenseItem(data[key]));
+    Object.keys(data).forEach(key => processItem(data[key]));
   }
-
-  // সামারি টেবিল রেন্ডারিং
-  Object.keys(categoryTotals).forEach(cat => {
-    const trCat = document.createElement('tr');
-    trCat.innerHTML = `
-      <td><strong>${cat}</strong></td>
-      <td style="color: #3b82f6; font-weight: 600;">৳${categoryTotals[cat].toLocaleString()}</td>
-    `;
-    catTbody.appendChild(trCat);
-  });
 
   if (!hasData) {
-    catTbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #71717a; padding: 20px;">No data found!</td></tr>`;
-    detailsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a; padding: 20px;">No records found!</td></tr>`;
+    catTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No data found!</td></tr>`;
+    detailsTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No records found!</td></tr>`;
   }
 
+  // কার্ডের ভ্যালু আপডেট করা
   document.getElementById('monthExpense').innerText = `৳${totalMonth.toLocaleString()}`;
   document.getElementById('yearExpense').innerText = `৳${totalYear.toLocaleString()}`;
 });
 
+// মেনু স্ক্রিপ্ট
 function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
