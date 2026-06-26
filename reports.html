@@ -93,6 +93,20 @@ body{
   z-index:1001;
 }
 .sidebar.show{ transform:translateX(320px); }
+
+/* ক্লোজ বাটন স্টাইল */
+.close-btn { 
+  font-size: 26px; 
+  cursor: pointer; 
+  margin-bottom: 25px; 
+  color: #94a3b8; 
+  display: inline-block;
+}
+.close-btn:hover { 
+  color: #fff; 
+  transform: rotate(90deg); 
+}
+
 .sidebar a{
   display:block;
   text-decoration:none;
@@ -181,6 +195,7 @@ tr:hover { background: rgba(255,255,255,.04); }
 <div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
 <div class="sidebar" id="sidebar">
+  <div class="close-btn" onclick="closeMenu()">✕</div>
   <a href="dashboard.html">Dashboard</a>
   <a href="members.html">Members</a>
   <a href="collection.html">Collection</a>
@@ -247,31 +262,26 @@ tr:hover { background: rgba(255,255,255,.04); }
   </div>
 </div>
 
-<div class="footer">KPTC Reports V1</div>
+<div class="footer">KPTC Reports V1.1</div>
 
 <script>
-// ফায়ারবেজ কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
-// ফায়ারবেজ ইনিশিয়ালাইজ
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-// গ্লোবাল ডাটা অবজেক্ট
 let incomeData = {};
-let expenseData = {};
+let generalExpenseData = {};
+let tourExpenseData = {};
 
-// মেইন প্রসেসিং ফাংশন
 function processReports() {
   let totalIncome = 0;
   let totalExpense = 0;
   
-  // বছর এবং মাস ভিত্তিক স্ট্রাকচার তৈরি
-  // ফরম্যাট: reportTree[year][monthIdx] = { income: 0, expense: 0 }
   const reportTree = {};
 
   // ইনকাম ডাটা প্রসেস
@@ -283,7 +293,7 @@ function processReports() {
     const dateStr = item.date || "";
     const parts = dateStr.split('-');
     if (parts.length === 3) {
-      const monthIdx = parseInt(parts[1], 10) - 1; // 0-11
+      const monthIdx = parseInt(parts[1], 10) - 1;
       const year = parts[2];
 
       if (!reportTree[year]) reportTree[year] = Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
@@ -293,9 +303,28 @@ function processReports() {
     }
   });
 
-  // এক্সপেন্স ডাটা প্রসেস
-  Object.keys(expenseData).forEach(key => {
-    const item = expenseData[key];
+  // জেনারেল এক্সপেন্স ডাটা প্রসেস
+  Object.keys(generalExpenseData).forEach(key => {
+    const item = generalExpenseData[key];
+    const amount = parseFloat(item.amount) || 0;
+    totalExpense += amount;
+
+    const dateStr = item.date || "";
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const monthIdx = parseInt(parts[1], 10) - 1;
+      const year = parts[2];
+
+      if (!reportTree[year]) reportTree[year] = Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
+      if (monthIdx >= 0 && monthIdx < 12) {
+        reportTree[year][monthIdx].expense += amount;
+      }
+    }
+  });
+
+  // ট্যুর এক্সপেন্স ডাটা প্রসেস
+  Object.keys(tourExpenseData).forEach(key => {
+    const item = tourExpenseData[key];
     const amount = parseFloat(item.amount) || 0;
     totalExpense += amount;
 
@@ -317,14 +346,13 @@ function processReports() {
   document.getElementById('totalExpense').innerText = `৳${totalExpense.toLocaleString()}`;
   document.getElementById('currentBalance').innerText = `৳${(totalIncome - totalExpense).toLocaleString()}`;
 
-  // টেবিল রেন্ডার করা
   const monthlyTbody = document.getElementById('monthlyTableBody');
   const yearlyTbody = document.getElementById('yearlyTableBody');
   
   monthlyTbody.innerHTML = "";
   yearlyTbody.innerHTML = "";
 
-  const years = Object.keys(reportTree).sort().reverse(); // নতুন বছর উপরে থাকবে
+  const years = Object.keys(reportTree).sort().reverse();
 
   if (years.length === 0) {
     monthlyTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No data available</td></tr>`;
@@ -336,9 +364,7 @@ function processReports() {
     let yearlyIncomeSum = 0;
     let yearlyExpenseSum = 0;
 
-    // ঐ বছরের প্রতি মাসের হিসাব
     reportTree[year].forEach((monthData, idx) => {
-      // ট্রানজেকশন থাকলে তবেই টেবিলে রো দেখাবে
       if (monthData.income > 0 || monthData.expense > 0) {
         yearlyIncomeSum += monthData.income;
         yearlyExpenseSum += monthData.expense;
@@ -356,7 +382,6 @@ function processReports() {
       }
     });
 
-    // ইয়ারলি সামারি টেবিল রো
     const trYear = document.createElement('tr');
     trYear.innerHTML = `
       <td>${year}</td>
@@ -370,14 +395,19 @@ function processReports() {
   });
 }
 
-// ফায়ারবেজ লিসেনার্স
+// ফায়ারবেজ স্প্লিট নোড লিসেনার্স
 db.ref('income').on('value', (snapshot) => {
   incomeData = snapshot.val() || {};
   processReports();
 });
 
-db.ref('expense').on('value', (snapshot) => {
-  expenseData = snapshot.val() || {};
+db.ref('expense/general').on('value', (snapshot) => {
+  generalExpenseData = snapshot.val() || {};
+  processReports();
+});
+
+db.ref('expense/tour').on('value', (snapshot) => {
+  tourExpenseData = snapshot.val() || {};
   processReports();
 });
 
@@ -393,6 +423,5 @@ function closeMenu(){
   document.getElementById('menuBtn').style.opacity='1';
 }
 </script>
-
 </body>
 </html>
