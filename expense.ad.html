@@ -246,29 +246,29 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 <div class="sidebar" id="sidebar">
 <div class="close-btn" onclick="closeMenu()">✕</div>
-<a href="adminF6.html">👑 Admin Dashboard</a>
-<a href="members.ad.html">👥 Manage Members</a>
-<a href="collection.ad.html">📅 Manage Collection</a>
-<a href="income.ad.html">💰 Manage Income</a>
-<a href="expense.ad.html">💸 Manage Expense</a>
-<a href="reports.ad.html">📊 View Reports</a>
+<a href="adminF6.html"> Admin Dashboard</a>
+<a href="members.ad.html"> Manage Members</a>
+<a href="collection.ad.html"> Manage Collection</a>
+<a href="income.ad.html"> Manage Income</a>
+<a href="expense.ad.html"> Manage Expense</a>
+<a href="reports.ad.html"> View Reports</a>
 <a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);">🚪 Exit Admin</a>
 </div>
 
 <div class="cards">
   <div class="card">
-    <small>💰 This Month Expense</small>
+    <small> This Month Expense</small>
     <h2 id="monthExpense">৳0</h2>
   </div>
   <div class="card">
-    <small>📈 This Year Expense</small>
+    <small> This Year Expense</small>
     <h2 id="yearExpense">৳0</h2>
   </div>
 </div>
 
 <div class="section">
   <div class="panel">
-    <h2>💰 Expense History (General)</h2>
+    <h2> Expense History (General)</h2>
     
     <div class="form-container">
       <input type="text" id="genCategory" placeholder="Category (e.g., Food, Office)">
@@ -296,7 +296,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 <div class="section">
   <div class="panel">
-    <h2>🧳 Tour Expense Details</h2>
+    <h2> Tour Expense Details</h2>
     
     <div class="form-container">
       <input type="text" id="tourDetails" placeholder="Details (e.g., Bus Fare, Hotel booking)">
@@ -323,7 +323,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   </div>
 </div>
 
-<div id="toast" class="toast">✅ Action Synchronized!</div>
+<div id="toast" class="toast"> Action Synchronized!</div>
 
 <div class="footer">KPTC Expense Admin V3.1</div>
 
@@ -369,7 +369,7 @@ function pushGeneralExpense() {
 
   db.ref('expense/general').push({ category, amount: parseFloat(amount), date }, (error) => {
     if(!error) {
-      showToast('💰 General Expense Logged!');
+      showToast(' General Expense Logged!');
       document.getElementById('genCategory').value = '';
       document.getElementById('genAmount').value = '';
       document.getElementById('genDate').value = '';
@@ -387,7 +387,7 @@ function pushTourExpense() {
 
   db.ref('expense/tour').push({ details, amount: parseFloat(amount), date }, (error) => {
     if(!error) {
-      showToast('🧳 Tour Log Added!');
+      showToast(' Tour Log Added!');
       document.getElementById('tourDetails').value = '';
       document.getElementById('tourAmount').value = '';
       document.getElementById('tourDate').value = '';
