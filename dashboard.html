@@ -247,7 +247,7 @@ h1 {
 <div class="hero">
 <div class="logo-wrap"><img src="Logo.png" class="logo"></div>
 <h1>কপাল পোড়া ট্রাভেলার্স ক্লাব</h1>
-<div class="slogan">ঘুরতে যান এবং গোয়া মারা খান</div>
+<div class="slogan">ঘুরতে যান এবং নতুন অভিজ্ঞতা অর্জন করুন</div>
 </div>
 
 <div class="cards">
@@ -259,10 +259,13 @@ h1 {
 
 <div class="section">
 <div class="panel">
-<h2>🧳 Next Tour</h2>
-<p style="margin-bottom: 8px; color: #a1a1aa;">Destination: <span style="color: #fff; font-weight: 500;">Mongla</span></p>
-<p style="margin-bottom: 8px; color: #a1a1aa;">Status: <span style="color: #34d399; font-weight: 500;">Planning</span></p>
-<p style="color: #a1a1aa;">Expected Members: <span id="expectedMembers" style="color: #fff; font-weight: 500;">0</span></p>
+<h2>🧳 Last Tour History</h2>
+<p style="margin-bottom: 8px; color: #a1a1aa;">ভ্রমণের স্থান: <span id="histLocation" style="color: #fff; font-weight: 500;">Loading...</span></p>
+<p style="margin-bottom: 8px; color: #a1a1aa;">ভ্রমণের তারিখ: <span id="histDate" style="color: #fff; font-weight: 500;">Loading...</span></p>
+<p style="margin-bottom: 8px; color: #a1a1aa;">মোট সদস্য সংখ্যা: <span id="histMembers" style="color: #fff; font-weight: 500;">Loading...</span></p>
+<p style="margin-bottom: 12px; color: #a1a1aa;">মোট ট্যুর খরচ: <span id="histCost" style="color: #2563eb; font-weight: 600;">Loading...</span></p>
+<hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px;">
+<p style="color: #a1a1aa; font-size: 15px; line-height: 1.6;">💬 বিবরণ: <br><span id="histDescription" style="color: #e4e4e7; font-style: italic;">Loading...</span></p>
 </div>
 </div>
 
@@ -275,7 +278,7 @@ h1 {
 </div>
 </div>
 
-<div class="footer">KPTC Dashboard V3</div>
+<div class="footer">KPTC Dashboard V3.3</div>
 
 <script>
 // ফায়ারবেজ কনফিগারেশন
@@ -290,7 +293,6 @@ const db = firebase.database();
 let globalIncome = 0;
 let globalExpense = 0;
 
-// সর্বমোট হিসাব আপডেট করার ফাংশন
 function updateFinancials() {
   const balance = globalIncome - globalExpense;
   document.getElementById('totalIncome').innerText = `৳${globalIncome.toLocaleString()}`;
@@ -303,7 +305,6 @@ db.ref('members').on('value', (snapshot) => {
   const data = snapshot.val() || {};
   const count = Object.keys(data).length;
   document.getElementById('totalMembers').innerText = count;
-  document.getElementById('expectedMembers').innerText = count; // এক্সপেক্টেড মেম্বারও অটো আপডেট হবে
 });
 
 // ২. ইনকাম ডাটা লোড
@@ -321,20 +322,42 @@ db.ref('income').on('value', (snapshot) => {
 db.ref('expense').on('value', (snapshot) => {
   const data = snapshot.val() || {};
   let total = 0;
-  Object.keys(data).forEach(key => {
-    total += parseFloat(data[key].amount) || 0;
-  });
+  
+  // জেনারেল এবং ট্যুর স্প্লিট ডেটা সামঞ্জস্য রাখতে লুপ চেক
+  if(data.general || data.tour) {
+    Object.keys(data.general || {}).forEach(k => total += parseFloat(data.general[k].amount) || 0);
+    Object.keys(data.tour || {}).forEach(k => total += parseFloat(data.tour[k].amount) || 0);
+  } else {
+    Object.keys(data).forEach(key => total += parseFloat(data[key].amount) || 0);
+  }
+  
   globalExpense = total;
   updateFinancials();
   
-  // রিসেন্ট অ্যাক্টিভিটি জেনারেট করা (ডেমো হিসেবে সাজানো)
   const activityDiv = document.getElementById('activityList');
   activityDiv.innerHTML = `
     <div> Members real-time synchronization active</div>
     <div> Total Financial log synced with database</div>
-    <div> Latest Expense: ৳${total.toLocaleString()} monitored</div>
-    <div> Mongla Tour Planning Started</div>
+    <div> Latest Expense monitored successfully</div>
+    <div> Core systems running in stable state</div>
   `;
+});
+
+// ৪. অ্যাডমিন প্যানেল থেকে পাঠানো ট্যুর হিস্ট্রি লোড (কোনো অটো-হিসাব ছাড়া)
+db.ref('tour_history').on('value', (snapshot) => {
+  const data = snapshot.val() || {
+    location: "N/A",
+    date: "N/A",
+    members: "0",
+    cost: "0",
+    description: "অ্যাডমিন প্যানেল থেকে কোনো ইতিহাস সেট করা হয়নি।"
+  };
+  
+  document.getElementById('histLocation').innerText = data.location || "N/A";
+  document.getElementById('histDate').innerText = data.date || "N/A";
+  document.getElementById('histMembers').innerText = data.members || "0 জন";
+  document.getElementById('histCost').innerText = `৳${(parseFloat(data.cost) || 0).toLocaleString()}`;
+  document.getElementById('histDescription').innerText = data.description || "কোনো বিবরণ নেই।";
 });
 
 // মেনু স্ক্রিপ্ট
