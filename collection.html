@@ -281,7 +281,7 @@ font-size:18px;
 </div>
 
 <div style="text-align:center; padding:40px; color:#94a3b8;">
-KPTC Collection V1.1
+KPTC Collection V1.2
 </div>
 
 <script>
@@ -295,15 +295,12 @@ KPTC Collection V1.1
   let allMembersData = {}; 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  // ১. ডাইনামিক কারেন্ট টাইম ও বছর ক্যালকুলেশন
   const currentYear = new Date().getFullYear().toString();
   const currentMonthIdx = new Date().getMonth();
   document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
 
-  // ড্রপডাউন এলিমেন্ট রেফারেন্স
   const yearSelect = document.getElementById('yearSelect');
 
-  // ২. সিস্টেমেটিক বছর ম্যাচিং (চলতি বছর অটো ড্রপডাউনে সেট করার মেকানিজম)
   let yearFound = false;
   for (let i = 0; i < yearSelect.options.length; i++) {
     if (yearSelect.options[i].value === currentYear) {
@@ -312,12 +309,10 @@ KPTC Collection V1.1
       break;
     }
   }
-  // যদি কোনো কারণে চলতি বছর লিস্টে না থাকে, তবে ডিফল্ট হিসেবে প্রথম অপশনটিই লোড হবে
   if(!yearFound) {
     yearSelect.selectedIndex = 0;
   }
 
-  // ডাটাবেজ থেকে ডাটা আনা
   function loadCollectionData(year) {
     const dbRef = db.ref('collections/' + year);
     dbRef.on('value', (snapshot) => {
@@ -326,7 +321,6 @@ KPTC Collection V1.1
     });
   }
 
-  // টেবিলে ডাটা দেখানো
   function renderTable(data, filterText = "") {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = "";
@@ -345,7 +339,7 @@ KPTC Collection V1.1
 
       total++;
 
-      let rowHtml = '<tr><td>' + memberName + '</td>';
+      let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
       months.forEach((month, idx) => {
         const isPaid = member[month] === true || member[month.toLowerCase()] === true;
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
@@ -367,21 +361,17 @@ KPTC Collection V1.1
     document.getElementById('pendingMembers').innerText = pending;
   }
 
-  // বছর পরিবর্তন ফিল্টার
   yearSelect.addEventListener('change', (e) => {
     loadCollectionData(e.target.value);
   });
 
-  // সার্চ ফিল্টার
   const searchInput = document.getElementById('searchInput');
   searchInput.addEventListener('input', (e) => {
     renderTable(allMembersData, e.target.value);
   });
 
-  // পেজ ওপেন হওয়ার সাথে সাথেই সিলেক্টেড বছরের কালেকশন ডাটা অটো লোড হবে
   loadCollectionData(yearSelect.value);
 
-  // মেনু স্ক্রিপ্ট
   function openMenu(){
     document.getElementById('sidebar').classList.add('show');
     document.getElementById('overlay').classList.add('show');
