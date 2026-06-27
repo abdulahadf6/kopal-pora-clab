@@ -416,10 +416,8 @@ tr:hover{
   // ২. লাইভ ফি স্ট্রাকচার স্কিমা লোড করা 
   db.ref('kptc_settings/fee_structure').on('value', (snapshot) => {
     globalRatesSchema = snapshot.val() || {};
-    const yr = document.getElementById('rateYear').value;
-    const mo = document.getElementById('rateMonth').value;
-    const activeRate = (globalRatesSchema[yr] && globalRatesSchema[yr][mo]) ? globalRatesSchema[yr][mo] : 100; // Default fallback 100 BDT
-    document.getElementById('activeRateNotice').innerText = `Active Configuration Rule: Year ${yr} (${mo}) = ৳${activeRate}`;
+    updateNoticeText();
+    renderTable(allMembersData);
   });
 
   // রিয়েল-টাইম নোটিশ চেঞ্জার ইভেন্ট লিসেনার
@@ -428,7 +426,7 @@ tr:hover{
   function updateNoticeText(){
     const yr = document.getElementById('rateYear').value;
     const mo = document.getElementById('rateMonth').value;
-    const activeRate = (globalRatesSchema[yr] && globalRatesSchema[yr][mo]) ? globalRatesSchema[yr][mo] : 100;
+    const activeRate = (globalRatesSchema[yr] && globalRatesSchema[yr][mo]) !== undefined ? globalRatesSchema[yr][mo] : 100;
     document.getElementById('activeRateNotice').innerText = `Active Configuration Rule: Year ${yr} (${mo}) = ৳${activeRate}`;
   }
 
@@ -442,7 +440,7 @@ tr:hover{
     if(!mId) return alert('মেম্বার আইডি বা নাম ইনপুট দিন!');
 
     // রেট ডিটেকশন প্রসেস
-    const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) ? globalRatesSchema[year][month] : 100;
+    const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) !== undefined ? globalRatesSchema[year][month] : 100;
     const transactionKey = `${year}_${month}_${mId}`.replace(/[.#$\[\]]/g, "_"); // Firebase Safe String
 
     const nodeRef = db.ref(`collections/${year}/${mId}`);
@@ -454,14 +452,12 @@ tr:hover{
         currentData.name = mId;
       }
       
-      const previousStatus = currentData[month] === true;
-      currentData[month] = status;
+      const previousStatus = currentData[month] === true || currentData[month] === "Paid";
+      currentData[month] = status; // এটি এখন সরাসরি Boolean true/false রাখবে যা সিস্টেমে সামঞ্জস্যপূর্ণ
       
       nodeRef.set(currentData, (error) => {
         if(!error) {
-          // কন্ডিশনাল ফিন্যান্সিয়াল লেজার অটো-ম্যানেজমেন্ট লজিক
           if (status === true && !previousStatus) {
-            // PAID করা হলে: ডাইনামিক অ্যামাউন্ট দিয়ে অটো ইনকামে পুশ হবে
             db.ref(`income/collections_auto/${transactionKey}`).set({
               amount: targetFee,
               category: "Monthly Subscription",
@@ -471,7 +467,6 @@ tr:hover{
             showToast('✅ Matrix Saved & Balance Added!');
           } 
           else if (status === false && previousStatus) {
-            // UNPAID করা হলে: ইনকাম নোড থেকে উক্ত রেকর্ড মুছে যাবে (অটো মাইনাস)
             db.ref(`income/collections_auto/${transactionKey}`).remove();
             showToast('🗑️ Matrix Revoked & Balance Deducted!');
           } else {
@@ -511,7 +506,7 @@ tr:hover{
 
       let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
       months.forEach((month, idx) => {
-        const isPaid = member[month] === true || member[month.toLowerCase()] === true;
+        const isPaid = member[month] === true || member[month] === "Paid" || member[month.toLowerCase()] === true || member[month.toLowerCase()] === "Paid";
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
         if (idx === currentMonthIdx) {
