@@ -3,56 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPTC Admin - Collection Management</title>
+<title>KPTC Collection</title>
 
 <style>
 *{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body{
-  background:#081018;
-  color:#fff;
-  min-height:100vh;
-  overflow-x:hidden;
-  position:relative;
+background:#081018;
+color:#fff;
+min-height:100vh;
+overflow-x:hidden;
+position:relative;
 }
 
 .bg-container{
-  position:fixed;
-  inset:0;
-  z-index:-1;
-  overflow:hidden;
-  background: linear-gradient(135deg, #051923, #0b132b, #1c2541, #0f172a);
+position:fixed;
+inset:0;
+z-index:-1;
+overflow:hidden;
+background:
+linear-gradient(
+135deg,
+#051923,
+#0b132b,
+#1c2541,
+#0f172a
+);
 }
 
 .bg-wave{
-  position:absolute;
-  width:180vw;
-  height:180vh;
-  top:-40%;
-  left:-40%;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(34,211,238,.25), transparent 30%),
-    radial-gradient(circle at 80% 30%, rgba(16,185,129,.20), transparent 35%),
-    radial-gradient(circle at 50% 80%, rgba(168,85,247,.20), transparent 35%);
-  filter:blur(90px);
-  animation: move1 18s linear infinite, move2 24s linear infinite;
+position:absolute;
+width:180vw;
+height:180vh;
+top:-40%;
+left:-40%;
+background:
+radial-gradient(circle at 20% 20%, rgba(34,211,238,.25), transparent 30%),
+radial-gradient(circle at 80% 30%, rgba(16,185,129,.20), transparent 35%),
+radial-gradient(circle at 50% 80%, rgba(168,85,247,.20), transparent 35%);
+filter:blur(90px);
+animation:
+move1 18s linear infinite,
+move2 24s linear infinite;
 }
 
 @keyframes move1{
-  0%{transform:rotate(0deg) scale(1);}
-  50%{transform:rotate(180deg) scale(1.2);}
-  100%{transform:rotate(360deg) scale(1);}
+0%{transform:rotate(0deg) scale(1);}
+50%{transform:rotate(180deg) scale(1.2);}
+100%{transform:rotate(360deg) scale(1);}
 }
+
 @keyframes move2{
-  0%{margin-left:-10%;}
-  50%{margin-left:10%;}
-  100%{margin-left:-10%;}
+0%{margin-left:-10%;}
+50%{margin-left:10%;}
+100%{margin-left:-10%;}
 }
 
 .menu-btn {
@@ -103,6 +113,7 @@ body{
   box-shadow: 20px 0 80px rgba(0,0,0,0.3);
 }
 .sidebar.show { transform: translateX(320px); }
+
 .close-btn { font-size: 26px; cursor: pointer; margin-bottom: 30px; color: #a1a1aa; display: inline-block; }
 .close-btn:hover { color: #fff; transform: rotate(90deg); }
 
@@ -123,125 +134,116 @@ body{
 }
 
 .container{
-  max-width:1400px;
-  margin:auto;
-  padding:90px 20px 40px;
+max-width:1400px;
+margin:auto;
+padding:90px 20px 40px;
 }
 
 .topbar{
-  display:flex;
-  gap:20px;
-  margin-bottom:25px;
-  flex-wrap:wrap;
+display:flex;
+gap:20px;
+margin-bottom:25px;
+flex-wrap:wrap;
 }
 
 .glass{
-  background:rgba(255,255,255,.05);
-  backdrop-filter:blur(40px);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:24px;
-  box-shadow: 0 15px 35px rgba(0,0,0,.3);
+background:rgba(255,255,255,.05);
+backdrop-filter:blur(40px);
+border:1px solid rgba(255,255,255,.1);
+border-radius:24px;
+box-shadow: 0 15px 35px rgba(0,0,0,.3);
 }
 
-select, input, button {
-  padding:16px;
-  border:none;
-  outline:none;
-  background:rgba(255,255,255,.05);
-  color:white;
-  border-radius:18px;
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+.card-box {
+  padding: 24px;
+}
+.card-box small {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 6px;
+}
+.card-box h2 {
+  font-size: 30px;
+  font-weight: 600;
+}
+
+select,
+input{
+padding:16px;
+border:none;
+outline:none;
+background:rgba(255,255,255,.05);
+color:white;
+border-radius:18px;
 }
 
 select.glass option {
-  background-color: #0b132b;
-  color: #ffffff;
+background-color: #0b132b;
+color: #ffffff;
 }
 
 .search{
-  flex:1;
-  min-width:250px;
+flex:1;
+min-width:250px;
 }
-
-/* ফর্ম মডিউল */
-.form-container {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  padding: 20px;
-  margin-bottom: 25px;
-}
-.btn-update {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-}
-.btn-update:hover { transform: translateY(-2px); filter: brightness(1.1); }
-
-/* কনফিগারেশন রেট সেটার প্যানেল */
-.rate-setter-container {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  padding: 20px;
-  margin-bottom: 25px;
-  border-color: rgba(168, 85, 247, 0.4);
-}
-.btn-rate {
-  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-}
-.btn-rate:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
 .table-box{
-  padding:25px;
-  overflow:auto;
+padding:25px;
+overflow:auto;
 }
 
 table{
-  width:100%;
-  border-collapse:collapse;
+width:100%;
+border-collapse:collapse;
 }
-th, td{
-  padding:18px;
-  text-align:center;
+
+th{
+padding:18px;
+text-align:center;
+font-size:15px;
 }
+
+td{
+padding:18px;
+text-align:center;
+}
+
 tr{
-  border-bottom:1px solid rgba(255,255,255,.08);
+border-bottom:1px solid rgba(255,255,255,.08);
 }
+
 tr:hover{
-  background:rgba(255,255,255,.03);
+background:rgba(255,255,255,.03);
 }
 
-.ok{ color:#22c55e; font-size:18px; }
-.no{ color:#ef4444; font-size:18px; }
+.ok{
+color:#22c55e;
+font-size:18px;
+}
 
-/* নোটিফিকেশন টোস্ট */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(16, 185, 129, 0.9);
-  color: white;
-  padding: 15px 25px;
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-  z-index: 2000;
-  display: none;
+.no{
+color:#ef4444;
+font-size:18px;
 }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
 </head>
 
 <body>
 
 <div class="bg-container">
-  <div class="bg-wave"></div>
+<div class="bg-wave"></div>
 </div>
 
 <div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
@@ -249,105 +251,71 @@ tr:hover{
 
 <div class="sidebar" id="sidebar">
 <div class="close-btn" onclick="closeMenu()">✕</div> 
-<a href="adminF6.html"> Admin Dashboard</a>
-<a href="members.ad.html"> Manage Members</a>
-<a href="collection.ad.html"> Manage Collection</a>
-<a href="income.ad.html"> Manage Income</a>
-<a href="expense.ad.html"> Manage Expense</a>
-<a href="reports.ad.html"> View Reports</a>
-<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);"> Exit Admin</a>
+<a href="dashboard.html"> Dashboard</a>
+<a href="members.html"> Members</a>
+<a href="collection.html"> Collection</a>
+<a href="income.html"> Income</a>
+<a href="expense.html"> Expense</a>
+<a href="reports.html"> Reports</a>
+<a href="about.html"> About</a>
+<a href="index.html"> Logout</a>
 </div>
 
 <div class="container">
-<div class="hero" style="text-align:center; margin-bottom: 30px;">
-  <h1 style="font-size: clamp(32px, 5vw, 50px); font-weight:700; background: linear-gradient(180deg, #ffffff 40%, #d4d4d8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Collection Manager (Admin)</h1>
-  <div style="opacity: 0.6; margin-top: 8px; font-size: 16px;">মাসিক চাঁদা বা কালেকশন ডাটা এন্ট্রি টার্মিনাল</div>
-</div>
 
-<div class="glass rate-setter-container">
-  <div style="width: 100%; font-size: 15px; font-weight: 600; color: #c084fc; margin-bottom: 5px;">⚙️ Configure Dynamic Monthly Subscription Rate</div>
-  <select class="glass" id="rateYear">
-    <option value="2026">2026</option>
-    <option value="2027">2027</option>
-    <option value="2028">2028</option>
-    <option value="2029">2029</option>
-    <option value="2030">2030</option>
-  </select>
-  <select class="glass" id="rateMonth">
-    <option value="Jan">January</option><option value="Feb">February</option><option value="Mar">March</option>
-    <option value="Apr">April</option><option value="May">May</option><option value="Jun">June</option>
-    <option value="Jul">July</option><option value="Aug">August</option><option value="Sep">September</option>
-    <option value="Oct">October</option><option value="Nov">November</option><option value="Dec">December</option>
-  </select>
-  <input type="number" id="monthlyRateAmount" placeholder="Set Rate (e.g., 100 or 150)" style="flex:1; min-width:150px;">
-  <button class="btn-rate" onclick="saveMonthlyRate()">Save Rate Structure</button>
-  <div style="font-size:12px; color:#a1a1aa; width:100%;" id="activeRateNotice">Loading current rate schema...</div>
-</div>
-
-<div class="glass form-container">
-  <select class="glass" id="inputYear">
-    <option value="2026">2026</option>
-    <option value="2027">2027</option>
-    <option value="2028">2028</option>
-    <option value="2029">2029</option>
-    <option value="2030">2030</option>
-  </select>
-
-  <input type="text" id="inputMemberId" placeholder="Member Node Key/Name (e.g., KPTC-01)" style="flex:1; min-width:200px;">
-
-  <select class="glass" id="inputMonth">
-    <option value="Jan">January</option><option value="Feb">February</option><option value="Mar">March</option>
-    <option value="Apr">April</option><option value="May">May</option><option value="Jun">June</option>
-    <option value="Jul">July</option><option value="Aug">August</option><option value="Sep">September</option>
-    <option value="Oct">October</option><option value="Nov">November</option><option value="Dec">December</option>
-  </select>
-
-  <select class="glass" id="inputStatus">
-    <option value="true">Paid (✅)</option>
-    <option value="false">Unpaid (-)</option>
-  </select>
-
-  <button class="btn-update" onclick="updateCollectionStatus()">Update Status</button>
+<div class="cards-grid">
+  <div class="glass card-box">
+    <small id="monthCardTitle">Collection (This Month)</small>
+    <h2 id="monthCollectionFunds">৳0</h2>
+  </div>
+  <div class="glass card-box">
+    <small id="yearCardTitle">Collection (This Year)</small>
+    <h2 id="yearCollectionFunds">৳0</h2>
+  </div>
 </div>
 
 <div class="topbar">
-  <select class="glass" id="yearSelect">
-    <option value="2026">2026</option>
-    <option value="2027">2027</option>
-    <option value="2028">2028</option>
-    <option value="2029">2029</option>
-    <option value="2030">2030</option>
-  </select>
-  <input class="search glass" type="text" id="searchInput" placeholder="🔍 Search Member...">
+<select class="glass" id="yearSelect">
+<option value="2026">2026</option>
+<option value="2027">2027</option>
+<option value="2028">2028</option>
+<option value="2029">2029</option>
+<option value="2030">2030</option>
+</select>
+
+<input class="search glass" type="text" id="searchInput" placeholder="🔍 Search Member...">
 </div>
 
 <div class="glass table-box">
-  <h2 style="margin-bottom:20px; font-size:28px; font-weight:700;"> Live Collection Ledger</h2>
-  <table id="collectionTable">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
-        <th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-      <tr><td colspan="13" style="padding:30px; color:#94a3b8;">Loading data from database...</td></tr>
-    </tbody>
-  </table>
+<h2 style="margin-bottom:20px; font-size:28px; font-weight:700;">
+ Collection Status <span id="rateTag" style="font-size:14px; font-weight:normal; color:#94a3b8; margin-left:10px;">(Current Rate: Loading...)</span>
+</h2>
+
+<table id="collectionTable">
+<thead>
+<tr>
+<th>Name</th>
+<th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>May</th><th>Jun</th>
+<th>Jul</th><th>Aug</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dec</th>
+</tr>
+</thead>
+<tbody id="tableBody">
+<tr><td colspan="13" style="padding:30px; color:#94a3b8;">Loading data from database...</td></tr>
+</tbody>
+</table>
 </div>
 
 <div class="glass" style="margin-top:25px; padding:25px;">
-  <h3 style="margin-bottom:15px;"> Summary</h3>
-  <p>Total Members : <span id="totalMembers">0</span></p><br>
-  <p>Paid This Month (<span id="currentMonthName">Month</span>) : <span id="paidMembers">0</span></p><br>
-  <p>Pending Members : <span id="pendingMembers">0</span></p>
+<h3 style="margin-bottom:15px;"> Summary</h3>
+<p>Total Members : <span id="totalMembers">0</span></p><br>
+<p>Paid This Month (<span id="currentMonthName">Month</span>) : <span id="paidMembers">0</span></p><br>
+<p>Pending Members : <span id="pendingMembers">0</span></p>
 </div>
 </div>
 
-<div id="toast" class="toast">✅ Collection Matrix Updated!</div>
-
-<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V1.2</div>
+<div style="text-align:center; padding:40px; color:#94a3b8;">
+KPTC Collection V1.3
+</div>
 
 <script>
   const firebaseConfig = {
@@ -358,131 +326,47 @@ tr:hover{
   const db = firebase.database();
 
   let allMembersData = {}; 
-  let globalRatesSchema = {};
+  let globalRatesSchema = {}; // এডমিনের ডাইনামিক রেট স্ট্রাকচার স্টোর করার অবজেক্ট
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-  const currentYear = new Date().getFullYear().toString();
-  const currentMonthIdx = new Date().getMonth();
-  document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
+  const currentDateObj = new Date();
+  const currentYear = currentDateObj.getFullYear().toString();
+  const currentMonthIdx = currentDateObj.getMonth();
+  const currentMonthStr = months[currentMonthIdx];
+  document.getElementById('currentMonthName').innerText = currentMonthStr;
 
-  const inputYear = document.getElementById('inputYear');
   const yearSelect = document.getElementById('yearSelect');
-  const rateYear = document.getElementById('rateYear');
 
-  function setDropdownToCurrentYear(dropdownElement) {
-    let yearFound = false;
-    for (let i = 0; i < dropdownElement.options.length; i++) {
-      if (dropdownElement.options[i].value === currentYear) {
-        dropdownElement.selectedIndex = i;
-        yearFound = true;
-        break;
-      }
+  let yearFound = false;
+  for (let i = 0; i < yearSelect.options.length; i++) {
+    if (yearSelect.options[i].value === currentYear) {
+      yearSelect.selectedIndex = i;
+      yearFound = true;
+      break;
     }
-    if (!yearFound) dropdownElement.selectedIndex = 0;
+  }
+  if(!yearFound) {
+    yearSelect.selectedIndex = 0;
   }
 
-  setDropdownToCurrentYear(inputYear);
-  setDropdownToCurrentYear(yearSelect);
-  setDropdownToCurrentYear(rateYear);
-
-  document.getElementById('inputMonth').selectedIndex = currentMonthIdx;
-  document.getElementById('rateMonth').selectedIndex = currentMonthIdx;
-
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    if(msg) t.innerText = msg;
-    t.style.display = 'block';
-    setTimeout(() => { t.style.display = 'none'; }, 3000);
-  }
-
-  // ১. ডাইনামিক মাসিক ফি রেট ডাটাবেজে সংরক্ষণ করা
-  function saveMonthlyRate() {
-    const year = document.getElementById('rateYear').value;
-    const month = document.getElementById('rateMonth').value;
-    const rateValue = parseFloat(document.getElementById('monthlyRateAmount').value);
-
-    if (isNaN(rateValue) || rateValue < 0) {
-      return alert('অনুগ্রহ করে সঠিক টাকার পরিমাণ ইনপুট দিন!');
-    }
-
-    db.ref(`kptc_settings/fee_structure/${year}/${month}`).set(rateValue, (error) => {
-      if (!error) {
-        showToast('⚙️ Rate Schema Saved Successfully!');
-        document.getElementById('monthlyRateAmount').value = '';
-      }
-    });
-  }
-
-  // ২. লাইভ ফি স্ট্রাকচার স্কিমা লোড করা 
+  // এডমিন প্যানেলের সম্পূর্ণ রেট স্কিমা রিয়েল-টাইমে রিড করার লিসেনার
   db.ref('kptc_settings/fee_structure').on('value', (snapshot) => {
     globalRatesSchema = snapshot.val() || {};
-    updateNoticeText();
-    renderTable(allMembersData);
-  });
-
-  // রিয়েল-টাইম নোটিশ চেঞ্জার ইভেন্ট লিসেনার
-  document.getElementById('rateYear').addEventListener('change', updateNoticeText);
-  document.getElementById('rateMonth').addEventListener('change', updateNoticeText);
-  function updateNoticeText(){
-    const yr = document.getElementById('rateYear').value;
-    const mo = document.getElementById('rateMonth').value;
-    const activeRate = (globalRatesSchema[yr] && globalRatesSchema[yr][mo]) !== undefined ? globalRatesSchema[yr][mo] : 100;
-    document.getElementById('activeRateNotice').innerText = `Active Configuration Rule: Year ${yr} (${mo}) = ৳${activeRate}`;
-  }
-
-  // ৩. মূল কালেকশন স্ট্যাটাস আপডেট + ইনকাম অ্যাকাউন্ট ব্যালেন্স অটো-সিঙ্ক (প্লাস/মাইনাস লজিক)
-  function updateCollectionStatus() {
-    const year = document.getElementById('inputYear').value;
-    const mId = document.getElementById('inputMemberId').value.trim();
-    const month = document.getElementById('inputMonth').value;
-    const status = document.getElementById('inputStatus').value === "true";
-
-    if(!mId) return alert('মেম্বার আইডি বা নাম ইনপুট দিন!');
-
-    // রেট ডিটেকশন প্রসেস
-    const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) !== undefined ? globalRatesSchema[year][month] : 100;
-    const transactionKey = `${year}_${month}_${mId}`.replace(/[.#$\[\]]/g, "_"); // Firebase Safe String
-
-    const nodeRef = db.ref(`collections/${year}/${mId}`);
     
-    nodeRef.once('value').then((snapshot) => {
-      let currentData = snapshot.val() || {};
-      
-      if (!currentData.name) {
-        currentData.name = mId;
-      }
-      
-      const previousStatus = currentData[month] === true || currentData[month] === "Paid";
-      currentData[month] = status; // এটি এখন সরাসরি Boolean true/false রাখবে যা সিস্টেমে সামঞ্জস্যপূর্ণ
-      
-      nodeRef.set(currentData, (error) => {
-        if(!error) {
-          if (status === true && !previousStatus) {
-            db.ref(`income/collections_auto/${transactionKey}`).set({
-              amount: targetFee,
-              category: "Monthly Subscription",
-              date: `01-${String(months.indexOf(month)+1).padStart(2,'0')}-${year}`,
-              details: `Auto Sync: Fees collected from ${mId} for ${month}-${year}`
-            });
-            showToast('✅ Matrix Saved & Balance Added!');
-          } 
-          else if (status === false && previousStatus) {
-            db.ref(`income/collections_auto/${transactionKey}`).remove();
-            showToast('🗑️ Matrix Revoked & Balance Deducted!');
-          } else {
-            showToast('✅ Matrix Adjusted!');
-          }
-          document.getElementById('inputMemberId').value = '';
-        }
-      });
-    });
-  }
+    // কারেন্ট সিলেক্টেড বছরের কারেন্ট মাসের রেট ট্যাগ আপডেট করা
+    const yr = yearSelect.value;
+    const currentRate = (globalRatesSchema[yr] && globalRatesSchema[yr][currentMonthStr]) !== undefined ? globalRatesSchema[yr][currentMonthStr] : 100;
+    document.getElementById('rateTag').innerText = `(${currentMonthStr} Rate: ৳${currentRate}/mon)`;
+    
+    // ডাটা রি-রেন্ডার করা
+    renderTable(allMembersData, document.getElementById('searchInput').value);
+  });
 
   function loadCollectionData(year) {
     const dbRef = db.ref('collections/' + year);
     dbRef.on('value', (snapshot) => {
       allMembersData = snapshot.val() || {};
-      renderTable(allMembersData);
+      renderTable(allMembersData, document.getElementById('searchInput').value);
     });
   }
 
@@ -491,8 +375,13 @@ tr:hover{
     tbody.innerHTML = "";
 
     let total = 0;
-    let paid = 0;
-    let pending = 0;
+    let paidThisMonthCount = 0;
+    let pendingThisMonthCount = 0;
+    
+    let totalCalculatedMonthFunds = 0; // চলতি মাসের মোট টাকা
+    let totalCalculatedYearFunds = 0;  // পুরো বছরের ডাইনামিক রেট অনুযায়ী মোট টাকা
+
+    const activeYear = yearSelect.value;
 
     Object.keys(data).forEach(memberId => {
       const member = data[memberId];
@@ -505,12 +394,28 @@ tr:hover{
       total++;
 
       let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
+      
       months.forEach((month, idx) => {
-        const isPaid = member[month] === true || member[month] === "Paid" || member[month.toLowerCase()] === true || member[month.toLowerCase()] === "Paid";
+        const mVal = member[month];
+        const mValLower = member[month.toLowerCase()];
+        const isPaid = mVal === true || mVal === "Paid" || mValLower === true || mValLower === "Paid";
+        
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
+        // প্রতিটি নির্দিষ্ট মাসের জন্য এডমিন প্যানেলের সেট করা ডাইনামিক রেট নিয়ে আসা
+        const monthFeeRate = (globalRatesSchema[activeYear] && globalRatesSchema[activeYear][month]) !== undefined ? globalRatesSchema[activeYear][month] : 100;
+
+        if (isPaid) {
+          totalCalculatedYearFunds += monthFeeRate; // যে যে মাস পেইড, সেই মাসের রেট যোগ হবে
+        }
+
         if (idx === currentMonthIdx) {
-          if (isPaid) paid++; else pending++;
+          if (isPaid) {
+            paidThisMonthCount++;
+            totalCalculatedMonthFunds += monthFeeRate;
+          } else {
+            pendingThisMonthCount++;
+          }
         }
       });
       rowHtml += '</tr>';
@@ -522,12 +427,22 @@ tr:hover{
     }
 
     document.getElementById('totalMembers').innerText = total;
-    document.getElementById('paidMembers').innerText = paid;
-    document.getElementById('pendingMembers').innerText = pending;
+    document.getElementById('paidMembers').innerText = paidThisMonthCount;
+    document.getElementById('pendingMembers').innerText = pendingThisMonthCount;
+
+    // লাইভ ডাইনামিক রেটের যোগফল কার্ডে প্রদর্শন
+    document.getElementById('monthCollectionFunds').innerText = `৳${totalCalculatedMonthFunds.toLocaleString()}`;
+    document.getElementById('yearCollectionFunds').innerText = `৳${totalCalculatedYearFunds.toLocaleString()}`;
   }
 
   yearSelect.addEventListener('change', (e) => {
     loadCollectionData(e.target.value);
+    document.getElementById('yearCardTitle').innerText = `Collection (Year ${e.target.value})`;
+    
+    // বছর পরিবর্তন হলে রেট ট্যাগ রি-ফ্রেশ করা
+    const yr = e.target.value;
+    const currentRate = (globalRatesSchema[yr] && globalRatesSchema[yr][currentMonthStr]) !== undefined ? globalRatesSchema[yr][currentMonthStr] : 100;
+    document.getElementById('rateTag').innerText = `(${currentMonthStr} Rate: ৳${currentRate}/mon)`;
   });
 
   const searchInput = document.getElementById('searchInput');
@@ -541,12 +456,15 @@ tr:hover{
     document.getElementById('sidebar').classList.add('show');
     document.getElementById('overlay').classList.add('show');
     document.getElementById('menuBtn').style.opacity = '0';
+    document.getElementById('menuBtn').style.pointerEvents = 'none';
   }
   function closeMenu(){
     document.getElementById('sidebar').classList.remove('show');
     document.getElementById('overlay').classList.remove('show');
     document.getElementById('menuBtn').style.opacity = '1';
+    document.getElementById('menuBtn').style.pointerEvents = 'auto';
   }
 </script>
+
 </body>
 </html>
