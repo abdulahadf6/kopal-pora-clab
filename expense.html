@@ -265,11 +265,10 @@ const expenseRef = db.ref('expense');
 expenseRef.on('value', (snapshot) => {
   const data = snapshot.val() || {};
   
-  // DOM থেকে টেবিল বডি নিয়ে আসা
   const catTbody = document.getElementById('categoryTableBody');
   const detailsTbody = document.getElementById('expenseDetailsBody');
   
-  // মেমোরি ক্লিন এবং পুশ আইডি রি-রেন্ডার করার আগে সম্পূর্ণ ক্লিন করা (CRITICAL FIX)
+  // রি-রেন্ডার করার আগে টেবিল ডাটা ফ্রেস ক্লিন করা
   while(catTbody.firstChild) { catTbody.removeChild(catTbody.firstChild); }
   while(detailsTbody.firstChild) { detailsTbody.removeChild(detailsTbody.firstChild); }
 
@@ -282,20 +281,20 @@ expenseRef.on('value', (snapshot) => {
   const currentYearStr = String(currentDate.getFullYear()); // YYYY
   const shortYearStr = currentYearStr.slice(-2); // YY
 
-  // ক্যাটাগরি সামারি অবজেক্ট 
+  // ক্যাটাগরি সামারি অবজেক্ট (শুধুমাত্র টেবিল ১ এর জন্য)
   const summaryMap = {};
 
-  // আইটেম প্রসেসিং ফাংশন
-  function processItem(item, nodeCategory) {
+  // ইউনিফাইড ডাটা প্রসেসিং মেকানিজম (ব্রাঞ্চ লজিক ট্র্যাক করবে)
+  function processItem(item, logicBranch) {
     if (!item) return;
     hasData = true;
 
     const amount = parseFloat(item.amount) || 0;
     const dateStr = item.date || "N/A"; 
-    const category = item.category || nodeCategory || "General";
+    const category = item.category || (logicBranch === 'tour' ? 'tour' : 'General');
     const details = item.details || "N/A";
 
-    // কার্ডের জন্য মাস এবং বছর ক্যালকুলেশন লজিক
+    // মাস এবং বছর ম্যাচিং লজিক (টোটাল অ্যামাউন্ট কার্ড আপডেটের জন্য)
     if (dateStr && dateStr !== "N/A") {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
@@ -311,15 +310,17 @@ expenseRef.on('value', (snapshot) => {
       }
     }
 
-    // টেবিল ১ এর জন্য ডাটা গ্রুপ করা
-    if (!summaryMap[category]) {
-      summaryMap[category] = { amount: 0, date: dateStr };
-    }
-    summaryMap[category].amount += amount;
-    summaryMap[category].date = dateStr; 
-
-    // টেবিল ২ (Tour Expense Details): কড়াকড়ি ফিল্টারিং
-    if (category.toLowerCase() === 'tour') {
+    // অ্যাডমিন প্যানেলের বক্স অনুযায়ী ডাটা বন্টন লজিক
+    if (logicBranch === 'general') {
+      // শুধুমাত্র ওপরের 'General' ইনপুট বক্সের ডাটা এখানে হিস্ট্রি টেবিলে ঢুকবে
+      if (!summaryMap[category]) {
+        summaryMap[category] = { amount: 0, date: dateStr };
+      }
+      summaryMap[category].amount += amount;
+      summaryMap[category].date = dateStr; 
+    } 
+    else if (logicBranch === 'tour') {
+      // শুধুমাত্র নিচের 'Tour Expense' ইনপুট বক্সের ডাটা এখানে ডিটেইলস টেবিলে ঢুকবে
       const trDetail = document.createElement('tr');
       trDetail.innerHTML = `
         <td>${dateStr}</td>
@@ -330,22 +331,25 @@ expenseRef.on('value', (snapshot) => {
     }
   }
 
-  // ডাটাবেজ স্ট্রাকচার লুপ (Nested ও Flat নোড ডুপ্লিকেশন প্রোটেকশন)
+  // ফায়ারবেজ অবজেক্ট ব্রাঞ্চ ফিল্টারিং লুপ
   Object.keys(data).forEach(key => {
     const node = data[key];
     if (node && typeof node === 'object') {
       if (node.general || node.tour) {
-        if (node.general) Object.keys(node.general).forEach(k => processItem(node.general[k], "General"));
+        if (node.general) Object.keys(node.general).forEach(k => processItem(node.general[k], "general"));
         if (node.tour) Object.keys(node.tour).forEach(k => processItem(node.tour[k], "tour"));
       } else if (key === 'general' || key === 'tour') {
         Object.keys(node).forEach(k => processItem(node[k], key));
       } else {
-        processItem(node, node.category);
+        // ওল্ড ব্যাকআপ বা কাস্টম ইউনিক আইডির ক্ষেত্রে ফিল্টারিং
+        const branch = (node.category && node.category.toLowerCase() === 'tour' && !node.details) ? 'tour' : 'general';
+        const realBranch = (node.details && node.details !== 'N/A') ? 'tour' : branch;
+        processItem(node, realBranch);
       }
     }
   });
 
-  // গ্রুপ করা ডাটা দিয়ে টেবিল ১ তৈরি করা
+  // গ্রুপ করা ডাটা দিয়ে টেবিল ১ (Expense History) রেন্ডার
   Object.keys(summaryMap).forEach(cat => {
     const trCat = document.createElement('tr');
     trCat.innerHTML = `
@@ -356,16 +360,15 @@ expenseRef.on('value', (snapshot) => {
     catTbody.appendChild(trCat);
   });
 
-  // ট্যুর ডিটেইলস টেবিল ডাটা ফ্রেস চেক
+  // যদি কোনো টেবিলে ডাটা না থাকে, তবে নোটিশ দেখাবে
+  if (catTbody.children.length === 0) {
+    catTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No general expenses found!</td></tr>`;
+  }
   if (detailsTbody.children.length === 0) {
     detailsTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No tour records found!</td></tr>`;
   }
 
-  if (!hasData) {
-    catTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No data found!</td></tr>`;
-  }
-
-  // কার্ডের ভ্যালু আপডেট
+  // কার্ড মেম্বারশিপ ডাটা ভ্যালু আপডেট
   document.getElementById('monthExpense').innerText = `৳${totalMonth.toLocaleString()}`;
   document.getElementById('yearExpense').innerText = `৳${totalYear.toLocaleString()}`;
 });
