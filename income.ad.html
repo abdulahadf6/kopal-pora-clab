@@ -75,6 +75,32 @@ body {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+/* ফিল্টার সেকশন স্টাইল */
+.filter-container {
+  max-width: 1200px;
+  margin: 80px auto 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+.year-select {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+}
+.year-select option {
+  background: #0d1117;
+  color: #fff;
+}
+
 /* ওভারলে */
 .overlay {
   position: fixed;
@@ -127,7 +153,7 @@ body {
 .cards {
   max-width: 1200px;
   margin: auto;
-  padding: 80px 24px 24px 24px;
+  padding: 16px 24px 24px 24px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 22px;
@@ -248,13 +274,19 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);"> Exit Admin</a>
 </div>
 
+<div class="filter-container">
+  <select id="yearFilter" class="year-select" onchange="renderIncomeAdminDashboard()">
+    <option value="all">All Years</option>
+  </select>
+</div>
+
 <div class="cards">
   <div class="card">
-    <small> This Month Income</small>
+    <small id="monthCardTitle">This Month Income</small>
     <h2 id="monthIncome">৳0</h2>
   </div>
   <div class="card">
-    <small> This Year Income</small>
+    <small id="yearCardTitle">This Year Income</small>
     <h2 id="yearIncome">৳0</h2>
   </div>
 </div>
@@ -299,13 +331,27 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <div class="footer">KPTC Income Admin V3</div>
 
 <script>
-// ফায়ারবেজ কনফিগারেশন
+// ফায়ারবেজে কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+let globalIncomeData = {}; 
+
+// ড্রপডাউন জেনারেটর (মেম্বার প্যানেলের মতো ২০২৬ থেকে শুরু)
+const currentYear = new Date().getFullYear(); // 2026
+const yearFilterSelect = document.getElementById('yearFilter');
+
+for (let y = currentYear; y <= currentYear + 4; y++) {
+  const opt = document.createElement('option');
+  opt.value = y;
+  opt.innerText = `Year: ${y}`;
+  if (y === currentYear) opt.selected = true; 
+  yearFilterSelect.appendChild(opt);
+}
 
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -350,60 +396,93 @@ function deleteIncome(key) {
 // ডাটাবেজ থেকে ইনকাম ডাটা রিড করা
 const incomeRef = db.ref('income');
 incomeRef.on('value', (snapshot) => {
-  const data = snapshot.val() || {};
+  globalIncomeData = snapshot.val() || {};
+  renderIncomeAdminDashboard();
+});
+
+// ফিল্টারিং এবং রেন্ডারিং মেইন ফাংশন
+function renderIncomeAdminDashboard() {
+  const selectedYearStr = document.getElementById('yearFilter').value; 
+  const shortYearStr = selectedYearStr !== 'all' ? selectedYearStr.slice(-2) : ''; 
+
   const tbody = document.getElementById('incomeTableBody');
   tbody.innerHTML = ""; 
 
   let totalMonth = 0;
-  let totalYear = 0;
+  let totalYearOrAll = 0;
   let hasData = false;
 
   const currentDate = new Date();
   const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); 
-  const currentYearStr = String(currentDate.getFullYear()); 
 
-  Object.keys(data).forEach(key => {
-    const item = data[key];
-    hasData = true;
+  // কার্ড টাইটেল পরিবর্তন লজিক
+  if (selectedYearStr === 'all') {
+    document.getElementById('monthCardTitle').innerText = "Current Month Income";
+    document.getElementById('yearCardTitle').innerText = "Total Lifetime Income";
+  } else {
+    document.getElementById('monthCardTitle').innerText = "This Month Income";
+    document.getElementById('yearCardTitle').innerText = `Year ${selectedYearStr} Income`;
+  }
 
+  Object.keys(globalIncomeData).forEach(key => {
+    const item = globalIncomeData[key];
     const amount = parseFloat(item.amount) || 0;
     const dateStr = item.date || ""; 
+    let shouldInclude = false;
 
-    if (dateStr) {
+    if (selectedYearStr === 'all') {
+      shouldInclude = true;
+      hasData = true;
+      totalYearOrAll += amount;
+
+      if (dateStr) {
+        const parts = dateStr.split('-');
+        if (parts.length === 3 && parts[1] === currentMonthStr && parts[2] === String(currentDate.getFullYear())) {
+          totalMonth += amount;
+        }
+      }
+    } 
+    else if (dateStr) {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
         const itemMonth = parts[1];
         const itemYear = parts[2];
 
-        if (itemYear === currentYearStr) {
-          totalYear += amount;
-          if (itemMonth === currentMonthStr) {
+        if (itemYear === selectedYearStr || itemYear === shortYearStr) {
+          shouldInclude = true;
+          hasData = true;
+          totalYearOrAll += amount;
+
+          if (itemMonth === currentMonthStr && (selectedYearStr == currentDate.getFullYear())) {
             totalMonth += amount;
           }
         }
       }
     }
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${item.source || 'N/A'}</td>
-      <td>${item.from || 'N/A'}</td>
-      <td>৳${amount.toLocaleString()}</td>
-      <td>${dateStr || 'N/A'}</td>
-      <td>
-        <button class="btn-delete" onclick="deleteIncome('${key}')">Delete</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
+    if (shouldInclude) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.source || 'N/A'}</td>
+        <td>${item.from || 'N/A'}</td>
+        <td>৳${amount.toLocaleString()}</td>
+        <td>${dateStr || 'N/A'}</td>
+        <td>
+          <button class="btn-delete" onclick="deleteIncome('${key}')">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
   });
 
+  const scopeText = selectedYearStr === 'all' ? 'All Time' : `year ${selectedYearStr}`;
   if (!hasData) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #71717a;">No income records found!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #71717a;">No income records found for ${scopeText}!</td></tr>`;
   }
 
   document.getElementById('monthIncome').innerText = `৳${totalMonth.toLocaleString()}`;
-  document.getElementById('yearIncome').innerText = `৳${totalYear.toLocaleString()}`;
-});
+  document.getElementById('yearIncome').innerText = `৳${totalYearOrAll.toLocaleString()}`;
+}
 
 // মেনু স্ক্রিপ্ট
 function openMenu(){
