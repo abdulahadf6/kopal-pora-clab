@@ -265,11 +265,13 @@ const expenseRef = db.ref('expense');
 expenseRef.on('value', (snapshot) => {
   const data = snapshot.val() || {};
   
+  // DOM থেকে টেবিল বডি নিয়ে আসা
   const catTbody = document.getElementById('categoryTableBody');
   const detailsTbody = document.getElementById('expenseDetailsBody');
   
-  catTbody.innerHTML = "";
-  detailsTbody.innerHTML = "";
+  // মেমোরি ক্লিন এবং পুশ আইডি রি-রেন্ডার করার আগে সম্পূর্ণ ক্লিন করা (CRITICAL FIX)
+  while(catTbody.firstChild) { catTbody.removeChild(catTbody.firstChild); }
+  while(detailsTbody.firstChild) { detailsTbody.removeChild(detailsTbody.firstChild); }
 
   let totalMonth = 0;
   let totalYear = 0;
@@ -278,23 +280,22 @@ expenseRef.on('value', (snapshot) => {
   const currentDate = new Date();
   const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // MM
   const currentYearStr = String(currentDate.getFullYear()); // YYYY
-  const shortYearStr = currentYearStr.slice(-2); // YY (যেমন: 26)
+  const shortYearStr = currentYearStr.slice(-2); // YY
 
-  // ক্যাটাগরি সামারি অবজেক্ট (প্রথম টেবিল মার্জ করার জন্য)
+  // ক্যাটাগরি সামারি অবজেক্ট 
   const summaryMap = {};
 
-  // ইউনিফাইড আইটেম প্রসেসর ফাংশন
-  function extractAndProcess(item, fallbackCat) {
-    if (!item || typeof item !== 'object') return;
+  // আইটেম প্রসেসিং ফাংশন
+  function processItem(item, nodeCategory) {
+    if (!item) return;
     hasData = true;
 
     const amount = parseFloat(item.amount) || 0;
     const dateStr = item.date || "N/A"; 
-    // অবজেক্টের ভেতরের category চেক করবে, না থাকলে প্যারেন্ট কী-এর নাম নিবে
-    const category = item.category || fallbackCat || "General";
+    const category = item.category || nodeCategory || "General";
     const details = item.details || "N/A";
 
-    // মাস এবং বছর ম্যাচিং লজিক (কার্ড আপডেট)
+    // কার্ডের জন্য মাস এবং বছর ক্যালকুলেশন লজিক
     if (dateStr && dateStr !== "N/A") {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
@@ -310,14 +311,14 @@ expenseRef.on('value', (snapshot) => {
       }
     }
 
-    // টেবিল ১: Expense History এর জন্য ক্যাটাগরি ডাটা মার্জ করা
+    // টেবিল ১ এর জন্য ডাটা গ্রুপ করা
     if (!summaryMap[category]) {
       summaryMap[category] = { amount: 0, date: dateStr };
     }
     summaryMap[category].amount += amount;
     summaryMap[category].date = dateStr; 
 
-    // টেবিল ২ (Tour Expense Details): এখানে কড়াকড়িভাবে শুধুমাত্র 'tour' ক্যাটাগরি আসবে
+    // টেবিল ২ (Tour Expense Details): কড়াকড়ি ফিল্টারিং
     if (category.toLowerCase() === 'tour') {
       const trDetail = document.createElement('tr');
       trDetail.innerHTML = `
@@ -329,27 +330,22 @@ expenseRef.on('value', (snapshot) => {
     }
   }
 
-  // ফায়ারবেজের ডাইনামিক বা নেস্টেড সব ধরনের অবজেক্ট হ্যান্ডলিং লুপ
+  // ডাটাবেজ স্ট্রাকচার লুপ (Nested ও Flat নোড ডুপ্লিকেশন প্রোটেকশন)
   Object.keys(data).forEach(key => {
     const node = data[key];
     if (node && typeof node === 'object') {
-      // যদি ডাটাবেজ নোডটি সরাসরি .general বা .tour ধারণ করে
       if (node.general || node.tour) {
-        if (node.general) Object.keys(node.general).forEach(k => extractAndProcess(node.general[k], "General"));
-        if (node.tour) Object.keys(node.tour).forEach(k => extractAndProcess(node.tour[k], "tour"));
-      } 
-      // যদি মূল রুটেই সরাসরি general/tour কি (Key) থাকে 
-      else if (key === 'general' || key === 'tour') {
-        Object.keys(node).forEach(k => extractAndProcess(node[k], key));
-      } 
-      // নতুবা এটি একটি সাধারণ ফায়ারবেজ পুশ আইডি (যেমন: -O...) যার ভেতরে ক্যাটাগরি ডিফাইন করা আছে
-      else {
-        extractAndProcess(node, node.category);
+        if (node.general) Object.keys(node.general).forEach(k => processItem(node.general[k], "General"));
+        if (node.tour) Object.keys(node.tour).forEach(k => processItem(node.tour[k], "tour"));
+      } else if (key === 'general' || key === 'tour') {
+        Object.keys(node).forEach(k => processItem(node[k], key));
+      } else {
+        processItem(node, node.category);
       }
     }
   });
 
-  // গ্রুপ করা সামারি ডাটা দিয়ে টেবিল ১ (Expense History) রেন্ডার করা
+  // গ্রুপ করা ডাটা দিয়ে টেবিল ১ তৈরি করা
   Object.keys(summaryMap).forEach(cat => {
     const trCat = document.createElement('tr');
     trCat.innerHTML = `
@@ -360,7 +356,7 @@ expenseRef.on('value', (snapshot) => {
     catTbody.appendChild(trCat);
   });
 
-  // যদি ট্যুর ডিটেইলস টেবিল খালি থাকে (যেমন কোন ট্যুর ডাটা না থাকলে)
+  // ট্যুর ডিটেইলস টেবিল ডাটা ফ্রেস চেক
   if (detailsTbody.children.length === 0) {
     detailsTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No tour records found!</td></tr>`;
   }
@@ -369,7 +365,7 @@ expenseRef.on('value', (snapshot) => {
     catTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No data found!</td></tr>`;
   }
 
-  // কার্ডের ভ্যালু আপডেট করা
+  // কার্ডের ভ্যালু আপডেট
   document.getElementById('monthExpense').innerText = `৳${totalMonth.toLocaleString()}`;
   document.getElementById('yearExpense').innerText = `৳${totalYear.toLocaleString()}`;
 });
@@ -382,7 +378,6 @@ function openMenu(){
   document.getElementById('menuBtn').style.pointerEvents = 'none';
 }
 function closeMenu(){
-  document.getElementById('sidebar').classList.remove('remove'); // Fix classList safely
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity = '1';
