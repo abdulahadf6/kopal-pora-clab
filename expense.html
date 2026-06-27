@@ -216,7 +216,8 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
         <tr>
           <th>Category</th>
           <th>Total Amount</th>
-          <th>Date</th> </tr>
+          <th>Date</th> 
+        </tr>
       </thead>
       <tbody id="categoryTableBody">
         <tr>
@@ -277,6 +278,10 @@ expenseRef.on('value', (snapshot) => {
   const currentDate = new Date();
   const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // MM
   const currentYearStr = String(currentDate.getFullYear()); // YYYY
+  const shortYearStr = currentYearStr.slice(-2); // YY (e.g., "26")
+
+  // ক্যাটাগরি সামারি অবজেক্ট
+  const summaryMap = {};
 
   // আইটেম প্রসেসিং ফাংশন
   function processItem(item) {
@@ -286,14 +291,14 @@ expenseRef.on('value', (snapshot) => {
     const category = item.category || "General";
     const details = item.details || "N/A";
 
-    // মাস এবং বছর ম্যাচিং লজিক (গ্লোবাল কার্ড ক্যালকুলেশন)
+    // মাস এবং বছর ম্যাচিং লজিক (গ্লোবাল কার্ড ক্যালকুলেশন - YYYY এবং YY দুই ফরম্যাটই হ্যান্ডেল করবে)
     if (dateStr && dateStr !== "N/A") {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
         const itemMonth = parts[1];
         const itemYear = parts[2];
 
-        if (itemYear === currentYearStr) {
+        if (itemYear === currentYearStr || itemYear === shortYearStr) {
           totalYear += amount;
           if (itemMonth === currentMonthStr) {
             totalMonth += amount;
@@ -302,16 +307,14 @@ expenseRef.on('value', (snapshot) => {
       }
     }
 
-    // টেবিল ১: Expense History (Category, Total Amount, Date) ৩টি কলাম ডাটা পুশ
-    const trCat = document.createElement('tr');
-    trCat.innerHTML = `
-      <td>${category}</td>
-      <td>৳${amount.toLocaleString()}</td>
-      <td>${dateStr}</td>
-    `;
-    catTbody.appendChild(trCat);
+    // টেবিল ১ এর জন্য ডাটা গ্রুপ করা (ডুপ্লিকেট রিমুভ মেকানিজম)
+    if (!summaryMap[category]) {
+      summaryMap[category] = { amount: 0, date: dateStr };
+    }
+    summaryMap[category].amount += amount;
+    summaryMap[category].date = dateStr; // লেটেস্ট তারিখ আপডেট রাখবে
 
-    // টেবিল ২: Detailed Expense রো যোগ করা
+    // টেবিল ২: Detailed Expense রো যোগ করা (এখানে সব ডাটা সিঙ্গেল লাইন হিসেবে আসবে)
     const trDetail = document.createElement('tr');
     trDetail.innerHTML = `
       <td>${dateStr}</td>
@@ -321,13 +324,31 @@ expenseRef.on('value', (snapshot) => {
     detailsTbody.appendChild(trDetail);
   }
 
-  // স্ট্রাকচার চেক (Nested বনাম Flat)
+  // স্ট্রাকচার চেক (Nested বনাম Flat ডাটাবেজ নোড হ্যান্ডলিং)
   if (data.general || data.tour) {
     if (data.general) Object.keys(data.general).forEach(k => processItem(data.general[k]));
     if (data.tour) Object.keys(data.tour).forEach(k => processItem(data.tour[k]));
   } else {
-    Object.keys(data).forEach(key => processItem(data[key]));
+    Object.keys(data).forEach(key => {
+      if(typeof data[key] === 'object' && data[key] !== null && (data[key].general || data[key].tour)){
+         if(data[key].general) Object.keys(data[key].general).forEach(k => processItem(data[key].general[k]));
+         if(data[key].tour) Object.keys(data[key].tour).forEach(k => processItem(data[key].tour[k]));
+      } else {
+         processItem(data[key]);
+      }
+    });
   }
+
+  // গ্রুপ করা সামারি ডাটা দিয়ে টেবিল ১ (Expense History) তৈরি করা
+  Object.keys(summaryMap).forEach(cat => {
+    const trCat = document.createElement('tr');
+    trCat.innerHTML = `
+      <td>${cat}</td>
+      <td>৳${summaryMap[cat].amount.toLocaleString()}</td>
+      <td>${summaryMap[cat].date}</td>
+    `;
+    catTbody.appendChild(trCat);
+  });
 
   if (!hasData) {
     catTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No data found!</td></tr>`;
