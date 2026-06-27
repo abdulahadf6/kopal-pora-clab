@@ -270,11 +270,11 @@ const db = firebase.database();
 
 let globalIncomeData = {}; 
 
-// ড্রপডাউনে সালের তালিকা তৈরি করা (চলতি সাল ডিফল্ট থাকবে)
+// ড্রপডাউন মেকানিজম (চলতি বছর থেকে শুরু করে পরবর্তী ৪ বছর জেনারেট করবে)
 const currentYear = new Date().getFullYear(); // 2026
 const yearFilterSelect = document.getElementById('yearFilter');
 
-for (let y = currentYear - 2; y <= currentYear + 4; y++) {
+for (let y = currentYear; y <= currentYear + 4; y++) {
   const opt = document.createElement('option');
   opt.value = y;
   opt.innerText = `Year: ${y}`;
@@ -291,7 +291,7 @@ incomeRef.on('value', (snapshot) => {
 
 // ফিল্টারিং এবং রেন্ডারিং মেইন ফাংশন
 function renderIncomeDashboard() {
-  const selectedYearStr = document.getElementById('yearFilter').value; // 'all' অথবা কোনো সাল (যেমন: '2026')
+  const selectedYearStr = document.getElementById('yearFilter').value; // 'all' অথবা কোনো সাল
   const shortYearStr = selectedYearStr !== 'all' ? selectedYearStr.slice(-2) : ''; 
 
   const tbody = document.getElementById('incomeTableBody');
@@ -319,7 +319,7 @@ function renderIncomeDashboard() {
     const dateStr = item.date || ""; 
     let shouldInclude = false;
 
-    // All Years সিলেক্ট করা থাকলে সব ডাটা আসবে
+    // All Years ফিল্টারিং লজিক
     if (selectedYearStr === 'all') {
       shouldInclude = true;
       hasData = true;
@@ -332,7 +332,7 @@ function renderIncomeDashboard() {
         }
       }
     } 
-    // নির্দিষ্ট কোনো সাল সিলেক্ট থাকলে সেই সাল ফিল্টারিং
+    // নির্দিষ্ট সাল ফিল্টারিং লজিক
     else if (dateStr) {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
