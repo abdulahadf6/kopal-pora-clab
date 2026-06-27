@@ -420,7 +420,6 @@ tr:hover{
     renderTable(allMembersData);
   });
 
-  // রিয়েল-টাইম নোটিশ চেঞ্জার ইভেন্ট লিসেনার
   document.getElementById('rateYear').addEventListener('change', updateNoticeText);
   document.getElementById('rateMonth').addEventListener('change', updateNoticeText);
   function updateNoticeText(){
@@ -430,7 +429,7 @@ tr:hover{
     document.getElementById('activeRateNotice').innerText = `Active Configuration Rule: Year ${yr} (${mo}) = ৳${activeRate}`;
   }
 
-  // ৩. মূল কালেকশন স্ট্যাটাস আপডেট + ইনকাম অ্যাকাউন্ট ব্যালেন্স অটো-সিঙ্ক (প্লাস/মাইনাস লজিক)
+  // ৩. মূল কালেকশন স্ট্যাটাস আপডেট + ড্যাশবোর্ড ও ইনকাম পেজের সাথে অটো-সিঙ্ক (প্লাস/মাইনাস লজিক)
   function updateCollectionStatus() {
     const year = document.getElementById('inputYear').value;
     const mId = document.getElementById('inputMemberId').value.trim();
@@ -441,7 +440,9 @@ tr:hover{
 
     // রেট ডিটেকশন প্রসেস
     const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) !== undefined ? globalRatesSchema[year][month] : 100;
-    const transactionKey = `${year}_${month}_${mId}`.replace(/[.#$\[\]]/g, "_"); // Firebase Safe String
+    
+    // মেইন ইনকাম নোডের জন্য ইউনিক ট্রানজেকশন আইডি
+    const transactionKey = `AUTO_COLL_${year}_${month}_${mId}`.replace(/[.#$\[\]]/g, "_");
 
     const nodeRef = db.ref(`collections/${year}/${mId}`);
     
@@ -453,22 +454,34 @@ tr:hover{
       }
       
       const previousStatus = currentData[month] === true || currentData[month] === "Paid";
-      currentData[month] = status; // এটি এখন সরাসরি Boolean true/false রাখবে যা সিস্টেমে সামঞ্জস্যপূর্ণ
+      currentData[month] = status; 
       
       nodeRef.set(currentData, (error) => {
         if(!error) {
+          
+          // সরাসরি প্রধান ইনকাম পাথে ডাটা পুশ/রিমুভ করা হচ্ছে যাতে সব কার্ড লাইভ আপডেট হয়
+          const mainIncomeRef = db.ref(`income/${year}/${transactionKey}`);
+          const altIncomeRef = db.ref(`income/${transactionKey}`); 
+
           if (status === true && !previousStatus) {
-            db.ref(`income/collections_auto/${transactionKey}`).set({
+            const incomeData = {
               amount: targetFee,
               category: "Monthly Subscription",
-              date: `01-${String(months.indexOf(month)+1).padStart(2,'0')}-${year}`,
-              details: `Auto Sync: Fees collected from ${mId} for ${month}-${year}`
-            });
-            showToast('✅ Matrix Saved & Balance Added!');
+              date: `${year}-${String(months.indexOf(month)+1).padStart(2,'0')}-01`, 
+              details: `Collection: ${mId} (${month}-${year})`,
+              type: "income"
+            };
+
+            mainIncomeRef.set(incomeData);
+            altIncomeRef.set(incomeData); 
+            
+            showToast('✅ Balance Added to Dashboard!');
           } 
           else if (status === false && previousStatus) {
-            db.ref(`income/collections_auto/${transactionKey}`).remove();
-            showToast('🗑️ Matrix Revoked & Balance Deducted!');
+            mainIncomeRef.remove();
+            altIncomeRef.remove();
+            
+            showToast('🗑️ Balance Deducted from Dashboard!');
           } else {
             showToast('✅ Matrix Adjusted!');
           }
