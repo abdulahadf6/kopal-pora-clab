@@ -347,7 +347,7 @@ tr:hover{
 
 <div id="toast" class="toast">✅ Collection Matrix Updated!</div>
 
-<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V1.2</div>
+<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V1.4</div>
 
 <script>
   const firebaseConfig = {
@@ -429,7 +429,7 @@ tr:hover{
     document.getElementById('activeRateNotice').innerText = `Active Configuration Rule: Year ${yr} (${mo}) = ৳${activeRate}`;
   }
 
-  // ৩. মূল কালেকশন স্ট্যাটাস আপডেট + ড্যাশবোর্ড ও ইনকাম পেজের সাথে অটো-সিঙ্ক (প্লাস/মাইনাস লজিক)
+  // ৩. মূল কালেকশন স্ট্যাটাস আপডেট + মেম্বার ইনকাম ড্যাশবোর্ডের সাথে লাইভ সিঙ্ক (প্লাস/মাইনাস লজিক)
   function updateCollectionStatus() {
     const year = document.getElementById('inputYear').value;
     const mId = document.getElementById('inputMemberId').value.trim();
@@ -441,7 +441,7 @@ tr:hover{
     // রেট ডিটেকশন প্রসেস
     const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) !== undefined ? globalRatesSchema[year][month] : 100;
     
-    // মেইন ইনকাম নোডের জন্য ইউনিক ট্রানজেকশন আইডি
+    // আপনার ইনকাম ড্যাশবোর্ডের ফ্ল্যাট `income` নোড স্ট্রাকচারের জন্য ইউনিক কী
     const transactionKey = `AUTO_COLL_${year}_${month}_${mId}`.replace(/[.#$\[\]]/g, "_");
 
     const nodeRef = db.ref(`collections/${year}/${mId}`);
@@ -459,29 +459,30 @@ tr:hover{
       nodeRef.set(currentData, (error) => {
         if(!error) {
           
-          // সরাসরি প্রধান ইনকাম পাথে ডাটা পুশ/রিমুভ করা হচ্ছে যাতে সব কার্ড লাইভ আপডেট হয়
-          const mainIncomeRef = db.ref(`income/${year}/${transactionKey}`);
-          const altIncomeRef = db.ref(`income/${transactionKey}`); 
+          // আপনার ইনকাম ড্যাশবোর্ড সরাসরি `db.ref('income')` রিড করে।
+          // তাই আমরা ফ্ল্যাট নোড হিসেবে ডাটা পুশ করব যাতে অবজেক্ট লুপ ভাঙতে না পারে।
+          const mainIncomeRef = db.ref(`income/${transactionKey}`);
 
           if (status === true && !previousStatus) {
+            // ইনকাম ড্যাশবোর্ডের ফিল্টারিং লজিক (source, from, amount, date) অনুযায়ী নিখুঁত ম্যাপিং:
+            // ডেট ফরম্যাট হবে DD-MM-YYYY যাতে ড্যাশবোর্ডের split('-')[1] এবং [2] সফলভাবে ফিল্টার করতে পারে।
+            const monthNumberStr = String(months.indexOf(month) + 1).padStart(2, '0');
+            const formattedDate = `01-${monthNumberStr}-${year}`;
+
             const incomeData = {
+              source: "Monthly Subscription",
+              from: mId,
               amount: targetFee,
-              category: "Monthly Subscription",
-              date: `${year}-${String(months.indexOf(month)+1).padStart(2,'0')}-01`, 
-              details: `Collection: ${mId} (${month}-${year})`,
-              type: "income"
+              date: formattedDate
             };
 
             mainIncomeRef.set(incomeData);
-            altIncomeRef.set(incomeData); 
-            
-            showToast('✅ Balance Added to Dashboard!');
+            showToast('✅ Income Logged & Sync Complete!');
           } 
           else if (status === false && previousStatus) {
+            // Unpaid করলে ইনকাম নোড থেকে রিমুভ (অটোমেটিক মাইনাস)
             mainIncomeRef.remove();
-            altIncomeRef.remove();
-            
-            showToast('🗑️ Balance Deducted from Dashboard!');
+            showToast('🗑️ Balance Revoked from Dashboard!');
           } else {
             showToast('✅ Matrix Adjusted!');
           }
