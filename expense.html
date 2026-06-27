@@ -278,20 +278,22 @@ expenseRef.on('value', (snapshot) => {
   const currentDate = new Date();
   const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // MM
   const currentYearStr = String(currentDate.getFullYear()); // YYYY
-  const shortYearStr = currentYearStr.slice(-2); // YY (e.g., "26")
+  const shortYearStr = currentYearStr.slice(-2); // YY
 
-  // ক্যাটাগরি সামারি অবজেক্ট
+  // ক্যাটাগরি সামারি অবজেক্ট (প্রথম টেবিল ডুপ্লিকেট রিমুভ করার জন্য)
   const summaryMap = {};
 
   // আইটেম প্রসেসিং ফাংশন
-  function processItem(item) {
+  function processItem(item, actualCategory) {
+    if (!item) return;
     hasData = true;
+
     const amount = parseFloat(item.amount) || 0;
     const dateStr = item.date || "N/A"; 
-    const category = item.category || "General";
+    const category = item.category || actualCategory || "General";
     const details = item.details || "N/A";
 
-    // মাস এবং বছর ম্যাচিং লজিক (গ্লোবাল কার্ড ক্যালকুলেশন - YYYY এবং YY দুই ফরম্যাটই হ্যান্ডেল করবে)
+    // মাস এবং বছর ম্যাচিং লজিক (গ্লোবাল কার্ড ক্যালকুলেশন)
     if (dateStr && dateStr !== "N/A") {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
@@ -312,34 +314,38 @@ expenseRef.on('value', (snapshot) => {
       summaryMap[category] = { amount: 0, date: dateStr };
     }
     summaryMap[category].amount += amount;
-    summaryMap[category].date = dateStr; // লেটেস্ট তারিখ আপডেট রাখবে
+    summaryMap[category].date = dateStr; 
 
-    // টেবিল ২: Detailed Expense রো যোগ করা (এখানে সব ডাটা সিঙ্গেল লাইন হিসেবে আসবে)
-    const trDetail = document.createElement('tr');
-    trDetail.innerHTML = `
-      <td>${dateStr}</td>
-      <td>${details}</td>
-      <td>৳${amount.toLocaleString()}</td>
-    `;
-    detailsTbody.appendChild(trDetail);
+    // টেবিল ২ (Tour Expense Details): শুধুমাত্র tour ক্যাটাগরির ডাটা এখানে আসবে
+    if (category.toLowerCase() === 'tour') {
+      const trDetail = document.createElement('tr');
+      trDetail.innerHTML = `
+        <td>${dateStr}</td>
+        <td>${details}</td>
+        <td>৳${amount.toLocaleString()}</td>
+      `;
+      detailsTbody.appendChild(trDetail);
+    }
   }
 
-  // স্ট্রাকচার চেক (Nested বনাম Flat ডাটাবেজ নোড হ্যান্ডলিং)
+  // স্ট্রাকচার চেক এবং ডাটা সেপারেশন লুপ (ডুপ্লিকেট রেন্ডারিং ব্লক)
   if (data.general || data.tour) {
-    if (data.general) Object.keys(data.general).forEach(k => processItem(data.general[k]));
-    if (data.tour) Object.keys(data.tour).forEach(k => processItem(data.tour[k]));
+    if (data.general) Object.keys(data.general).forEach(k => processItem(data.general[k], "General"));
+    if (data.tour) Object.keys(data.tour).forEach(k => processItem(data.tour[k], "tour"));
   } else {
     Object.keys(data).forEach(key => {
-      if(typeof data[key] === 'object' && data[key] !== null && (data[key].general || data[key].tour)){
-         if(data[key].general) Object.keys(data[key].general).forEach(k => processItem(data[key].general[k]));
-         if(data[key].tour) Object.keys(data[key].tour).forEach(k => processItem(data[key].tour[k]));
-      } else {
-         processItem(data[key]);
+      if(typeof data[key] === 'object' && data[key] !== null) {
+         if(data[key].general || data[key].tour) {
+            if(data[key].general) Object.keys(data[key].general).forEach(k => processItem(data[key].general[k], "General"));
+            if(data[key].tour) Object.keys(data[key].tour).forEach(k => processItem(data[key].tour[k], "tour"));
+         } else {
+            processItem(data[key], data[key].category);
+         }
       }
     });
   }
 
-  // গ্রুপ করা সামারি ডাটা দিয়ে টেবিল ১ (Expense History) তৈরি করা
+  // গ্রুপ করা ডাটা দিয়ে টেবিল ১ (Expense History) রেন্ডার করা
   Object.keys(summaryMap).forEach(cat => {
     const trCat = document.createElement('tr');
     trCat.innerHTML = `
@@ -350,9 +356,13 @@ expenseRef.on('value', (snapshot) => {
     catTbody.appendChild(trCat);
   });
 
+  // যদি ট্যুর ডিটেইলস টেবিল খালি থাকে
+  if (detailsTbody.children.length === 0) {
+    detailsTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No tour records found!</td></tr>`;
+  }
+
   if (!hasData) {
     catTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No data found!</td></tr>`;
-    detailsTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No records found!</td></tr>`;
   }
 
   // কার্ডের ভ্যালু আপডেট করা
