@@ -154,6 +154,28 @@ border-radius:24px;
 box-shadow: 0 15px 35px rgba(0,0,0,.3);
 }
 
+/* ইনকাম কার্ড স্টাইল */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
+}
+.card-box {
+  padding: 24px;
+}
+.card-box small {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 6px;
+}
+.card-box h2 {
+  font-size: 30px;
+  font-weight: 600;
+}
+
 select,
 input{
 padding:16px;
@@ -241,6 +263,18 @@ font-size:18px;
 </div>
 
 <div class="container">
+
+<div class="cards-grid">
+  <div class="glass card-box">
+    <small id="monthCardTitle">Collection (This Month)</small>
+    <h2 id="monthCollectionFunds">৳0</h2>
+  </div>
+  <div class="glass card-box">
+    <small id="yearCardTitle">Collection (This Year)</small>
+    <h2 id="yearCollectionFunds">৳0</h2>
+  </div>
+</div>
+
 <div class="topbar">
 <select class="glass" id="yearSelect">
 <option value="2026">2026</option>
@@ -255,7 +289,7 @@ font-size:18px;
 
 <div class="glass table-box">
 <h2 style="margin-bottom:20px; font-size:28px; font-weight:700;">
- Collection Status
+ Collection Status <span id="rateTag" style="font-size:14px; font-weight:normal; color:#94a3b8; margin-left:10px;">(Rate: ৳0/mon)</span>
 </h2>
 
 <table id="collectionTable">
@@ -281,7 +315,7 @@ font-size:18px;
 </div>
 
 <div style="text-align:center; padding:40px; color:#94a3b8;">
-KPTC Collection V1.2
+KPTC Collection V1.3
 </div>
 
 <script>
@@ -294,9 +328,13 @@ KPTC Collection V1.2
 
   let allMembersData = {}; 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  // অ্যাডমিন প্যানেল থেকে আসা ডাইনামিক সাবস্ক্রিপশন ফি (ডিফল্ট ৫০০ রাখা হলো লোড হওয়ার আগ পর্যন্ত)
+  let subscriptionFee = 500; 
 
-  const currentYear = new Date().getFullYear().toString();
-  const currentMonthIdx = new Date().getMonth();
+  const currentDateObj = new Date();
+  const currentYear = currentDateObj.getFullYear().toString();
+  const currentMonthIdx = currentDateObj.getMonth();
   document.getElementById('currentMonthName').innerText = months[currentMonthIdx];
 
   const yearSelect = document.getElementById('yearSelect');
@@ -313,11 +351,22 @@ KPTC Collection V1.2
     yearSelect.selectedIndex = 0;
   }
 
+  // ডেটাবেজ থেকে লাইভ চাঁদার রেট রিড করার লিসেনার
+  db.ref('collection_settings/subscription_fee').on('value', (snapshot) => {
+    const fee = snapshot.val();
+    if(fee !== null) {
+      subscriptionFee = parseFloat(fee) || 0;
+      document.getElementById('rateTag').innerText = `(Rate: ৳${subscriptionFee}/mon)`;
+      // রেট চেঞ্জ হলে টেবিল ও কার্ড আবার রি-রেন্ডার হবে স্বয়ংক্রিয়ভাবে
+      renderTable(allMembersData, document.getElementById('searchInput').value);
+    }
+  });
+
   function loadCollectionData(year) {
     const dbRef = db.ref('collections/' + year);
     dbRef.on('value', (snapshot) => {
       allMembersData = snapshot.val() || {};
-      renderTable(allMembersData);
+      renderTable(allMembersData, document.getElementById('searchInput').value);
     });
   }
 
@@ -326,8 +375,10 @@ KPTC Collection V1.2
     tbody.innerHTML = "";
 
     let total = 0;
-    let paid = 0;
-    let pending = 0;
+    let paidThisMonthCount = 0;
+    let pendingThisMonthCount = 0;
+    
+    let totalYearlyPaidSlots = 0;
 
     Object.keys(data).forEach(memberId => {
       const member = data[memberId];
@@ -340,12 +391,20 @@ KPTC Collection V1.2
       total++;
 
       let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
+      
       months.forEach((month, idx) => {
-        const isPaid = member[month] === true || member[month.toLowerCase()] === true;
+        const mVal = member[month];
+        const mValLower = member[month.toLowerCase()];
+        const isPaid = mVal === true || mVal === "Paid" || mValLower === true || mValLower === "Paid";
+        
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
+        if (isPaid) {
+          totalYearlyPaidSlots++;
+        }
+
         if (idx === currentMonthIdx) {
-          if (isPaid) paid++; else pending++;
+          if (isPaid) paidThisMonthCount++; else pendingThisMonthCount++;
         }
       });
       rowHtml += '</tr>';
@@ -357,12 +416,20 @@ KPTC Collection V1.2
     }
 
     document.getElementById('totalMembers').innerText = total;
-    document.getElementById('paidMembers').innerText = paid;
-    document.getElementById('pendingMembers').innerText = pending;
+    document.getElementById('paidMembers').innerText = paidThisMonthCount;
+    document.getElementById('pendingMembers').innerText = pendingThisMonthCount;
+
+    // অ্যাডমিন প্যানেলের লাইভ রেট অনুযায়ী মোট টাকার হিসাব
+    const calculatedMonthFunds = paidThisMonthCount * subscriptionFee;
+    const calculatedYearFunds = totalYearlyPaidSlots * subscriptionFee;
+
+    document.getElementById('monthCollectionFunds').innerText = `৳${calculatedMonthFunds.toLocaleString()}`;
+    document.getElementById('yearCollectionFunds').innerText = `৳${calculatedYearFunds.toLocaleString()}`;
   }
 
   yearSelect.addEventListener('change', (e) => {
     loadCollectionData(e.target.value);
+    document.getElementById('yearCardTitle').innerText = `Collection (Year ${e.target.value})`;
   });
 
   const searchInput = document.getElementById('searchInput');
