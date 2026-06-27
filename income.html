@@ -257,10 +257,9 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
   </div>
 </div>
 
-<div class="footer">KPTC Income Dashboard V3</div>
+<div class="footer">KPTC Income Dashboard V3.1</div>
 
 <script>
-// ফায়ারবেজে কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
@@ -270,28 +269,25 @@ const db = firebase.database();
 
 let globalIncomeData = {}; 
 
-// ড্রপডাউন মেকানিজম (চলতি বছর থেকে শুরু করে পরবর্তী ৪ বছর জেনারেট করবে)
-const currentYear = new Date().getFullYear(); // 2026
+const currentYear = new Date().getFullYear(); 
 const yearFilterSelect = document.getElementById('yearFilter');
 
 for (let y = currentYear; y <= currentYear + 4; y++) {
   const opt = document.createElement('option');
   opt.value = y;
   opt.innerText = `Year: ${y}`;
-  if (y === currentYear) opt.selected = true; // ২০২৬ ডিফল্ট সিলেক্টেড থাকবে
+  if (y === currentYear) opt.selected = true; 
   yearFilterSelect.appendChild(opt);
 }
 
-// ডাটাবেজ থেকে ইনকাম ডাটা রিড করা
 const incomeRef = db.ref('income');
 incomeRef.on('value', (snapshot) => {
   globalIncomeData = snapshot.val() || {};
   renderIncomeDashboard();
 });
 
-// ফিল্টারিং এবং রেন্ডারিং মেইন ফাংশন
 function renderIncomeDashboard() {
-  const selectedYearStr = document.getElementById('yearFilter').value; // 'all' অথবা কোনো সাল
+  const selectedYearStr = document.getElementById('yearFilter').value.toString(); 
   const shortYearStr = selectedYearStr !== 'all' ? selectedYearStr.slice(-2) : ''; 
 
   const tbody = document.getElementById('incomeTableBody');
@@ -302,9 +298,9 @@ function renderIncomeDashboard() {
   let hasData = false;
 
   const currentDate = new Date();
-  const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // MM
+  const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); 
+  const currentFullYearStr = currentDate.getFullYear().toString();
 
-  // কার্ড টাইটেল পরিবর্তন লজিক
   if (selectedYearStr === 'all') {
     document.getElementById('monthCardTitle').innerText = "Current Month Income";
     document.getElementById('yearCardTitle').innerText = "Total Lifetime Income";
@@ -316,10 +312,9 @@ function renderIncomeDashboard() {
   Object.keys(globalIncomeData).forEach(key => {
     const item = globalIncomeData[key];
     const amount = parseFloat(item.amount) || 0;
-    const dateStr = item.date || ""; 
+    const dateStr = (item.date || "").toString(); 
     let shouldInclude = false;
 
-    // All Years ফিল্টারিং লজিক
     if (selectedYearStr === 'all') {
       shouldInclude = true;
       hasData = true;
@@ -327,24 +322,25 @@ function renderIncomeDashboard() {
 
       if (dateStr) {
         const parts = dateStr.split('-');
-        if (parts.length === 3 && parts[1] === currentMonthStr && parts[2] === String(currentDate.getFullYear())) {
+        if (parts.length === 3 && parts[1] === currentMonthStr && parts[2] === currentFullYearStr) {
           totalMonth += amount;
         }
       }
     } 
-    // নির্দিষ্ট সাল ফিল্টারিং লজিক
     else if (dateStr) {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
-        const itemMonth = parts[1];
-        const itemYear = parts[2];
+        const itemMonth = parts[1].toString();
+        const itemYear = parts[2].toString();
 
+        // স্ট্রিক্ট স্ট্রিং বা টাইপ সেফটি চেক ফিক্স
         if (itemYear === selectedYearStr || itemYear === shortYearStr) {
           shouldInclude = true;
           hasData = true;
           totalYearOrAll += amount;
 
-          if (itemMonth === currentMonthStr && (selectedYearStr == currentDate.getFullYear())) {
+          // এই মাসের ব্যালেন্স কার্ডের জন্য নিখুঁত ম্যাচিং রুল
+          if (itemMonth === currentMonthStr && selectedYearStr === currentFullYearStr) {
             totalMonth += amount;
           }
         }
@@ -372,7 +368,6 @@ function renderIncomeDashboard() {
   document.getElementById('yearIncome').innerText = `৳${totalYearOrAll.toLocaleString()}`;
 }
 
-// মেনু স্ক্রিপ্ট
 function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
