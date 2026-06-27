@@ -75,6 +75,32 @@ body {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
+/* ফিল্টার সেকশন স্টাইল */
+.filter-container {
+  max-width: 1200px;
+  margin: 80px auto 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+.year-select {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+}
+.year-select option {
+  background: #0d1117;
+  color: #fff;
+}
+
 /* ওভারলে */
 .overlay {
   position: fixed;
@@ -127,7 +153,7 @@ body {
 .cards {
   max-width: 1200px;
   margin: auto;
-  padding: 80px 24px 24px 24px; /* মেনু বাটনের জন্য টপ প্যাডিং বাড়ানো হয়েছে */
+  padding: 16px 24px 24px 24px; 
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 22px;
@@ -196,33 +222,57 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <a href="index.html"> Logout</a>
 </div>
 
+<div class="filter-container">
+  <select id="yearFilter" class="year-select" onchange="renderDashboard()">
+    <option value="all">All Years</option> </select>
+</div>
+
 <div class="cards">
   <div class="card">
-    <small> This Month Income</small>
-    <h2 id="monthIncome">৳0</h2>
+    <small id="monthCardTitle">This Month Expense</small>
+    <h2 id="monthExpense">৳0</h2>
   </div>
 
   <div class="card">
-    <small> This Year Income</small>
-    <h2 id="yearIncome">৳0</h2>
+    <small id="yearCardTitle">This Year Expense</small>
+    <h2 id="yearExpense">৳0</h2>
   </div>
 </div>
 
 <div class="section">
   <div class="panel">
-    <h2> Income History</h2>
+    <h2> Expense History</h2>
     <table>
       <thead>
         <tr>
-          <th>Source</th>
-          <th>From</th>
-          <th>Amount</th>
-          <th>Date</th>
+          <th>Category</th>
+          <th>Total Amount</th>
+          <th>Date</th> 
         </tr>
       </thead>
-      <tbody id="incomeTableBody">
+      <tbody id="categoryTableBody">
         <tr>
-          <td colspan="4" style="text-align: center; color: #71717a;">Loading income history...</td>
+          <td colspan="3" style="text-align: center; color: #71717a;">Loading summary...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section">
+  <div class="panel">
+    <h2> Tour Expense Details</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Details</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody id="expenseDetailsBody">
+        <tr>
+          <td colspan="3" style="text-align: center; color: #71717a;">Loading details...</td>
         </tr>
       </tbody>
     </table>
@@ -232,7 +282,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <div class="footer">KPTC Dashboard V3</div>
 
 <script>
-// ফায়ারবেজ কনফিগারেশন
+// ফায়ারবেজে কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
@@ -241,64 +291,164 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ডাটাবেজ থেকে ইনকাম ডাটা রিড করা
-const incomeRef = db.ref('income');
-incomeRef.on('value', (snapshot) => {
-  const data = snapshot.val() || {};
-  const tbody = document.getElementById('incomeTableBody');
-  tbody.innerHTML = ""; // টেবিল ক্লিয়ার করা
+let globalData = {}; // ডাটাবেজের লোকাল কপি
+
+// ড্রপডাউনে সালের তালিকা তৈরি করা (চলতি সাল ডিফল্ট থাকবে)
+const currentYear = new Date().getFullYear(); // ২০২৬
+const yearFilterSelect = document.getElementById('yearFilter');
+
+for (let y = currentYear - 2; y <= currentYear + 4; y++) {
+  const opt = document.createElement('option');
+  opt.value = y;
+  opt.innerText = `Year: ${y}`;
+  if (y === currentYear) opt.selected = true; // ২০২৬ ডিফল্ট সিলেক্টেড থাকবে
+  yearFilterSelect.appendChild(opt);
+}
+
+// ডাটাবেজ থেকে এক্সপেন্স ডাটা রিড করা
+const expenseRef = db.ref('expense');
+expenseRef.on('value', (snapshot) => {
+  globalData = snapshot.val() || {};
+  renderDashboard();
+});
+
+// ফিল্টারিং এবং রেন্ডারিং মেইন ফাংশন
+function renderDashboard() {
+  const selectedYearStr = document.getElementById('yearFilter').value; // 'all' অথবা কোনো সাল (যেমন: '2026')
+  const shortYearStr = selectedYearStr !== 'all' ? selectedYearStr.slice(-2) : ''; 
+
+  const catTbody = document.getElementById('categoryTableBody');
+  const detailsTbody = document.getElementById('expenseDetailsBody');
+  
+  // টেবিল পরিষ্কার করা
+  while(catTbody.firstChild) { catTbody.removeChild(catTbody.firstChild); }
+  while(detailsTbody.firstChild) { detailsTbody.removeChild(detailsTbody.firstChild); }
 
   let totalMonth = 0;
-  let totalYear = 0;
+  let totalYearOrAll = 0;
   let hasData = false;
 
-  // কারেন্ট মাস ও বছর বের করা
   const currentDate = new Date();
   const currentMonthStr = String(currentDate.getMonth() + 1).padStart(2, '0'); // MM
-  const currentYearStr = String(currentDate.getFullYear()); // YYYY
 
-  Object.keys(data).forEach(key => {
-    const item = data[key];
-    hasData = true;
+  const summaryMap = {};
 
+  // কার্ড টাইটেল পরিবর্তন লজিক
+  if (selectedYearStr === 'all') {
+    document.getElementById('monthCardTitle').innerText = "Current Month Expense";
+    document.getElementById('yearCardTitle').innerText = "Total Lifetime Expense";
+  } else {
+    document.getElementById('monthCardTitle').innerText = "This Month Expense";
+    document.getElementById('yearCardTitle').innerText = `Year ${selectedYearStr} Expense`;
+  }
+
+  // প্রতিটি আইটেম প্রসেসিং ফাংশন
+  function processItem(item, logicBranch) {
+    if (!item) return;
+
+    const dateStr = item.date || "N/A"; 
     const amount = parseFloat(item.amount) || 0;
-    const dateStr = item.date || ""; // আশা করা হচ্ছে ফরম্যাট DD-MM-YYYY হবে
+    let shouldInclude = false;
 
-    // মাস এবং বছর ম্যাচিং লজিক
-    if (dateStr) {
+    // যদি 'All Years' সিলেক্ট করা থাকে, তবে কোনো ফিল্টার ছাড়া সব ডাটা আসবে
+    if (selectedYearStr === 'all') {
+      shouldInclude = true;
+      hasData = true;
+      totalYearOrAll += amount;
+
+      // All Years সিলেক্ট থাকলেও চলতি মাস এবং চলতি বছরের ডাটার ভিত্তিতে এই মাসের কার্ড হিসাব করবে
+      if (dateStr && dateStr !== "N/A") {
+        const parts = dateStr.split('-');
+        if (parts.length === 3 && parts[1] === currentMonthStr && parts[2] === String(currentDate.getFullYear())) {
+          totalMonth += amount;
+        }
+      }
+    } 
+    // নির্দিষ্ট কোনো সাল সিলেক্ট থাকলে সেই সাল ম্যাচ করানোর লজিক
+    else if (dateStr && dateStr !== "N/A") {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
         const itemMonth = parts[1];
         const itemYear = parts[2];
 
-        if (itemYear === currentYearStr) {
-          totalYear += amount;
-          if (itemMonth === currentMonthStr) {
+        if (itemYear === selectedYearStr || itemYear === shortYearStr) {
+          shouldInclude = true;
+          hasData = true;
+          totalYearOrAll += amount;
+
+          // চলতি মাসের ডাটা কাউন্ট করার জন্য
+          if (itemMonth === currentMonthStr && (selectedYearStr == currentDate.getFullYear())) {
             totalMonth += amount;
           }
         }
       }
     }
 
-    // টেবিলে রো যোগ করা
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${item.source || 'N/A'}</td>
-      <td>${item.from || 'N/A'}</td>
-      <td>৳${amount.toLocaleString()}</td>
-      <td>${dateStr || 'N/A'}</td>
-    `;
-    tbody.appendChild(tr);
-  });
+    // যদি ডাটা বর্তমান সিলেক্টেড ফিল্টারের শর্ত পূরণ করে
+    if (shouldInclude) {
+      const category = item.category || (logicBranch === 'tour' ? 'tour' : 'General');
+      const details = item.details || "N/A";
 
-  if (!hasData) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a;">No income records found!</td></tr>`;
+      if (logicBranch === 'general') {
+        if (!summaryMap[category]) {
+          summaryMap[category] = { amount: 0, date: dateStr };
+        }
+        summaryMap[category].amount += amount;
+        summaryMap[category].date = dateStr; 
+      } 
+      else if (logicBranch === 'tour') {
+        const trDetail = document.createElement('tr');
+        trDetail.innerHTML = `
+          <td>${dateStr}</td>
+          <td>${details}</td>
+          <td>৳${amount.toLocaleString()}</td>
+        `;
+        detailsTbody.appendChild(trDetail);
+      }
+    }
   }
 
-  // কার্ডের ভ্যালু আপডেট করা
-  document.getElementById('monthIncome').innerText = `৳${totalMonth.toLocaleString()}`;
-  document.getElementById('yearIncome').innerText = `৳${totalYear.toLocaleString()}`;
-});
+  // ফায়ারবেজ অবজেক্ট স্ক্যান লুপ
+  Object.keys(globalData).forEach(key => {
+    const node = globalData[key];
+    if (node && typeof node === 'object') {
+      if (node.general || node.tour) {
+        if (node.general) Object.keys(node.general).forEach(k => processItem(node.general[k], "general"));
+        if (node.tour) Object.keys(node.tour).forEach(k => processItem(node.tour[k], "tour"));
+      } else if (key === 'general' || key === 'tour') {
+        Object.keys(node).forEach(k => processItem(node[k], key));
+      } else {
+        const branch = (node.category && node.category.toLowerCase() === 'tour' && !node.details) ? 'tour' : 'general';
+        const realBranch = (node.details && node.details !== 'N/A') ? 'tour' : branch;
+        processItem(node, realBranch);
+      }
+    }
+  });
+
+  // টেবিল ১ রেন্ডার করা
+  Object.keys(summaryMap).forEach(cat => {
+    const trCat = document.createElement('tr');
+    trCat.innerHTML = `
+      <td>${cat}</td>
+      <td>৳${summaryMap[cat].amount.toLocaleString()}</td>
+      <td>${summaryMap[cat].date}</td>
+    `;
+    catTbody.appendChild(trCat);
+  });
+
+  // কোনো ডাটা খুঁজে না পাওয়া গেলে ফাঁকা নোটিশ
+  const scopeText = selectedYearStr === 'all' ? 'All Time' : `year ${selectedYearStr}`;
+  if (catTbody.children.length === 0) {
+    catTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No general expenses found for ${scopeText}!</td></tr>`;
+  }
+  if (detailsTbody.children.length === 0) {
+    detailsTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No tour records found for ${scopeText}!</td></tr>`;
+  }
+
+  // কার্ডের টোটাল সংখ্যা লাইভ আপডেট
+  document.getElementById('monthExpense').innerText = `৳${totalMonth.toLocaleString()}`;
+  document.getElementById('yearExpense').innerText = `৳${totalYearOrAll.toLocaleString()}`;
+}
 
 // মেনু স্ক্রিপ্ট
 function openMenu(){
