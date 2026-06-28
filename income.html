@@ -238,26 +238,26 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 <div class="section">
   <div class="panel">
-    <h2> Income History (Live From Collections)</h2>
+    <h2> Income History</h2>
     <table>
       <thead>
         <tr>
           <th>Source</th>
           <th>From</th>
           <th>Amount</th>
-          <th>Month/Year</th>
+          <th>Date</th>
         </tr>
       </thead>
       <tbody id="incomeTableBody">
         <tr>
-          <td colspan="4" style="text-align: center; color: #71717a;">Loading collection history...</td>
+          <td colspan="4" style="text-align: center; color: #71717a;">Loading income history...</td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
 
-<div class="footer">KPTC Income Dashboard V5.0</div>
+<div class="footer">KPTC Income Dashboard V3.2</div>
 
 <script>
 const firebaseConfig = {
@@ -267,15 +267,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let allCollectionsData = {}; 
-let globalRatesSchema = {};
-const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const monthFullNames = {
-  "Jan": "January", "Feb": "February", "Mar": "March", "Apr": "April", 
-  "May": "May", "Jun": "June", "Jul": "July", "Aug": "August", 
-  "Sep": "September", "Oct": "October", "Nov": "November", "Dec": "December"
-
-    };
+let globalIncomeData = {}; 
 
 const currentYear = new Date().getFullYear(); 
 const yearFilterSelect = document.getElementById('yearFilter');
@@ -288,18 +280,15 @@ for (let y = currentYear; y <= currentYear + 4; y++) {
   yearFilterSelect.appendChild(opt);
 }
 
-// ফি স্ট্রাকচার ও মেম্বার কালেকশন নোড একসাথে সিঙ্ক করা
-db.ref('kptc_settings/fee_structure').on('value', (rateSnapshot) => {
-  globalRatesSchema = rateSnapshot.val() || {};
-  
-  db.ref('collections').on('value', (collectionSnapshot) => {
-    allCollectionsData = collectionSnapshot.val() || {};
-    renderIncomeDashboard();
-  });
+const incomeRef = db.ref('income');
+incomeRef.on('value', (snapshot) => {
+  globalIncomeData = snapshot.val() || {};
+  renderIncomeDashboard();
 });
 
 function renderIncomeDashboard() {
   const selectedYearStr = document.getElementById('yearFilter').value.toString(); 
+  const shortYearStr = selectedYearStr !== 'all' ? selectedYearStr.slice(-2) : ''; 
 
   const tbody = document.getElementById('incomeTableBody');
   tbody.innerHTML = ""; 
@@ -309,8 +298,9 @@ function renderIncomeDashboard() {
   let hasData = false;
 
   const currentDate = new Date();
-  const currentMonthName = months[currentDate.getMonth()]; // যেমন: "Jun"
-  const currentFullYearStr = currentDate.getFullYear().toString();
+  // ইন্টিজার ভ্যালুতে কনভার্ট করে টাইপ-সেফ ফিল্টারিং নিশ্চিত করা
+  const currentMonthInt = currentDate.getMonth() + 1; 
+  const currentFullYearInt = currentDate.getFullYear();
 
   if (selectedYearStr === 'all') {
     document.getElementById('monthCardTitle').innerText = "Current Month Income";
@@ -320,56 +310,65 @@ function renderIncomeDashboard() {
     document.getElementById('yearCardTitle').innerText = `Year ${selectedYearStr} Income`;
   }
 
-  // ফায়ারবেস স্ক্রিনশট ম্যাচিং লুপ (collections -> yearKey -> memberKey)
-  Object.keys(allCollectionsData).forEach(yearKey => {
-    // বছর ফিল্টার লজিক
-    if (selectedYearStr !== 'all' && yearKey !== selectedYearStr) return;
+  Object.keys(globalIncomeData).forEach(key => {
+    const item = globalIncomeData[key];
+    const amount = parseFloat(item.amount) || 0;
+    const dateStr = (item.date || "").toString(); 
+    let shouldInclude = false;
 
-    const yearNode = allCollectionsData[yearKey];
-    if (!yearNode || typeof yearNode !== 'object') return;
+    if (selectedYearStr === 'all') {
+      shouldInclude = true;
+      hasData = true;
+      totalYearOrAll += amount;
 
-    // মেম্বার অবজেক্ট লুপ
-    Object.keys(yearNode).forEach(memberId => {
-      const memberObj = yearNode[memberId];
-      if (!memberObj || typeof memberObj !== 'object') return;
-
-      // মেম্বারের নাম বের করা (আপনার দেওয়া ডাটাবেজ স্ট্রাকচার অনুযায়ী)
-      const memberName = memberObj.name || memberId;
-
-      months.forEach(monthName => {
-        // Jun: true চেক করা হচ্ছে (কেস সেন্সিটিভ সহ)
-        const isPaid = memberObj[monthName] === true || memberObj[monthName] === "Paid" ||
-                       memberObj[monthName.toLowerCase()] === true || memberObj[monthName.toLowerCase()] === "Paid";
-        
-        if (isPaid) {
-          // কনফিগার করা ফি স্ট্রাকচার থেকে রেট নেওয়া (না থাকলে ডিফল্ট ১০০ টাকা)
-          const targetFee = (globalRatesSchema[yearKey] && globalRatesSchema[yearKey][monthName]) !== undefined ? globalRatesSchema[yearKey][monthName] : 100;
-          
-          hasData = true;
-          totalYearOrAll += targetFee;
-
-          // এই মাস এবং এই বছরের ডাটা হলে উপরের প্রথম কার্ডে যাবে
-          if (monthName === currentMonthName && yearKey === currentFullYearStr) {
-            totalMonth += targetFee;
+      if (dateStr) {
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          const itemMonthInt = parseInt(parts[1], 10);
+          const itemYearInt = parseInt(parts[2], 10);
+          if (itemMonthInt === currentMonthInt && itemYearInt === currentFullYearInt) {
+            totalMonth += amount;
           }
-
-          // ইনকাম হিস্ট্রি টেবিলে মেম্বারের রো পুশ করা
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>Monthly Subscription (${monthFullNames[monthName] || monthName})</td>
-            <td>${memberName}</td>
-            <td>৳${targetFee.toLocaleString()}</td>
-            <td>${monthName} - ${yearKey}</td>
-          `;
-          tbody.appendChild(tr);
         }
-      });
-    });
+      }
+    } 
+    else if (dateStr) {
+      const parts = dateStr.split('-');
+      if (parts.length === 3) {
+        const itemMonthInt = parseInt(parts[1], 10);
+        const itemYearInt = parseInt(parts[2], 10);
+        const selectedYearInt = parseInt(selectedYearStr, 10);
+        const shortYearInt = parseInt(shortYearStr, 10);
+
+        // স্ট্রিং অমিলের ঝামেলা এড়াতে পিওর নাম্বার কম্পারিশন রুল
+        if (itemYearInt === selectedYearInt || itemYearInt === shortYearInt) {
+          shouldInclude = true;
+          hasData = true;
+          totalYearOrAll += amount;
+
+          // চলতি মাসের ব্যালেন্স কার্ড আপডেট করা
+          if (itemMonthInt === currentMonthInt && selectedYearInt === currentFullYearInt) {
+            totalMonth += amount;
+          }
+        }
+      }
+    }
+
+    if (shouldInclude) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${item.source || 'N/A'}</td>
+        <td>${item.from || 'N/A'}</td>
+        <td>৳${amount.toLocaleString()}</td>
+        <td>${dateStr || 'N/A'}</td>
+      `;
+      tbody.appendChild(tr);
+    }
   });
 
   const scopeText = selectedYearStr === 'all' ? 'All Time' : `year ${selectedYearStr}`;
   if (!hasData) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a;">No paid collection records found for ${scopeText}!</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a;">No income records found for ${scopeText}!</td></tr>`;
   }
 
   document.getElementById('monthIncome').innerText = `৳${totalMonth.toLocaleString()}`;
@@ -389,4 +388,3 @@ function closeMenu(){
 </script>
 </body>
 </html>
-  
