@@ -326,7 +326,7 @@ KPTC Collection V1.3
   const db = firebase.database();
 
   let allMembersData = {}; 
-  let globalRatesSchema = {}; // এডমিনের ডাইনামিক রেট স্ট্রাকচার স্টোর করার অবজেক্ট
+  let globalRatesSchema = {}; 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   const currentDateObj = new Date();
@@ -349,17 +349,14 @@ KPTC Collection V1.3
     yearSelect.selectedIndex = 0;
   }
 
-  // এডমিন প্যানেলের সম্পূর্ণ রেট স্কিমা রিয়েল-টাইমে রিড করার লিসেনার
   db.ref('kptc_settings/fee_structure').on('value', (snapshot) => {
     globalRatesSchema = snapshot.val() || {};
     
-    // কারেন্ট সিলেক্টেড বছরের কারেন্ট মাসের রেট ট্যাগ আপডেট করা
     const yr = yearSelect.value;
     const currentRate = (globalRatesSchema[yr] && globalRatesSchema[yr][currentMonthStr]) !== undefined ? globalRatesSchema[yr][currentMonthStr] : 100;
     document.getElementById('rateTag').innerText = `(${currentMonthStr} Rate: ৳${currentRate}/mon)`;
     
-    // ডাটা রি-রেন্ডার করা
-    renderTable(allMembersData, document.getElementById('searchInput').value);
+    loadCollectionData(yearSelect.value);
   });
 
   function loadCollectionData(year) {
@@ -378,8 +375,8 @@ KPTC Collection V1.3
     let paidThisMonthCount = 0;
     let pendingThisMonthCount = 0;
     
-    let totalCalculatedMonthFunds = 0; // চলতি মাসের মোট টাকা
-    let totalCalculatedYearFunds = 0;  // পুরো বছরের ডাইনামিক রেট অনুযায়ী মোট টাকা
+    let totalCalculatedMonthFunds = 0; 
+    let totalCalculatedYearFunds = 0;  
 
     const activeYear = yearSelect.value;
 
@@ -402,11 +399,10 @@ KPTC Collection V1.3
         
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
-        // প্রতিটি নির্দিষ্ট মাসের জন্য এডমিন প্যানেলের সেট করা ডাইনামিক রেট নিয়ে আসা
         const monthFeeRate = (globalRatesSchema[activeYear] && globalRatesSchema[activeYear][month]) !== undefined ? globalRatesSchema[activeYear][month] : 100;
 
         if (isPaid) {
-          totalCalculatedYearFunds += monthFeeRate; // যে যে মাস পেইড, সেই মাসের রেট যোগ হবে
+          totalCalculatedYearFunds += monthFeeRate; 
         }
 
         if (idx === currentMonthIdx) {
@@ -430,16 +426,21 @@ KPTC Collection V1.3
     document.getElementById('paidMembers').innerText = paidThisMonthCount;
     document.getElementById('pendingMembers').innerText = pendingThisMonthCount;
 
-    // লাইভ ডাইনামিক রেটের যোগফল কার্ডে প্রদর্শন
     document.getElementById('monthCollectionFunds').innerText = `৳${totalCalculatedMonthFunds.toLocaleString()}`;
     document.getElementById('yearCollectionFunds').innerText = `৳${totalCalculatedYearFunds.toLocaleString()}`;
+
+    // 🌟 [ম্যাজিক কোড আপডেট] ডাটাবেজের গ্লোবাল নোডে ডেটা অটো পুশ করা
+    db.ref('global_totals/collection_income').set({
+      thisMonth: totalCalculatedMonthFunds,
+      thisYear: totalCalculatedYearFunds,
+      lastUpdated: new Date().getTime()
+    });
   }
 
   yearSelect.addEventListener('change', (e) => {
     loadCollectionData(e.target.value);
     document.getElementById('yearCardTitle').innerText = `Collection (Year ${e.target.value})`;
     
-    // বছর পরিবর্তন হলে রেট ট্যাগ রি-ফ্রেশ করা
     const yr = e.target.value;
     const currentRate = (globalRatesSchema[yr] && globalRatesSchema[yr][currentMonthStr]) !== undefined ? globalRatesSchema[yr][currentMonthStr] : 100;
     document.getElementById('rateTag').innerText = `(${currentMonthStr} Rate: ৳${currentRate}/mon)`;
@@ -449,8 +450,6 @@ KPTC Collection V1.3
   searchInput.addEventListener('input', (e) => {
     renderTable(allMembersData, e.target.value);
   });
-
-  loadCollectionData(yearSelect.value);
 
   function openMenu(){
     document.getElementById('sidebar').classList.add('show');
