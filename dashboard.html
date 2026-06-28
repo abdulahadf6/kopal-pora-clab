@@ -294,7 +294,7 @@ tr:hover { background: rgba(255, 255, 255, 0.03); }
 </div>
 </div>
 
-<div class="footer">KPTC Dashboard V3.4</div>
+<div class="footer">KPTC Dashboard V3.5</div>
 
 <script>
 // ফায়ারবেজ কনফিগারেশন
@@ -308,23 +308,15 @@ const db = firebase.database();
 
 let globalIncome = 0;
 let globalExpense = 0;
-let globalCollectionIncome = { thisMonth: 0, thisYear: 0 }; // 🌟 গ্লোবাল কালেকশন ডেটা রাখার অবজেক্ট
 
 function updateFinancials() {
-  // 🌟 [ম্যাজিক লাইভ আপডেট] সাধারণ ইনকামের সাথে কালেকশন পেজের বছরের টাকা যোগ করে ফাইনাল ব্যালেন্স ও ইনকাম বের করা
-  const finalTotalIncome = globalIncome + globalCollectionIncome.thisYear;
-  const balance = finalTotalIncome - globalExpense;
+  // 🌟 ডুপ্লিকেট যোগ চিরতরে বন্ধ। ডাটাবেজের ডিরেক্ট ইনকামই মেইন হিসাব।
+  const balance = globalIncome - globalExpense;
   
-  document.getElementById('totalIncome').innerText = `৳${finalTotalIncome.toLocaleString()}`;
+  document.getElementById('totalIncome').innerText = `৳${globalIncome.toLocaleString()}`;
   document.getElementById('totalExpense').innerText = `৳${globalExpense.toLocaleString()}`;
   document.getElementById('currentBalance').innerText = `৳${balance.toLocaleString()}`;
 }
-
-// 🌟 ০. কালেকশন পেজ থেকে পাঠানো সেন্ট্রাল নোড লাইভ রিড করা
-db.ref('global_totals/collection_income').on('value', (snapshot) => {
-  globalCollectionIncome = snapshot.val() || { thisMonth: 0, thisYear: 0 };
-  updateFinancials(); // কালেকশনের টাকা আপডেট হওয়ামাত্রই ফাইনাল ব্যালেন্স রি-ক্যালকুলেট হবে
-});
 
 // ১. মেম্বার ডাটা লোড
 db.ref('members').on('value', (snapshot) => {
