@@ -349,7 +349,7 @@ tr:hover{
 
 <div id="toast" class="toast">✅ Collection Matrix Updated!</div>
 
-<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V2.0</div>
+<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V2.5</div>
 
 <script>
   const firebaseConfig = {
@@ -359,7 +359,8 @@ tr:hover{
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  let allMembersData = {}; 
+  let activeMembersList = []; // 🌟 ডাটাবেজ থেকে আসা রিয়েল মেম্বারদের অ্যারে
+  let allCollectionsData = {}; // কালেকশন হিস্ট্রি অবজেক্ট
   let globalRatesSchema = {};
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -397,25 +398,31 @@ tr:hover{
     setTimeout(() => { t.style.display = 'none'; }, 3000);
   }
 
-  // মেম্বার পেজের ডাটা থেকে ড্রপডাউন লিস্ট লোড করার লাইভ লিসেনার
+  // 🌟 [ম্যাজিক লিসেনার] - 'members' নোড থেকে রিয়েল-টাইম মাস্টার মেম্বার লিস্ট রিড করা
   db.ref('members').on('value', (snapshot) => {
     const membersData = snapshot.val() || {};
-    const selectDrop = document.getElementById('inputMemberId');
+    activeMembersList = [];
     
-    // আগের পুরানো লিস্ট ক্লিয়ার করা
+    const selectDrop = document.getElementById('inputMemberId');
     selectDrop.innerHTML = '<option value="">Select Member...</option>';
     
-    // ডাটাবেজের সব মেম্বারকে লুপ করে ড্রপডাউনে যোগ করা
     Object.keys(membersData).forEach(key => {
       const member = membersData[key];
-      // আপনার মেম্বার নোডে 'name' প্রপার্টি থাকলে সেটা নিবে, নয়তো নোডের মূল Key টাই নিবে
-      const mName = member.name || key; 
+      const mName = (member.name || key).trim(); 
       
+      if(!activeMembersList.includes(mName)) {
+        activeMembersList.push(mName);
+      }
+
+      // ড্রপডাউন বক্সে নাম পুশ
       const opt = document.createElement('option');
-      opt.value = mName; // ভ্যালু হিসেবে নাম টাইপ স্ট্রিং যাচ্ছে
+      opt.value = mName; 
       opt.innerText = mName;
       selectDrop.appendChild(opt);
     });
+
+    // মেম্বার লিস্ট আপডেট হওয়া মাত্র টেবিল রি-রেন্ডার হবে (অটো অ্যাড/ডিলিট সিঙ্ক)
+    renderUnifiedTable();
   });
 
   // ১. ডাইনামিক মাসিক ফি রেট ডাটাবেজে সংরক্ষণ করা
@@ -440,7 +447,7 @@ tr:hover{
   db.ref('kptc_settings/fee_structure').on('value', (snapshot) => {
     globalRatesSchema = snapshot.val() || {};
     updateNoticeText();
-    renderTable(allMembersData);
+    renderUnifiedTable();
   });
 
   document.getElementById('rateYear').addEventListener('change', updateNoticeText);
@@ -452,7 +459,7 @@ tr:hover{
     document.getElementById('activeRateNotice').innerText = `Active Configuration Rule: Year ${yr} (${mo}) = ৳${activeRate}`;
   }
 
-  // ৩. মূল কালেকশন স্ট্যাটাস আপডেট + মেম্বার ইনকাম ড্যাশবোর্ডের সাথে লাইভ সিঙ্ক (প্লাস/মাইনাস লজিক)
+  // ৩. মূল কালেকশন স্ট্যাটাস আপডেট + মেম্বার ইনকাম ড্যাশবোর্ডের সাথে লাইভ সিঙ্ক
   function updateCollectionStatus() {
     const year = document.getElementById('inputYear').value;
     const mId = document.getElementById('inputMemberId').value.trim();
@@ -461,10 +468,7 @@ tr:hover{
 
     if(!mId) return alert('অনুগ্রহ করে তালিকা থেকে একজন মেম্বার সিলেক্ট করুন!');
 
-    // রেট ডিটেকশন প্রসেস
     const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) !== undefined ? globalRatesSchema[year][month] : 100;
-    
-    // ইউনিক ট্রানজেকশন কী
     const transactionKey = `AUTO_COLL_${year}_${month}_${mId}`.replace(/[.#$\[\]]/g, "_");
 
     const nodeRef = db.ref(`collections/${year}/${mId}`);
@@ -481,15 +485,12 @@ tr:hover{
       
       nodeRef.set(currentData, (error) => {
         if(!error) {
-          
           const mainIncomeRef = db.ref(`income/${transactionKey}`);
 
           if (status === true && !previousStatus) {
-            // নিখুঁত ডাইনামিক ডেট ম্যাপিং:
             const today = new Date();
             const dayStr = String(today.getDate()).padStart(2, '0');
             const monthNumberStr = String(months.indexOf(month) + 1).padStart(2, '0');
-            
             const formattedDate = `${dayStr}-${monthNumberStr}-${year}`;
 
             const incomeData = {
@@ -503,7 +504,6 @@ tr:hover{
             showToast('✅ Income Logged & Sync Complete!');
           } 
           else if (status === false && previousStatus) {
-            // Unpaid করলে ইনকাম নোড থেকে ডিলিট
             mainIncomeRef.remove();
             showToast('🗑️ Balance Revoked from Dashboard!');
           } else {
@@ -515,47 +515,56 @@ tr:hover{
     });
   }
 
+  // ৪. নির্দিষ্ট বছরের কালেকশন ডাটা রিড করা
   function loadCollectionData(year) {
-    const dbRef = db.ref('collections/' + year);
-    dbRef.on('value', (snapshot) => {
-      allMembersData = snapshot.val() || {};
-      renderTable(allMembersData);
+    db.ref('collections/' + year).on('value', (snapshot) => {
+      allCollectionsData = snapshot.val() || {};
+      renderUnifiedTable();
     });
   }
 
-  function renderTable(data, filterText = "") {
+  // 🌟 [মাস্টার রেন্ডারার] - মেম্বার ও কালেকশন ডাটা মার্জ করে টেবিল জেনারেট করা
+  function renderUnifiedTable() {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = "";
+
+    const filterText = document.getElementById('searchInput').value.trim().toLowerCase();
 
     let total = 0;
     let paid = 0;
     let pending = 0;
 
-    Object.keys(data).forEach(memberId => {
-      const member = data[memberId];
-      const memberName = member.name || memberId;
-
-      if (filterText && !memberName.toLowerCase().includes(filterText.toLowerCase())) {
+    // ডাটাবেজের রিয়েল মেম্বার লিস্ট ধরে লুপ চলবে
+    activeMembersList.forEach(memberName => {
+      
+      // সার্চ ফিল্টারিং 
+      if (filterText && !memberName.toLowerCase().includes(filterText)) {
         return;
       }
 
       total++;
 
+      // কালেকশন নোডে এই মেম্বারের পেইড ডাটা আছে কিনা চেক করা
+      const memberRecord = allCollectionsData[memberName] || {};
+
       let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
+      
       months.forEach((month, idx) => {
-        const isPaid = member[month] === true || member[month] === "Paid" || member[month.toLowerCase()] === true || member[month.toLowerCase()] === "Paid";
+        const isPaid = memberRecord[month] === true || memberRecord[month] === "Paid" || memberRecord[month.toLowerCase()] === true || memberRecord[month.toLowerCase()] === "Paid";
+        
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
         if (idx === currentMonthIdx) {
           if (isPaid) paid++; else pending++;
         }
       });
+      
       rowHtml += '</tr>';
       tbody.innerHTML += rowHtml;
     });
 
     if (total === 0) {
-      tbody.innerHTML = '<tr><td colspan="13" style="padding:30px; color:#94a3b8;">No data found in database!</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="13" style="padding:30px; color:#94a3b8;">No active member found!</td></tr>';
     }
 
     document.getElementById('totalMembers').innerText = total;
@@ -567,11 +576,9 @@ tr:hover{
     loadCollectionData(e.target.value);
   });
 
-  const searchInput = document.getElementById('searchInput');
-  searchInput.addEventListener('input', (e) => {
-    renderTable(allMembersData, e.target.value);
-  });
+  document.getElementById('searchInput').addEventListener('input', renderUnifiedTable);
 
+  // ইনিশিয়াল কল
   loadCollectionData(yearSelect.value);
 
   function openMenu(){
