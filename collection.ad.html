@@ -441,7 +441,7 @@ tr:hover{
     // রেট ডিটেকশন প্রসেস
     const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) !== undefined ? globalRatesSchema[year][month] : 100;
     
-    // আপনার ইনকাম ড্যাশবোর্ডের ফ্ল্যাট `income` নোড স্ট্রাকচারের জন্য ইউনিক কী
+    // ইউনিক ট্রানজেকশন কী
     const transactionKey = `AUTO_COLL_${year}_${month}_${mId}`.replace(/[.#$\[\]]/g, "_");
 
     const nodeRef = db.ref(`collections/${year}/${mId}`);
@@ -459,15 +459,16 @@ tr:hover{
       nodeRef.set(currentData, (error) => {
         if(!error) {
           
-          // আপনার ইনকাম ড্যাশবোর্ড সরাসরি `db.ref('income')` রিড করে।
-          // তাই আমরা ফ্ল্যাট নোড হিসেবে ডাটা পুশ করব যাতে অবজেক্ট লুপ ভাঙতে না পারে।
           const mainIncomeRef = db.ref(`income/${transactionKey}`);
 
           if (status === true && !previousStatus) {
-            // ইনকাম ড্যাশবোর্ডের ফিল্টারিং লজিক (source, from, amount, date) অনুযায়ী নিখুঁত ম্যাপিং:
-            // ডেট ফরম্যাট হবে DD-MM-YYYY যাতে ড্যাশবোর্ডের split('-')[1] এবং [2] সফলভাবে ফিল্টার করতে পারে।
+            // আপনার ড্যাশবোর্ডের ফিল্টারিং লজিক (DD-MM-YYYY) অনুযায়ী নিখুঁত ডাইনামিক ডেট ম্যাপিং:
+            const today = new Date();
+            const dayStr = String(today.getDate()).padStart(2, '0');
             const monthNumberStr = String(months.indexOf(month) + 1).padStart(2, '0');
-            const formattedDate = `01-${monthNumberStr}-${year}`;
+            
+            // আপনার ডাটাবেজ ফরম্যাট '27-06-2026' অনুযায়ী রিয়েল-টাইম ডেট জেনারেশন
+            const formattedDate = `${dayStr}-${monthNumberStr}-${year}`;
 
             const incomeData = {
               source: "Monthly Subscription",
@@ -480,7 +481,7 @@ tr:hover{
             showToast('✅ Income Logged & Sync Complete!');
           } 
           else if (status === false && previousStatus) {
-            // Unpaid করলে ইনকাম নোড থেকে রিমুভ (অটোমেটিক মাইনাস)
+            // Unpaid করলে ইনকাম নোড থেকে ডিলিট
             mainIncomeRef.remove();
             showToast('🗑️ Balance Revoked from Dashboard!');
           } else {
