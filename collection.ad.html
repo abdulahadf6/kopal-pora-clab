@@ -293,7 +293,9 @@ tr:hover{
     <option value="2030">2030</option>
   </select>
 
-  <input type="text" id="inputMemberId" placeholder="Member Node Key/Name (e.g., KPTC-01)" style="flex:1; min-width:200px;">
+  <select class="glass" id="inputMemberId" style="flex:1; min-width:200px;">
+    <option value="">Select Member...</option>
+  </select>
 
   <select class="glass" id="inputMonth">
     <option value="Jan">January</option><option value="Feb">February</option><option value="Mar">March</option>
@@ -347,7 +349,7 @@ tr:hover{
 
 <div id="toast" class="toast">✅ Collection Matrix Updated!</div>
 
-<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V1.4</div>
+<div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V2.0</div>
 
 <script>
   const firebaseConfig = {
@@ -395,6 +397,27 @@ tr:hover{
     setTimeout(() => { t.style.display = 'none'; }, 3000);
   }
 
+  // মেম্বার পেজের ডাটা থেকে ড্রপডাউন লিস্ট লোড করার লাইভ লিসেনার
+  db.ref('members').on('value', (snapshot) => {
+    const membersData = snapshot.val() || {};
+    const selectDrop = document.getElementById('inputMemberId');
+    
+    // আগের পুরানো লিস্ট ক্লিয়ার করা
+    selectDrop.innerHTML = '<option value="">Select Member...</option>';
+    
+    // ডাটাবেজের সব মেম্বারকে লুপ করে ড্রপডাউনে যোগ করা
+    Object.keys(membersData).forEach(key => {
+      const member = membersData[key];
+      // আপনার মেম্বার নোডে 'name' প্রপার্টি থাকলে সেটা নিবে, নয়তো নোডের মূল Key টাই নিবে
+      const mName = member.name || key; 
+      
+      const opt = document.createElement('option');
+      opt.value = mName; // ভ্যালু হিসেবে নাম টাইপ স্ট্রিং যাচ্ছে
+      opt.innerText = mName;
+      selectDrop.appendChild(opt);
+    });
+  });
+
   // ১. ডাইনামিক মাসিক ফি রেট ডাটাবেজে সংরক্ষণ করা
   function saveMonthlyRate() {
     const year = document.getElementById('rateYear').value;
@@ -436,7 +459,7 @@ tr:hover{
     const month = document.getElementById('inputMonth').value;
     const status = document.getElementById('inputStatus').value === "true";
 
-    if(!mId) return alert('মেম্বার আইডি বা নাম ইনপুট দিন!');
+    if(!mId) return alert('অনুগ্রহ করে তালিকা থেকে একজন মেম্বার সিলেক্ট করুন!');
 
     // রেট ডিটেকশন প্রসেস
     const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) !== undefined ? globalRatesSchema[year][month] : 100;
@@ -462,12 +485,11 @@ tr:hover{
           const mainIncomeRef = db.ref(`income/${transactionKey}`);
 
           if (status === true && !previousStatus) {
-            // আপনার ড্যাশবোর্ডের ফিল্টারিং লজিক (DD-MM-YYYY) অনুযায়ী নিখুঁত ডাইনামিক ডেট ম্যাপিং:
+            // নিখুঁত ডাইনামিক ডেট ম্যাপিং:
             const today = new Date();
             const dayStr = String(today.getDate()).padStart(2, '0');
             const monthNumberStr = String(months.indexOf(month) + 1).padStart(2, '0');
             
-            // আপনার ডাটাবেজ ফরম্যাট '27-06-2026' অনুযায়ী রিয়েল-টাইম ডেট জেনারেশন
             const formattedDate = `${dayStr}-${monthNumberStr}-${year}`;
 
             const incomeData = {
@@ -487,7 +509,7 @@ tr:hover{
           } else {
             showToast('✅ Matrix Adjusted!');
           }
-          document.getElementById('inputMemberId').value = '';
+          document.getElementById('inputMemberId').selectedIndex = 0;
         }
       });
     });
