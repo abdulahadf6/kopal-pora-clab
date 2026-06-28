@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPTC Reports</title>
+<title>KPTC - About, Policies & Tech</title>
 <style>
 *{
   margin:0;
@@ -94,7 +94,6 @@ body{
 }
 .sidebar.show{ transform:translateX(320px); }
 
-/* ক্লোজ বাটন স্টাইল */
 .close-btn { 
   font-size: 26px; 
   cursor: pointer; 
@@ -145,16 +144,43 @@ body{
 /* Panel */
 .panel{
   margin-top:25px;
-  padding:25px;
+  padding:35px;
   border-radius:28px;
-  background: rgba(255,255,255,.05);
+  background: rgba(255,255,255,.04);
   backdrop-filter:blur(25px);
   border:1px solid rgba(255,255,255,.12);
-  overflow:auto;
+  position: relative;
 }
-.panel h2{ margin-bottom:20px; }
-.panel p { line-height: 1.6; color: #e2e8f0; }
-.panel ul { padding-left: 20px; color: #e2e8f0; line-height: 1.8; }
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 15px;
+}
+.panel h2{ margin-bottom: 0; font-size: 24px; color: #3b82f6; }
+
+/* ট্রান্সলেশন বাটন স্টাইল */
+.translate-btn {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #3b82f6;
+  padding: 8px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+.translate-btn:hover {
+  background: #3b82f6;
+  color: #fff;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+.panel p { line-height: 1.8; color: #cbd5e1; font-size: 16px; text-align: justify; margin-bottom: 15px; }
+.panel ul { padding-left: 20px; color: #cbd5e1; line-height: 2; font-size: 16px; }
+.panel ul li { margin-bottom: 12px; text-align: justify; }
 
 .footer{ text-align:center; padding:40px; color:#94a3b8; }
 </style>
@@ -179,39 +205,122 @@ body{
 </div>
 
 <div class="container">
-  <h1 class="page-title">About</h1>
+  <h1 class="page-title">Management Overview</h1>
   
-  <div class="panel">
-    <h2>📖 About KPTC</h2>
-    <p>
-      কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC) একটি ভ্রমণপ্রেমী संगठन।
-      এই ক্লাবের মূল উদ্দেশ্য হলো বন্ধুদের নিয়ে ভ্রমণ করা, নতুন অভিজ্ঞতা অর্জন করা এবং সুন্দর স্মৃতি তৈরি করা।
-      সদস্যদের মাসিক চাঁদা, আয়-ব্যয় হিসাব এবং ট্যুর পরিকল্পনা পরিচালনার জন্য এই সিস্টেম তৈরি করা হয়েছে।
-    </p>
+  <div class="panel" id="aboutPanel">
+    <div class="panel-header">
+      <h2 id="aboutTitle">📖 About KPTC</h2>
+      <button class="translate-btn" onclick="toggleTranslation('about')">বাং / EN</button>
+    </div>
+    <div id="aboutContent"></div>
   </div>
     
-  <div class="panel">
-    <h2>📜 Club Policy</h2>
-    <ul>
-      <li>প্রতিটি সদস্যকে মাসিক চাঁদা প্রদান করতে হবে।</li>
-      <li>সকল আয়-ব্যয়ের হিসাব সংরক্ষণ করা হবে।</li>
-      <li>ক্লাবের অর্থ ব্যক্তিগত কাজে ব্যবহার করা যাবে না।</li>
-      <li>সদস্যদের পারস্পরিক সম্মান বজায় রাখতে হবে।</li>
-      <li>ট্যুর সংক্রান্ত সিদ্ধান্ত যৌথভাবে নেওয়া হবে।</li>
-      <li>প্রয়োজনে নীতিমালা পরিবর্তন করা যেতে পারে।</li>
-    </ul>
+  <div class="panel" id="policyPanel">
+    <div class="panel-header">
+      <h2 id="policyTitle">📜 Club Policy</h2>
+      <button class="translate-btn" onclick="toggleTranslation('policy')">বাং / EN</button>
+    </div>
+    <div id="policyContent"></div>
   </div>
+
+  <div class="panel" id="clubWebPanel">
+    <div class="panel-header">
+      <h2 id="clubWebTitle">🌐 About Club & Web</h2>
+      <button class="translate-btn" onclick="toggleTranslation('clubWeb')">বাং / EN</button>
+    </div>
+    <div id="clubWebContent"></div>
+  </div>
+
 </div>
 
-<div class="footer">KPTC Reports V1.2</div>
+<div class="footer">KPTC Core System V3.5</div>
 
 <script>
+const contents = {
+  about: {
+    en: {
+      title: "📖 About KPTC",
+      html: `<p>Welcome to the official portal of the <strong>Kopal Pora Travelers Club (KPTC)</strong>. We are an elite community of passionate globetrotters, nature admirers, and hardcore adventure seekers. KPTC was originally conceived as a lifelong brotherhood dedicated to breaking geographical barriers, mapping unexplored territories, building unbreakable friendships, and capturing timeless moments in the lap of nature.</p>
+             <p>Our core philosophy centers around stepping completely outside our comfort zones and discovering the pristine beauty of the world. We firmly believe that traveling is a profound method of self-discovery and cultural appreciation.</p>`
+    },
+    bn: {
+      title: "📖 কেপিটিসি পরিচিতি",
+      html: `<p><strong>কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC)</strong>-এর অফিসিয়াল পোর্টালে আপনাকে स्वागत। আমরা বিশ্বভ্রমণকারী এবং রোমাঞ্চপ্রিয় মানুষের এক অনন্য কমিউনিটি। KPTC কেবল ভ্রমণের উদ্দেশ্যে শুরু হয়নি; এটি এমন এক ভ্রাতৃত্বের বন্ধন যা ভৌগোলিক সীমানা ছাড়িয়ে প্রকৃতির কোলে অবিস্মরণীয় স্মৃতি তৈরি করতে এবং আজীবন অটুট বন্ধুত্ব গড়ে তুলতে প্রতিশ্রুতিবদ্ধ।</p>
+             <p>আমাদের মূল দর্শন হলো নিজের গণ্ডি থেকে বের হয়ে আসা এবং অজানার সৌন্দর্যকে আবিষ্কার করা। আমরা বিশ্বাস করি ভ্রমণ মানে নিজেকে নতুনভাবে চেনা এবং বৈচিত্র্যময় সংস্কৃতিকে অনুভব করার একটি অনন্য মাধ্যম।</p>`
+    }
+  },
+  policy: {
+    en: {
+      title: "📜 Club Policy",
+      html: `<ul>
+              <li><strong>Mandatory Subscription:</strong> Every official member must clear their designated monthly club subscription fee within the deadline to ensure the fund remains liquid.</li>
+              <li><strong>Financial Transparency:</strong> Financial integrity is our bedrock. Every single transaction must be dynamically logged in our real-time cloud ledger.</li>
+              <li><strong>Strict Non-Misuse Framework:</strong> Club funds are exclusively dedicated to collective tours and operations. No personal transactions will be tolerated.</li>
+              <li><strong>Democratic Consensus:</strong> Major club decisions—including budgets and new member entries—will be strictly processed through a democratic voting or unanimous consensus.</li>
+             </ul>`
+    },
+    bn: {
+      title: "📜 ক্লাবের নীতিমালা",
+      html: `<ul>
+              <li><strong>বাধ্যতামূলক চাঁদা কাঠামো:</strong> ক্লাবের প্রতিটি সদস্যকে নির্ধারিত সময়সীমার মধ্যে মাসিক চাঁদা পরিশোধ করতে হবে, যা ক্লাবের জরুরি প্রয়োজনে তহবিল সচল রাখে।</li>
+              <li><strong>নিশ্ছিদ্র আর্থিক স্বচ্ছতা:</strong> আর্থিক সততাই আমাদের মূল ভিত্তি। প্রতিটি একক লেনদেন এবং ব্যয় রিয়েল-টাইম ক্লাউড লেজারে নথিবদ্ধ করা বাধ্যতামূলক।</li>
+              <li><strong>তহবিলের অপব্যবহার রোধ:</strong> ক্লাবের অর্থ শুধুমাত্র যৌথ ট্যুর ও প্রাতিষ্ঠানিক উন্নয়নে সংরক্ষিত। ব্যক্তিগত সুবিধা বা ধারের কাজে এটি ব্যবহার করা যাবে না।</li>
+              <li><strong>গণতান্ত্রিক পদ্ধতি:</strong> ভ্রমণের পরিকল্পনা, বাজেট এবং নতুন সদস্য অন্তর্ভুক্তির মতো সিদ্ধান্তগুলো গণতান্ত্রিক ভোটাভুটি বা যৌথ মতামতের ভিত্তিতে হবে।</li>
+             </ul>`
+    }
+  },
+  clubWeb: {
+    en: {
+      title: "🌐 About Club & Web",
+      html: `<p><strong>Kopal Pora Travelers Club (KPTC)</strong> was officially established on <strong>June 5, 2026</strong>. The club owes its birth to a visionary group of close companions who shared an intense passion for wilderness, journeying, and collective expeditions. What originally began as casual conversations and shared travel dreams soon crystallized into a fully structured, highly dedicated organization designed to map uncharted destinations and bring travel lovers under one unified umbrella.</p>
+             <p>The core objective of KPTC goes far beyond arranging leisure trips. The club is built to promote eco-tourism, instill a deep sense of cultural empathy, and encourage individual personal growth through outdoor challenges. Our mission is to build a reliable and deeply trusted platform where members can break free from mundane routines, build life-altering experiences, and maintain an organized, sustainable treasury to support ambitious future international and national exploration projects.</p>
+             <p>To support this grand vision and systematically eliminate the operational flaws of manual ledger systems, this sophisticated web terminal was engineered. <strong>Abdul Ahad</strong> acts as the principal <strong>Executive</strong> handling both organizational mechanics and the full-stack system operations. The platform integrates a real-time data flow with an ultra-secure cloud database infrastructure, ensuring lightning-fast financial updates, zero data redundancy, and robust analytical reports. The entire web architecture is designed as a futuristic digital ecosystem, maintaining ironclad transparency and absolute operational integrity for the club’s long-term future.</p>`
+    },
+    bn: {
+      title: "🌐 ক্লাব ও ওয়েব আর্কিটেকচার",
+      html: `<p><strong>কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC)</strong> আনুষ্ঠানিকভাবে প্রতিষ্ঠিত হয় <strong>৫ই জুন, ২০২৬</strong> তারিখে। একদল ঘনিষ্ঠ বন্ধুর দীর্ঘদিনের যৌথ স্বপ্ন, প্রকৃতিপ্রেম এবং ভ্রমণের প্রতি গভীর আসক্তির ফসল হিসেবে এই ক্লাবের আত্মপ্রকাশ। বন্ধুদের আড্ডায় শুরু হওয়া সাধারণ কিছু ভ্রমণ পরিকল্পনা ও চিন্তাভাবনা দ্রুত একটি সুসংগঠিত প্রাতিষ্ঠানিক রূপ লাভ করে, যার মূল উদ্দেশ্য ছিল সব ভ্রমণপ্রেমীদের এক ছাতার নিচে নিয়ে আসা এবং অজানাকে উন্মোচন করা।</p>
+             <p>KPTC-এর মূল উদ্দেশ্য কেবল সাধারণ বিনোদনমূলক ভ্রমণের মধ্যে সীমাবদ্ধ নয়। এই ক্লাবটি মূলত পরিবেশ-বান্ধব পর্যটন (Eco-Tourism) প্রসার, বিভিন্ন অঞ্চলের বৈচিত্র্যময় সংস্কৃতির প্রতি শ্রদ্ধা জাগানো এবং রোমাঞ্চকর অভিযানের মাধ্যমে সদস্যদের ব্যক্তিগত ও মানসিক বিকাশ নিশ্চিত করার লক্ষ্যে কাজ করে। আমাদের লক্ষ্য এমন একটি টেকসই প্ল্যাটফর্ম তৈরি করা, যেখানে সদস্যরা দৈনন্দিন যান্ত্রিকতা থেকে মুক্তি পেয়ে নতুন অভিজ্ঞতা অর্জন করতে পারবে এবং ভবিষ্যতে বড় কোনো জাতীয় বা আন্তর্জাতিক ট্যুর পরিচালনার জন্য একটি সুসংহত আর্থিক তহবিল বজায় রাখতে পারবে।</p>
+             <p>এই সুদূরপ্রসারী উদ্দেশ্যকে বাস্তবে রূপ দিতে এবং সনাতন খাতা-কলমের হিসাবের অব্যবস্থাপনা দূর করতে এই উন্নত ওয়েব টার্মিনালটি তৈরি করা হয়েছে। <strong>Abdul Ahad</strong> এখানে প্রধান <strong>Executive</strong> হিসেবে এর প্রাতিষ্ঠানিক ও ফুল-স্ট্যাক ওয়েব সিস্টেম অপারেশনাল কার্যাবলী দেখাশোনা করছেন। এই প্ল্যাটফর্মটি একটি সুরক্ষিত ক্লাউড ডাটাবেজ আর্কিটেকচারের ওপর ভিত্তি করে রিয়েল-টাইম ডাটা ফ্লো নিশ্চিত করে, যা হিসাবের শতভাগ নির্ভুলতা, দ্রুততম আপডেট এবং ডাইনামিক অ্যানালিটিক্যাল রিপোর্ট তৈরি করতে সক্ষম। সম্পূর্ণ ওয়েব আর্কিটেকচারটিকে একটি দূরদর্শী ডিজিটাল ইকোসিস্টেম হিসেবে ডিজাইন করা হয়েছে, যা আগামী বহু বছর ধরে ক্লাবের সর্বোচ্চ স্বচ্ছতা ও প্রাতিষ্ঠানিক শৃঙ্খলা বজায় রাখবে।</p>`
+    }
+  }
+};
+
+let currentLang = { about: 'en', policy: 'en', clubWeb: 'en' };
+
+function initContent() {
+  document.getElementById('aboutTitle').innerHTML = contents.about.en.title;
+  document.getElementById('aboutContent').innerHTML = contents.about.en.html;
+  
+  document.getElementById('policyTitle').innerHTML = contents.policy.en.title;
+  document.getElementById('policyContent').innerHTML = contents.policy.en.html;
+
+  document.getElementById('clubWebTitle').innerHTML = contents.clubWeb.en.title;
+  document.getElementById('clubWebContent').innerHTML = contents.clubWeb.en.html;
+}
+
+function toggleTranslation(section) {
+  currentLang[section] = currentLang[section] === 'en' ? 'bn' : 'en';
+  const lang = currentLang[section];
+  
+  if (section === 'about') {
+    document.getElementById('aboutTitle').innerHTML = contents.about[lang].title;
+    document.getElementById('aboutContent').innerHTML = contents.about[lang].html;
+  } else if (section === 'policy') {
+    document.getElementById('policyTitle').innerHTML = contents.policy[lang].title;
+    document.getElementById('policyContent').innerHTML = contents.policy[lang].html;
+  } else if (section === 'clubWeb') {
+    document.getElementById('clubWebTitle').innerHTML = contents.clubWeb[lang].title;
+    document.getElementById('clubWebContent').innerHTML = contents.clubWeb[lang].html;
+  }
+}
+
+initContent();
+
 function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
   document.getElementById('menuBtn').style.opacity='0';
 }
-
 function closeMenu(){
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
