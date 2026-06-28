@@ -277,7 +277,6 @@ const monthNames = ["January", "February", "March", "April", "May", "June", "Jul
 let incomeData = {};
 let generalExpenseData = {};
 let tourExpenseData = {};
-let globalCollectionIncome = { thisMonth: 0, thisYear: 0 }; // 🌟 সেন্ট্রাল নোড ক্যাশ করার জন্য
 
 function processReports() {
   let totalIncome = 0;
@@ -285,12 +284,7 @@ function processReports() {
   
   const reportTree = {};
 
-  // কারেন্ট রিয়েল-টাইম মাস এবং বছর ট্র্যাকিং
-  const currentDate = new Date();
-  const currentMonthIdx = currentDate.getMonth(); 
-  const currentYearStr = currentDate.getFullYear().toString();
-
-  // ১. সাধারণ ইনকাম ডাটা প্রসেস
+  // ১. ইনকাম ডাটা প্রসেস (কালেকশনের টাকাগুলো নিজস্ব ডেট অনুযায়ী এখানে অটোমেটিক ভাগ হয়ে যাবে)
   Object.keys(incomeData).forEach(key => {
     const item = incomeData[key];
     const amount = parseFloat(item.amount) || 0;
@@ -347,31 +341,10 @@ function processReports() {
     }
   });
 
-  // 🌟 [ম্যাজিক ইনজেকশন] ডাটাবেজের কালেকশন ভ্যালুগুলো গাছের চলতি মাস ও বছরে ইনজেক্ট করা
-  if (!reportTree[currentYearStr]) {
-    reportTree[currentYearStr] = Array.from({ length: 12 }, () => ({ income: 0, expense: 0 }));
-  }
-  
-  // চলতি মাসে চলতি মাসের কালেকশন যোগ করা এবং বছরের টোটালে বাকি ব্যাকলগ ব্যালেন্স পাঠানো
-  reportTree[currentYearStr][currentMonthIdx].income += globalCollectionIncome.thisMonth;
-  
-  // যদি চলতি মাসের বাইরেও কোনো পুরানো বা অন্য মাসের পেইড ব্যাকলগ থাকে, তবে সেটা এই বছরের হিসাবে রিফ্লেক্ট করানো
-  const otherMonthsCollection = globalCollectionIncome.thisYear - globalCollectionIncome.thisMonth;
-  if (otherMonthsCollection > 0) {
-    // চলতি মাস বাদে যেকোনো একটি সচল স্লটে (ধরুন প্রথম মাস বা রিয়েল স্লটে) ব্যালেন্স ব্যালেন্সিং করা
-    let targetMonthIdx = currentMonthIdx === 0 ? 1 : 0; 
-    // মেম্বাররা জেনারেলি জুন/জুলাইতে দিয়েছে, সো আমরা ওই নির্দিষ্ট ইনডেক্সে বা কারেন্ট মাসেই পুশ করতে পারি। 
-    // সেফ থাকার জন্য ডিরেক্ট কারেন্ট মাসেই পুরো বছরের কালেকশন ইনজেক্ট করে দিচ্ছি যেন রিমেনিংটা মিস না হয়।
-    reportTree[currentYearStr][currentMonthIdx].income += otherMonthsCollection;
-  }
-
-  // গ্লোবাল কার্ড টোটালে বছরের কালেকশন ইনকাম মার্জ করা
-  const finalTotalIncome = totalIncome + globalCollectionIncome.thisYear;
-
-  // কার্ড ভ্যালু আপডেট
-  document.getElementById('totalIncome').innerText = `৳${finalTotalIncome.toLocaleString()}`;
+  // কার্ড ভ্যালু আপডেট (কোনো জগাখিচুড়ি বা ডাবল এন্ট্রি ছাড়াই ডিরেক্ট ক্যালকুলেশন)
+  document.getElementById('totalIncome').innerText = `৳${totalIncome.toLocaleString()}`;
   document.getElementById('totalExpense').innerText = `৳${totalExpense.toLocaleString()}`;
-  document.getElementById('currentBalance').innerText = `৳${(finalTotalIncome - totalExpense).toLocaleString()}`;
+  document.getElementById('currentBalance').innerText = `৳${(totalIncome - totalExpense).toLocaleString()}`;
 
   const monthlyTbody = document.getElementById('monthlyTableBody');
   const yearlyTbody = document.getElementById('yearlyTableBody');
@@ -422,13 +395,7 @@ function processReports() {
   });
 }
 
-// 🌟 ০. কালেকশন পেজের পাঠানো গ্লোবাল লাইভ নোড লিসেনার
-db.ref('global_totals/collection_income').on('value', (snapshot) => {
-  globalCollectionIncome = snapshot.val() || { thisMonth: 0, thisYear: 0 };
-  processReports();
-});
-
-// ফায়ারবেজ স্প্লিট নোড লিসেনার্স
+// ফায়ারবেজ মেইন নোড লিসেনার্স
 db.ref('income').on('value', (snapshot) => {
   incomeData = snapshot.val() || {};
   processReports();
