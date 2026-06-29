@@ -321,56 +321,65 @@ function updateFinancials() {
   document.getElementById('currentBalance').innerText = `৳${balance.toLocaleString()}`;
 }
 
-// 🎯 ডাইনামিক রিসেন্ট অ্যাক্টিভিটি জেনারেটর (ডাটাবেজে নতুন নোড ছাড়া ফিল্টারিং)
+// 🎯 ডাইনামিক রিসেন্ট অ্যাক্টিভিটি জেনারেটর (কোনো সেভ বা স্টোরেজ ট্র্যাশ ছাড়া)
 function generateRecentActivities() {
   let activities = [];
 
   // ১. মেম্বার ডাটা থেকে প্রসেস
-  Object.keys(rawMembers).forEach(key => {
-    const m = rawMembers[key];
-    activities.push({
-      id: key,
-      text: `👤 New Member Joined: <strong>${m.name || 'Unknown'}</strong> (${m.phone || 'No Phone'})`
-    });
-  });
-
-  // ২. ইনকাম ডাটা থেকে প্রসেস
-  Object.keys(rawIncome).forEach(key => {
-    const inc = rawIncome[key];
-    activities.push({
-      id: key,
-      text: `💰 Income Logged: <strong>৳${(parseFloat(inc.amount) || 0).toLocaleString()}</strong> - ${inc.category || inc.source || 'General Fund'}`
-    });
-  });
-
-  // ৩. এক্সপেন্স ডাটা থেকে প্রসেস (জেনারেল এবং ট্যুর দুই স্ট্রাকচারই হ্যান্ডেল করা হয়েছে)
-  if (rawExpense.general || rawExpense.tour) {
-    Object.keys(rawExpense.general || {}).forEach(key => {
-      const exp = rawExpense.general[key];
+  if (rawMembers) {
+    Object.keys(rawMembers).forEach(key => {
+      const m = rawMembers[key];
       activities.push({
         id: key,
-        text: `📉 General Expense: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.purpose || 'Office/Other'}`
-      });
-    });
-    Object.keys(rawExpense.tour || {}).forEach(key => {
-      const exp = rawExpense.tour[key];
-      activities.push({
-        id: key,
-        text: `✈️ Tour Expense: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.location || 'Trip Budget'}`
-      });
-    });
-  } else {
-    Object.keys(rawExpense).forEach(key => {
-      const exp = rawExpense[key];
-      activities.push({
-        id: key,
-        text: `📉 Expense Logged: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.purpose || 'Utilities'}`
+        text: `👤 New Member Joined: <strong>${m.name || 'Unknown'}</strong> (${m.phone || 'No Phone'})`
       });
     });
   }
 
-  // ফায়ারবেজের নিজস্ব ইউনিক কি (Key) দিয়ে সর্টিং (যা ক্রমানুসারে লেটেস্ট ডেটা আগে আনে)
-  activities.sort((a, b) => b.id.localeCompare(a.id));
+  // ২. ইনকাম ডাটা থেকে প্রসেস
+  if (rawIncome) {
+    Object.keys(rawIncome).forEach(key => {
+      const inc = rawIncome[key];
+      activities.push({
+        id: key,
+        text: `💰 Income Logged: <strong>৳${(parseFloat(inc.amount) || 0).toLocaleString()}</strong> - ${inc.category || inc.source || 'General Fund'}`
+      });
+    });
+  }
+
+  // ৩. এক্সপেন্স ডাটা থেকে প্রসেস
+  if (rawExpense) {
+    if (rawExpense.general || rawExpense.tour) {
+      Object.keys(rawExpense.general || {}).forEach(key => {
+        const exp = rawExpense.general[key];
+        activities.push({
+          id: key,
+          text: `📉 General Expense: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.purpose || 'Office/Other'}`
+        });
+      });
+      Object.keys(rawExpense.tour || {}).forEach(key => {
+        const exp = rawExpense.tour[key];
+        activities.push({
+          id: key,
+          text: `✈️ Tour Expense: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.location || 'Trip Budget'}`
+        });
+      });
+    } else {
+      Object.keys(rawExpense).forEach(key => {
+        const exp = rawExpense[key];
+        activities.push({
+          id: key,
+          text: `📉 Expense Logged: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.purpose || 'Utilities'}`
+        });
+      });
+    }
+  }
+
+  // 🌟 স্ট্রং স্ট্রিং সর্টিং লজিক: ফায়ারবেজের জেনারেটেড ক্রনোলজিক্যাল কী রিভার্স ম্যাচিং
+  // এর ফলে ভিন্ন ভিন্ন নোড থেকে আসা ডেটার মধ্যেও সবচেয়ে লেটেস্ট আইডিটি সবার প্রথমে থাকবে
+  activities.sort((a, b) => {
+    return b.id.localeCompare(a.id);
+  });
 
   // টপ ৫টি অ্যাক্টিভিটি ফিল্টার
   const latestFive = activities.slice(0, 5);
@@ -389,44 +398,40 @@ function generateRecentActivities() {
   });
 }
 
-// ১. মেম্বার ডাটা লোড
-db.ref('members').on('value', (snapshot) => {
-  rawMembers = snapshot.val() || {};
+// ফায়ারবেজ রুট নোড একসাথে লিসেনিং মেকানিজম
+db.ref().on('value', (snapshot) => {
+  const rootData = snapshot.val() || {};
+  
+  // ১. মেম্বার প্রসেস ও কাউন্ট
+  rawMembers = rootData.members || {};
   const count = Object.keys(rawMembers).length;
   document.getElementById('totalMembers').innerText = count;
-  generateRecentActivities();
-});
 
-// ২. ইনকাম ডাটা লোড
-db.ref('income').on('value', (snapshot) => {
-  rawIncome = snapshot.val() || {};
-  let total = 0;
+  // ২. ইনকাম প্রসেস
+  rawIncome = rootData.income || {};
+  let totalInc = 0;
   Object.keys(rawIncome).forEach(key => {
-    total += parseFloat(rawIncome[key].amount) || 0;
+    totalInc += parseFloat(rawIncome[key].amount) || 0;
   });
-  globalIncome = total;
-  updateFinancials();
-  generateRecentActivities();
-});
+  globalIncome = totalInc;
 
-// ৩. এক্সপেন্স ডাটা লোড
-db.ref('expense').on('value', (snapshot) => {
-  rawExpense = snapshot.val() || {};
-  let total = 0;
-  
+  // ৩. এক্সপেন্স প্রসেস
+  rawExpense = rootData.expense || {};
+  let totalExp = 0;
   if(rawExpense.general || rawExpense.tour) {
-    Object.keys(rawExpense.general || {}).forEach(k => total += parseFloat(rawExpense.general[k].amount) || 0);
-    Object.keys(rawExpense.tour || {}).forEach(k => total += parseFloat(rawExpense.tour[k].amount) || 0);
+    Object.keys(rawExpense.general || {}).forEach(k => totalExp += parseFloat(rawExpense.general[k].amount) || 0);
+    Object.keys(rawExpense.tour || {}).forEach(k => totalExp += parseFloat(rawExpense.tour[k].amount) || 0);
   } else {
-    Object.keys(rawExpense).forEach(key => total += parseFloat(rawExpense[key].amount) || 0);
+    Object.keys(rawExpense).forEach(key => totalExp += parseFloat(rawExpense[key].amount) || 0);
   }
-  
-  globalExpense = total;
+  globalExpense = totalExp;
+
+  // কার্ড ভ্যালু এবং রিসেন্ট অ্যাক্টিভিটি রিয়েল-টাইমে রেন্ডার
   updateFinancials();
   generateRecentActivities();
 });
 
-// ৪. ট্যুর হিস্ট্রি লোড
+// ৪. ট্যুর হিস্ট্রি ভিউয়ার
 db.ref('tour_history').on('value', (snapshot) => {
   const tbody = document.getElementById('tourHistoryBody');
   tbody.innerHTML = "";
