@@ -161,28 +161,34 @@ body{
 }
 .panel h2{ margin-bottom: 0; font-size: 24px; color: #10b981; }
 
-/* নতুন গ্লাস-মরফিজম ট্রান্সলেশন বাটন */
+/* আল্ট্রা-প্রোফেশনাল ডাইনামিক বাটন */
 .translate-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
   padding: 8px 18px;
   border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
 }
 .translate-btn:hover {
-  background: rgba(16, 185, 129, 0.2);
-  border-color: #10b981;
-  color: #10b981;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
   transform: translateY(-1px);
 }
-.translate-btn:active {
-  transform: translateY(1px);
+/* বাংলা মোডে সক্রিয় থাকার স্টাইল */
+.translate-btn.active-bn {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #10b981;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
 }
 
 .panel p { line-height: 1.8; color: #cbd5e1; font-size: 16px; text-align: justify; margin-bottom: 15px; }
@@ -217,7 +223,7 @@ body{
   <div class="panel" id="aboutPanel">
     <div class="panel-header">
       <h2 id="aboutTitle">📖 About KPTC</h2>
-      <button class="translate-btn" onclick="toggleTranslation('about')">বাং / EN</button>
+      <button class="translate-btn" id="aboutBtn" onclick="toggleTranslation('about')">🌐 English</button>
     </div>
     <div id="aboutContent"></div>
   </div>
@@ -225,7 +231,7 @@ body{
   <div class="panel" id="policyPanel">
     <div class="panel-header">
       <h2 id="policyTitle">📜 Club Policy</h2>
-      <button class="translate-btn" onclick="toggleTranslation('policy')">বাং / EN</button>
+      <button class="translate-btn" id="policyBtn" onclick="toggleTranslation('policy')">🌐 English</button>
     </div>
     <div id="policyContent"></div>
   </div>
@@ -233,14 +239,14 @@ body{
   <div class="panel" id="clubWebPanel">
     <div class="panel-header">
       <h2 id="clubWebTitle">🌐 About Club & Web</h2>
-      <button class="translate-btn" onclick="toggleTranslation('clubWeb')">বাং / EN</button>
+      <button class="translate-btn" id="clubWebBtn" onclick="toggleTranslation('clubWeb')">🌐 English</button>
     </div>
     <div id="clubWebContent"></div>
   </div>
 
 </div>
 
-<div class="footer">KPTC Core System V3.6</div>
+<div class="footer">KPTC Core System V3.7</div>
 
 <script>
 const contents = {
@@ -269,8 +275,8 @@ const contents = {
     bn: {
       title: "📜 ক্লাবের নীতিমালা",
       html: `<ul>
-              <li><strong>মাসিক চাঁদা কাঠামো:</strong> ক্লাবের প্রতিটি সদস্যকে নির্ধারিত সময়সীমার মধ্যে মাসিক চাঁদা পরিশোধ করতে হবে, যা ক্লাবের জরুরি প্রয়োজনে তহবিল সচল রাখে।</li>
-              <li><strong>আর্থিক স্বচ্ছতা:</strong> আর্থিক সততাই আমাদের মূল ভিত্তি। প্রতিটি একক লেনদেন এবং ব্যয় রিয়েল-智慧 ক্লাউড লেজারে ডাইনামিকভাবে নথিবদ্ধ করা হয়।</li>
+              <li><strong>বাধ্যতামূলক চাঁদা কাঠামো:</strong> ক্লাবের প্রতিটি সদস্যকে নির্ধারিত সময়সীমার মধ্যে মাসিক চাঁদা পরিশোধ করতে হবে, যা ক্লাবের জরুরি প্রয়োজনে তহবিল সচল রাখে।</li>
+              <li><strong>আর্থিক স্বচ্ছতা:</strong> আর্থিক সততাই আমাদের মূল ভিত্তি। প্রতিটি একক লেনদেন এবং ব্যয় রিয়েল-টাইম ক্লাউড লেজারে ডাইনামিকভাবে নথিবদ্ধ করা হয়।</li>
               <li><strong>তহবিলের সুরক্ষানীতি:</strong> ক্লাবের অর্থ শুধুমাত্র যৌথ ট্যুর ও প্রাতিষ্ঠানিক উন্নয়নে ব্যবহৃত হয়। ব্যক্তিগত কাজে ক্লাবের কোনো ফান্ড ব্যবহার করা হয় না।</li>
               <li><strong>গণতান্ত্রিক পদ্ধতি:</strong> ভ্রমণের পরিকল্পনা, বাজেট এবং নতুন সদস্য অন্তর্ভুক্তির মতো সিদ্ধান্তগুলো গণতান্ত্রিক ভোটাভুটি বা যৌথ মতামতের ভিত্তিতে নেওয়া হয়।</li>
              </ul>`
@@ -285,9 +291,9 @@ const contents = {
     },
     bn: {
       title: "🌐 ক্লাব ও ওয়েব আর্কিটেকচার",
-      html: `<p><strong>কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC)</strong> আনুষ্ঠানিকভাবে প্রতিষ্ঠিত হয় <strong>৫ই জুন, ২০২৬</strong> তারিখে। একদল ঘনিষ্ঠ বন্ধুর দীর্ঘদিনের যৌথ স্বপ্ন, প্রকৃতিপ্রেম এবং ভ্রমণের প্রতি গভীর আসক্তির ফসল হিসেবে এই ক্লাবের আত্মপ্রকাশ। বন্ধুদের আড্ডায় শুরু হওয়া সাধারণ কিছু ভ্রমণ পরিকল্পনা ও চিন্তাভাবনা দ্রুত একটি সুসংগঠিত প্রাতিষ্ঠানিক রূপ লাভ করে, যার মূল উদ্দেশ্য ছিল সব ভ্রমণপ্রেমীদের এক ছাতার নিচে নিয়ে আসা এবং অজানাকে উন্মোচন করা।</p>
+      html: `<p><strong>কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC)</strong> আনুষ্ঠানিকভাবে প্রতিষ্ঠিত হয় <strong>৫ই জুন, ২০২৬</strong> তারিখে। একদল ঘনিষ্ঠ বন্ধুর দীর্ঘদিনের যৌথ স্বপ্ন, প্রকৃতিপ্রেম এবং ভ্রমণের প্রতি গভীর আসক্তির ফসল হিসেবে এই ক্লাবের আত্মপ্রকাশ। বন্ধুদের আড্ডায় শুরু হওয়া সাধারণ কিছু ভ্রমণ পরিকল্পনা ও চিন্তা ভাবনা দ্রুত একটি সুসংগঠিত প্রাতিষ্ঠানিক রূপ লাভ করে, যার মূল উদ্দেশ্য ছিল সব ভ্রমণপ্রেমীদের এক ছাতার নিচে নিয়ে আসা এবং অজানাকে উন্মোচন করা।</p>
              <p>KPTC-এর মূল উদ্দেশ্য কেবল সাধারণ বিনোদনমূলক ভ্রমণের মধ্যে সীমাবদ্ধ নয়। এই ক্লাবটি মূলত পরিবেশ-বান্ধব পর্যটন (Eco-Tourism) প্রসার, বিভিন্ন অঞ্চলের বৈচিত্র্যময় সংস্কৃতির প্রতি শ্রদ্ধা জাগানো এবং রোমাঞ্চকর অভিযানের মাধ্যমে সদস্যদের ব্যক্তিগত ও মানসিক বিকাশ নিশ্চিত করার লক্ষ্যে কাজ করে। আমাদের লক্ষ্য এমন একটি টেকসই প্ল্যাটফর্ম তৈরি করা, যেখানে সদস্যরা দৈনন্দিন যান্ত্রিকতা থেকে মুক্তি পেয়ে নতুন অভিজ্ঞতা অর্জন করে এবং ভবিষ্যতে বড় কোনো ট্যুর পরিচালনার জন্য একটি সুসংহত আর্থিক তহবিল বজায় রাখে।</p>
-             <p>এই উদ্দেশ্যকে বাস্তবে রূপ দিতে এবং সনাতন খাতা-কলমের হিসাবের অব্যবস্থাপনা দূর করতে এই উন্নত ওয়েব টার্মিনালটি তৈরি করা হয়েছে। <strong>Abdul Ahad</strong> এখানে প্রধান <strong>Executive</strong> হিসেবে এর প্রাতিষ্ঠানিক ও ফুল-স্ট্যাক ওয়েব সিস্টেম অপারেশনাল কার্যাবলী দেখাশোনা করেন। এই প্ল্যাটফর্মটি একটি সুরক্ষিত ক্লাউড ডাটাবেজ আর্কিটেকচারের ওপর ভিত্তি করে রিয়েল-টাইম ডাটা ফ্লো নিশ্চিত করে, যা হিসাবের নির্ভুলতা, দ্রুততম আপডেট এবং ডাইনামিক অ্যানালিটিক্যাল রিপোর্ট তৈরি করতে সক্ষম। সম্পূর্ণ ওয়েব আর্কিটেকচারটিকে একটি দূরদর্শী ডিজিটাল ইকোসিস্টেম হিসেবে ডিজাইন করা হয়েছে, যা আগামী বহু বছর ধরে ক্লাবের সর্বোচ্চ স্বচ্ছতা ও প্রাতিষ্ঠানিক শৃঙ্খলা বজায় রাখে।</p>`
+             <p>এই উদ্দেশ্যকে বাস্তবে রূপ দিতে এবং সনাতন খাতা-কলমের হিসাবের অব্যবস্থাপনা দূর করতে এই উন্নত ওয়েব টার্মিনালটি তৈরি করা হয়েছে। <strong>Abdul Ahad</strong> এখানে প্রধান <strong>Executive</strong> হিসেবে এর প্রাতিষ্ঠানিক ও ফুল-স্ট্যাক ওয়েব সিস্টেম অপারেশনাল কার্যাবলী দেখাশোনা করেন। এই প্ল্যাটফর্মটি একটি সুরক্ষিত ক্লাউড ডাটাবেজ আর্কিটেকচারের ওপর ভিত্তি করে রিয়েল-টাইম ডাটা ফ্লো নিশ্চিত করে, যা হিসাবের নির্ভুলতা, দ্রুততম আপডেট এবং ডাইনামিক অ্যানালিটিক্যাল রিপোর্ট তৈরি করতে সক্ষম। সম্পূর্ণ ওয়েব আর্কিটেকচারটিকে একটি দূরদর্শী ডিজিটাল ইকোসিস্টেম হিসেবে ডিজাইন করা হয়েছে, যা আগামী বহু বছর ধরে ক্লাবের সর্বোচ্চ স্বচ্ছতা ও প্রাতিষ্ঠানিক শৃঙ্খলা বজায় রাখবে।</p>`
     }
   }
 };
@@ -295,20 +301,17 @@ const contents = {
 let currentLang = { about: 'en', policy: 'en', clubWeb: 'en' };
 
 function initContent() {
-  document.getElementById('aboutTitle').innerHTML = contents.about.en.title;
   document.getElementById('aboutContent').innerHTML = contents.about.en.html;
-  
-  document.getElementById('policyTitle').innerHTML = contents.policy.en.title;
   document.getElementById('policyContent').innerHTML = contents.policy.en.html;
-
-  document.getElementById('clubWebTitle').innerHTML = contents.clubWeb.en.title;
   document.getElementById('clubWebContent').innerHTML = contents.clubWeb.en.html;
 }
 
 function toggleTranslation(section) {
   currentLang[section] = currentLang[section] === 'en' ? 'bn' : 'en';
   const lang = currentLang[section];
+  const btn = document.getElementById(section + 'Btn');
   
+  // কন্টেন্ট ও টাইটেল পরিবর্তন
   if (section === 'about') {
     document.getElementById('aboutTitle').innerHTML = contents.about[lang].title;
     document.getElementById('aboutContent').innerHTML = contents.about[lang].html;
@@ -318,6 +321,15 @@ function toggleTranslation(section) {
   } else if (section === 'clubWeb') {
     document.getElementById('clubWebTitle').innerHTML = contents.clubWeb[lang].title;
     document.getElementById('clubWebContent').innerHTML = contents.clubWeb[lang].html;
+  }
+
+  // বাটনের টেক্সট এবং ভিজ্যুয়াল স্টেট (কালার) পরিবর্তন
+  if (lang === 'bn') {
+    btn.innerHTML = "🌐 বাংলা";
+    btn.classList.add('active-bn');
+  } else {
+    btn.innerHTML = "🌐 English";
+    btn.classList.remove('active-bn');
   }
 }
 
