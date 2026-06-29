@@ -289,12 +289,12 @@ tr:hover { background: rgba(255, 255, 255, 0.03); }
 <div class="panel">
 <h2> Recent Activity</h2>
 <div class="activity" id="activityList">
-  <div>✅ Loading latest dashboard summary...</div>
+  <div>⏳ Synchronizing real-time logs...</div>
 </div>
 </div>
 </div>
 
-<div class="footer">KPTC Dashboard V3.5</div>
+<div class="footer">KPTC Dashboard V3.6</div>
 
 <script>
 // ফায়ারবেজ কনফিগারেশন
@@ -309,62 +309,127 @@ const db = firebase.database();
 let globalIncome = 0;
 let globalExpense = 0;
 
+// রিয়েল-টাইম রিসেন্ট অ্যাক্টিভিটি ডেটা স্টোর অবজেক্ট
+let rawMembers = {};
+let rawIncome = {};
+let rawExpense = {};
+
 function updateFinancials() {
-  // 🌟 ডুপ্লিকেট যোগ চিরতরে বন্ধ। ডাটাবেজের ডিরেক্ট ইনকামই মেইন হিসাব।
   const balance = globalIncome - globalExpense;
-  
   document.getElementById('totalIncome').innerText = `৳${globalIncome.toLocaleString()}`;
   document.getElementById('totalExpense').innerText = `৳${globalExpense.toLocaleString()}`;
   document.getElementById('currentBalance').innerText = `৳${balance.toLocaleString()}`;
 }
 
+// 🎯 ডাইনামিক রিসেন্ট অ্যাক্টিভিটি জেনারেটর (ডাটাবেজে নতুন নোড ছাড়া ফিল্টারিং)
+function generateRecentActivities() {
+  let activities = [];
+
+  // ১. মেম্বার ডাটা থেকে প্রসেস
+  Object.keys(rawMembers).forEach(key => {
+    const m = rawMembers[key];
+    activities.push({
+      id: key,
+      text: `👤 New Member Joined: <strong>${m.name || 'Unknown'}</strong> (${m.phone || 'No Phone'})`
+    });
+  });
+
+  // ২. ইনকাম ডাটা থেকে প্রসেস
+  Object.keys(rawIncome).forEach(key => {
+    const inc = rawIncome[key];
+    activities.push({
+      id: key,
+      text: `💰 Income Logged: <strong>৳${(parseFloat(inc.amount) || 0).toLocaleString()}</strong> - ${inc.category || inc.source || 'General Fund'}`
+    });
+  });
+
+  // ৩. এক্সপেন্স ডাটা থেকে প্রসেস (জেনারেল এবং ট্যুর দুই স্ট্রাকচারই হ্যান্ডেল করা হয়েছে)
+  if (rawExpense.general || rawExpense.tour) {
+    Object.keys(rawExpense.general || {}).forEach(key => {
+      const exp = rawExpense.general[key];
+      activities.push({
+        id: key,
+        text: `📉 General Expense: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.purpose || 'Office/Other'}`
+      });
+    });
+    Object.keys(rawExpense.tour || {}).forEach(key => {
+      const exp = rawExpense.tour[key];
+      activities.push({
+        id: key,
+        text: `✈️ Tour Expense: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.location || 'Trip Budget'}`
+      });
+    });
+  } else {
+    Object.keys(rawExpense).forEach(key => {
+      const exp = rawExpense[key];
+      activities.push({
+        id: key,
+        text: `📉 Expense Logged: <strong>৳${(parseFloat(exp.amount) || 0).toLocaleString()}</strong> - ${exp.purpose || 'Utilities'}`
+      });
+    });
+  }
+
+  // ফায়ারবেজের নিজস্ব ইউনিক কি (Key) দিয়ে সর্টিং (যা ক্রমানুসারে লেটেস্ট ডেটা আগে আনে)
+  activities.sort((a, b) => b.id.localeCompare(a.id));
+
+  // টপ ৫টি অ্যাক্টিভিটি ফিল্টার
+  const latestFive = activities.slice(0, 5);
+
+  const activityDiv = document.getElementById('activityList');
+  if (latestFive.length === 0) {
+    activityDiv.innerHTML = `<div>📊 No dynamic transactions registered yet.</div>`;
+    return;
+  }
+
+  activityDiv.innerHTML = "";
+  latestFive.forEach(act => {
+    const item = document.createElement('div');
+    item.innerHTML = act.text;
+    activityDiv.appendChild(item);
+  });
+}
+
 // ১. মেম্বার ডাটা লোড
 db.ref('members').on('value', (snapshot) => {
-  const data = snapshot.val() || {};
-  const count = Object.keys(data).length;
+  rawMembers = snapshot.val() || {};
+  const count = Object.keys(rawMembers).length;
   document.getElementById('totalMembers').innerText = count;
+  generateRecentActivities();
 });
 
 // ২. ইনকাম ডাটা লোড
 db.ref('income').on('value', (snapshot) => {
-  const data = snapshot.val() || {};
+  rawIncome = snapshot.val() || {};
   let total = 0;
-  Object.keys(data).forEach(key => {
-    total += parseFloat(data[key].amount) || 0;
+  Object.keys(rawIncome).forEach(key => {
+    total += parseFloat(rawIncome[key].amount) || 0;
   });
   globalIncome = total;
   updateFinancials();
+  generateRecentActivities();
 });
 
 // ৩. এক্সপেন্স ডাটা লোড
 db.ref('expense').on('value', (snapshot) => {
-  const data = snapshot.val() || {};
+  rawExpense = snapshot.val() || {};
   let total = 0;
   
-  if(data.general || data.tour) {
-    Object.keys(data.general || {}).forEach(k => total += parseFloat(data.general[k].amount) || 0);
-    Object.keys(data.tour || {}).forEach(k => total += parseFloat(data.tour[k].amount) || 0);
+  if(rawExpense.general || rawExpense.tour) {
+    Object.keys(rawExpense.general || {}).forEach(k => total += parseFloat(rawExpense.general[k].amount) || 0);
+    Object.keys(rawExpense.tour || {}).forEach(k => total += parseFloat(rawExpense.tour[k].amount) || 0);
   } else {
-    Object.keys(data).forEach(key => total += parseFloat(data[key].amount) || 0);
+    Object.keys(rawExpense).forEach(key => total += parseFloat(rawExpense[key].amount) || 0);
   }
   
   globalExpense = total;
   updateFinancials();
-  
-  const activityDiv = document.getElementById('activityList');
-  activityDiv.innerHTML = `
-    <div> Members real-time synchronization active</div>
-    <div> Total Financial log synced with database</div>
-    <div> Latest Expense monitored successfully</div>
-    <div> Core systems running in stable state</div>
-  `;
+  generateRecentActivities();
 });
 
-// ৪. অ্যাডমিন প্যানেল থেকে পাঠানো মাল্টিপল ট্যুর হিস্ট্রি লোড (কোনো অটো-হিসাব ছাড়া)
+// ৪. ট্যুর হিস্ট্রি লোড
 db.ref('tour_history').on('value', (snapshot) => {
   const tbody = document.getElementById('tourHistoryBody');
   tbody.innerHTML = "";
-  
   const data = snapshot.val();
   
   if (!data) {
@@ -375,7 +440,6 @@ db.ref('tour_history').on('value', (snapshot) => {
   Object.keys(data).forEach(key => {
     const tour = data[key];
     const tr = document.createElement('tr');
-    
     const costAmount = parseFloat(tour.cost) || 0;
     
     tr.innerHTML = `
