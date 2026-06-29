@@ -161,34 +161,82 @@ body{
 }
 .panel h2{ margin-bottom: 0; font-size: 24px; color: #10b981; }
 
-/* আল্ট্রা-প্রোফেশনাল ডাইনামিক বাটন */
+/* অ্যাডভান্সড অ্যানিমেটেড ল্যাঙ্গুয়েজ বাটন */
 .translate-btn {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #94a3b8;
-  padding: 8px 18px;
+  width: 120px;
+  height: 38px;
   border-radius: 20px;
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.3px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  position: relative;
+  overflow: hidden;
 }
 .translate-btn:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.3);
   color: #fff;
-  transform: translateY(-1px);
 }
-/* বাংলা মোডে সক্রিয় থাকার স্টাইল */
+
+/* বাটন কন্টেইনার ফ্রেম */
+.btn-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  justify-content: space-between;
+}
+
+/* ইমোজি স্টাইল ও অ্যানিমেশন */
+.btn-emoji {
+  font-size: 14px;
+  position: absolute;
+  left: 12px;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+/* টেক্সট র‍্যাপার এবং স্লাইডিং অ্যানিমেশন */
+.btn-text {
+  position: absolute;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+.text-en {
+  right: 14px;
+  opacity: 1;
+  transform: translateY(0);
+}
+.text-bn {
+  left: 14px;
+  opacity: 0;
+  transform: translateY(20px); /* নিচে লুকিয়ে থাকবে */
+}
+
+/* --- অ্যাক্টিভ বাংলা মোড স্টেট --- */
 .translate-btn.active-bn {
-  background: rgba(16, 185, 129, 0.15);
+  background: rgba(16, 185, 129, 0.12);
   border-color: #10b981;
   color: #10b981;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+}
+/* ইমোজি বাম থেকে ডান পাশে যাবে (১২ পিক্সেল থেকে সরিয়ে ডানে নেওয়া) */
+.translate-btn.active-bn .btn-emoji {
+  transform: translateX(82px);
+}
+/* ইংরেজি টেক্সট নিচে নেমে অদৃশ্য হবে */
+.translate-btn.active-bn .text-en {
+  opacity: 0;
+  transform: translateY(20px);
+}
+/* বাংলা টেক্সট নিচ থেকে উঠে সামনে আসবে */
+.translate-btn.active-bn .text-bn {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .panel p { line-height: 1.8; color: #cbd5e1; font-size: 16px; text-align: justify; margin-bottom: 15px; }
@@ -223,7 +271,13 @@ body{
   <div class="panel" id="aboutPanel">
     <div class="panel-header">
       <h2 id="aboutTitle">📖 About KPTC</h2>
-      <button class="translate-btn" id="aboutBtn" onclick="toggleTranslation('about')">🌐 English</button>
+      <button class="translate-btn" id="aboutBtn" onclick="toggleTranslation('about')">
+        <div class="btn-inner">
+          <span class="btn-emoji">🌐</span>
+          <span class="btn-text text-en">English</span>
+          <span class="btn-text text-bn">বাংলা</span>
+        </div>
+      </button>
     </div>
     <div id="aboutContent"></div>
   </div>
@@ -231,7 +285,13 @@ body{
   <div class="panel" id="policyPanel">
     <div class="panel-header">
       <h2 id="policyTitle">📜 Club Policy</h2>
-      <button class="translate-btn" id="policyBtn" onclick="toggleTranslation('policy')">🌐 English</button>
+      <button class="translate-btn" id="policyBtn" onclick="toggleTranslation('policy')">
+        <div class="btn-inner">
+          <span class="btn-emoji">🌐</span>
+          <span class="btn-text text-en">English</span>
+          <span class="btn-text text-bn">বাংলা</span>
+        </div>
+      </button>
     </div>
     <div id="policyContent"></div>
   </div>
@@ -239,14 +299,20 @@ body{
   <div class="panel" id="clubWebPanel">
     <div class="panel-header">
       <h2 id="clubWebTitle">🌐 About Club & Web</h2>
-      <button class="translate-btn" id="clubWebBtn" onclick="toggleTranslation('clubWeb')">🌐 English</button>
+      <button class="translate-btn" id="clubWebBtn" onclick="toggleTranslation('clubWeb')">
+        <div class="btn-inner">
+          <span class="btn-emoji">🌐</span>
+          <span class="btn-text text-en">English</span>
+          <span class="btn-text text-bn">বাংলা</span>
+        </div>
+      </button>
     </div>
     <div id="clubWebContent"></div>
   </div>
 
 </div>
 
-<div class="footer">KPTC Core System V3.7</div>
+<div class="footer">KPTC Core System V4.0</div>
 
 <script>
 const contents = {
@@ -258,7 +324,7 @@ const contents = {
     },
     bn: {
       title: "📖 কেপিটিসি পরিচিতি",
-      html: `<p><strong>কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC)</strong>-এর অফিসিয়াল পোর্টালে আপনাকে স্বাগত। আমরা বিশ্বভ্রমণকারী এবং রোমাঞ্চপ্রিয় মানুষের এক অনন্য কমিউনিটি। KPTC কেবল ভ্রমণের উদ্দেশ্যে শুরু হয়নি; এটি এমন এক ভ্রাতৃত্বের বন্ধন যা ভৌগোলিক সীমানা ছাড়িয়ে প্রকৃতির কোলে অবিস্মরণীয় স্মৃতি তৈরি করতে এবং আজীবন অটুট বন্ধুত্ব গড়ে তুলতে কাজ করে।</p>
+      html: `<p><strong>কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC)</strong>-এর অফিসিয়াল পোর্টালে আপনাকে স্বাগতম। আমরা বিশ্বভ্রমণকারী এবং রোমাঞ্চপ্রিয় মানুষের এক অনন্য কমিউনিটি। KPTC কেবল ভ্রমণের উদ্দেশ্যে শুরু হয়নি; এটি এমন এক ভ্রাতৃত্বের বন্ধন যা ভৌগোলিক সীমানা ছাড়িয়ে প্রকৃতির কোলে অবিস্মরণীয় স্মৃতি তৈরি করতে এবং আজীবন অটুট বন্ধুত্ব গড়ে তুলতে কাজ করে।</p>
              <p>আমাদের মূল দর্শন হলো নিজের গণ্ডি থেকে বের হয়ে আসা এবং অজানার সৌন্দর্যকে আবিষ্কার করা। আমরা বিশ্বাস করি ভ্রমণ মানে নিজেকে নতুনভাবে চেনা এবং বৈচিত্র্যময় সংস্কৃতিকে অনুভব করার একটি সুন্দর মাধ্যম।</p>`
     }
   },
@@ -311,7 +377,7 @@ function toggleTranslation(section) {
   const lang = currentLang[section];
   const btn = document.getElementById(section + 'Btn');
   
-  // কন্টেন্ট ও টাইটেল পরিবর্তন
+  // টেক্সট ও টাইটেল আপডেট
   if (section === 'about') {
     document.getElementById('aboutTitle').innerHTML = contents.about[lang].title;
     document.getElementById('aboutContent').innerHTML = contents.about[lang].html;
@@ -323,12 +389,10 @@ function toggleTranslation(section) {
     document.getElementById('clubWebContent').innerHTML = contents.clubWeb[lang].html;
   }
 
-  // বাটনের টেক্সট এবং ভিজ্যুয়াল স্টেট (কালার) পরিবর্তন
+  // বাটন অ্যানিমেশন ক্লাস টগল
   if (lang === 'bn') {
-    btn.innerHTML = "🌐 বাংলা";
     btn.classList.add('active-bn');
   } else {
-    btn.innerHTML = "🌐 English";
     btn.classList.remove('active-bn');
   }
 }
