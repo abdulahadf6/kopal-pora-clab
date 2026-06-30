@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC Dashboard V3 - Ultra Premium Liquid</title>
+
+<script>
+if (localStorage.getItem('userRole') !== 'member') {
+    window.location.href = "login.html"; 
+}
+</script>
+
 <style>
 /* গ্লোবাল স্টাইল */
 *{
@@ -14,7 +21,9 @@
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 🔒 ডিফল্টভাবে পুরো বডি হাইড করা, সেশন ঠিক থাকলে স্ক্রিপ্ট দিয়ে একবারে অন হবে */
 body {
+  display: none;
   background: #030611;
   color: #f5f5f7;
   min-height: 100vh;
@@ -150,7 +159,7 @@ h1 {
   gap: 22px;
 }
 
-/* গ্লাস কার্ড এবং প্যানেল (অতিরিক্ত মাউস ইফেক্ট ছাড়া ফ্রেশ লুক) */
+/* গ্লাস কার্ড এবং প্যানেল */
 .card, .panel {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
   backdrop-filter: blur(40px); 
@@ -210,7 +219,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <a href="expense.html"> Expense</a>
 <a href="reports.html"> Reports</a>
 <a href="about.html"> About</a>
-<a href="index.html"> Logout</a>
+<a href="#" onclick="logoutUser()"> Logout</a>
 </div>
 
 <div class="hero">
@@ -266,6 +275,11 @@ KPTC Members V1
 </div>
 
 <script>
+// 🔒 মেম্বার সেশন ভ্যালিড থাকলে কেবল তখনই পেজটি শো করা হবে
+if (localStorage.getItem('userRole') === 'member') {
+    document.body.style.display = "block";
+}
+
 // ফায়ারবেজ কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
@@ -298,7 +312,6 @@ membersRef.on('value', (snapshot) => {
       locationsSet.add(member.location.trim().toLowerCase());
     }
 
-    // টেবিলে ডাটা পুশ করা (যা ডাটাবেজের location কে আপনার Address কলামে বসাবে)
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${member.id || memberKey}</td>
@@ -331,6 +344,12 @@ function closeMenu(){
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity = '1';
   document.getElementById('menuBtn').style.pointerEvents = 'auto';
+}
+
+// 🚪 লগআউট ফাংশন
+function logoutUser() {
+  localStorage.clear();
+  window.location.href = "login.html";
 }
 </script>
 
