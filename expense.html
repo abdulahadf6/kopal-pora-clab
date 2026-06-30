@@ -6,7 +6,7 @@
 <title>KPTC Dashboard V3 - Ultra Premium Liquid</title>
 
 <script>
-if (localStorage.getItem('userRole') !== 'member') {
+if (sessionStorage.getItem('userRole') !== 'member') {
     window.location.href = "login.html"; 
 }
 </script>
@@ -293,7 +293,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 
 <script>
 // 🔒 মেম্বার সেশন ট্রাস্টেড হলে কেবল তখনই পেজটি বডি আনহাইড হবে
-if (localStorage.getItem('userRole') === 'member') {
+if (sessionStorage.getItem('userRole') === 'member') {
     document.body.style.display = "block";
 }
 
@@ -468,7 +468,7 @@ function closeMenu(){
 
 // 🚪 লগআউট ফাংশন
 function logoutUser() {
-  localStorage.clear();
+  sessionStorage.clear();
   window.location.href = "login.html";
 }
 </script>
