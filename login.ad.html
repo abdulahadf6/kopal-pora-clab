@@ -87,7 +87,7 @@ text-align: center;
 font-weight: 600;
 }
 
-/* 👁️ চোখের আইকন পজিশন করার জন্য কন্টেইনার ফিক্স */
+/* 👁️ পাসওয়ার্ড বক্স ও আইকন কন্টেইনার */
 .pass-wrapper {
   position: relative;
   width: 100%;
@@ -95,21 +95,29 @@ font-weight: 600;
   align-items: center;
 }
 
-/* পাসওয়ার্ড ইনপুট ফিল্ডের দুই পাশে স্পেস রাখা হলো */
 .pass-wrapper input {
   padding-right: 50px;
   padding-left: 50px;
 }
 
-/* চোখের আইকনকে ইনপুট বক্সের ভেতরে ডান পাশে ফিক্স করা হলো */
+/* প্রফেশনাল আইকন বাটন স্টাইল */
 .toggle-password {
   position: absolute;
   right: 15px;
   cursor: pointer;
-  color: #333;
-  font-size: 22px;
-  user-select: none;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+/* আইকনের ভেতরের SVG কালার নিয়ন্ত্রণ */
+.toggle-password svg {
+  width: 100%;
+  height: 100%;
+  fill: #4b5563;
 }
 
 button{
@@ -155,7 +163,9 @@ button:hover{ transform:translateY(-3px); box-shadow:0 10px 25px rgba(16, 185, 1
 <div class="input-box">
   <div class="pass-wrapper">
     <input type="password" id="adminPasswordInput" placeholder="••••••••">
-    <span class="toggle-password" onclick="togglePass()">👁️</span>
+    <div class="toggle-password" id="eyeToggleButton" onclick="togglePass()">
+      <svg id="eyeIconSvg" viewBox="0 0 24 24"><path d="M12 19c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm0-16c-3.86 0-7 3.14-7 7s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 11c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm-7-5c0 .55-.45 1-1 1s-1-.45-1-1 .45-1 1-1 1 .45 1 1zm15 0c0 .55-.45 1-1 1s-1-.45-1-1 .45-1 1-1 1 .45 1 1z"/></svg>
+    </div>
   </div>
 </div>
 
@@ -168,7 +178,7 @@ button:hover{ transform:translateY(-3px); box-shadow:0 10px 25px rgba(16, 185, 1
 </div>
 
 <script>
-// আপনার নিজস্ব ফায়ারবেজ কনফিগারেশন কীসমূহ
+// ফায়ারবেজ কনফিগারেশন
 const firebaseConfig = {
   apiKey: "AIzaSyBDeCnZysIu3_H162qMsWZaZ3Ba09Hwhxg", 
   authDomain: "kopal-pora-travelers-club.firebaseapp.com",
@@ -180,21 +190,27 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// পাসওয়ার্ড শো এবং হাইড করার ফাংশন
+// আপনার আপলোড করা ইমেজ অনুযায়ী SVG পাথ ডেটা
+const eyeOpenPath = `<svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>`;
+const eyeClosePath = `<svg viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.82l2.92 2.92c1.51-1.39 2.7-3.13 3.44-5.09-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16c.56-.23 1.17-.36 1.82-.36zm-8.21-1.89L2.38 6.52l2.71 2.71C3.81 10.21 2.61 11.97 1.88 14c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l2.22 2.22 1.41-1.41L5.19 3.71 3.79 5.11zm6.39 6.39l2.5 2.5c-.27.14-.57.22-.9.22-1.1 0-2-.9-2-2 0-.33.08-.63.22-.9zM12 9c-.33 0-.63.08-.9.22l3.68 3.68c.14-.27.22-.57.22-.9 0-1.1-.9-2-2-2z"/></svg>`;
+
+// পেজ লোড হওয়ার সাথে সাথে ডিফল্টভাবে চোখ বন্ধের আইকন সেট করা
+document.getElementById('eyeToggleButton').innerHTML = eyeClosePath;
+
 function togglePass() {
   const passInput = document.getElementById('adminPasswordInput');
-  const eyeIcon = document.querySelector('.toggle-password');
+  const btn = document.getElementById('eyeToggleButton');
   
   if (passInput.type === "password") {
     passInput.type = "text";
-    eyeIcon.innerText = "🔒"; // পাসওয়ার্ড দেখতে চাইলে লক আইকন শো করবে
+    btn.innerHTML = eyeOpenPath; // পাসওয়ার্ড দেখালে চোখ খোলার আইকন হবে
   } else {
     passInput.type = "password";
-    eyeIcon.innerText = "👁️"; // হাইড থাকলে চোখ আইকন শো করবে
+    btn.innerHTML = eyeClosePath; // পাসওয়ার্ড হাইড থাকলে চোখ বন্ধের আইকন হবে
   }
 }
 
-// ফায়ারবেজ অথেন্টিকেশন চেক করার ফাংশন
+// ফায়ারবেজ অথেন্টিকেশন চেক
 function validateAdmin() {
   const email = document.getElementById('adminEmailInput').value.trim();
   const password = document.getElementById('adminPasswordInput').value;
@@ -210,9 +226,7 @@ function validateAdmin() {
 
   firebase.auth().signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
-      // লগইন সফল হলে সেশনে 'admin' রোল সেভ হবে 
       sessionStorage.setItem('userRole', 'admin');
-      // সফল লগইনের পর সরাসরি dashboard.ad.html-এ রিডাইরেক্ট করবে
       window.location.href = "dashboard.ad.html"; 
     })
     .catch((error) => {
