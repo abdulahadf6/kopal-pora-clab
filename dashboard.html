@@ -162,7 +162,7 @@ h1 {
 }
 .slogan { opacity: 0.6; margin-top: 12px; font-size: 16px; }
 
-/* কার্ড গ্রিড */
+/* カード গ্রিড */
 .cards {
   max-width: 1200px;
   margin: auto;
@@ -247,7 +247,7 @@ tr:hover { background: rgba(255, 255, 255, 0.03); }
 <a href="expense.html"> Expense</a>
 <a href="reports.html"> Reports</a>
 <a href="about.html"> About</a>
-<a href="index.html"> Logout</a>
+<a href="#" onclick="logoutUser()"> Logout</a>
 </div>
 
 <div class="hero">
@@ -297,6 +297,12 @@ tr:hover { background: rgba(255, 255, 255, 0.03); }
 <div class="footer">KPTC Dashboard V3.6</div>
 
 <script>
+// 🔒 মেম্বার সিকিউরিটি লক (স্ক্রিপ্টের শুরুতেই চেক করবে)
+if (localStorage.getItem('userRole') !== 'member') {
+    // লগইন ছাড়া সরাসরি বা চালাকি করে ঢুকতে চাইলে মেইন লগইন পেজে কিক আউট করবে
+    window.location.href = "login.html"; 
+}
+
 // ফায়ারবেজ কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
@@ -320,23 +326,21 @@ function updateFinancials() {
   document.getElementById('currentBalance').innerText = `৳${balance.toLocaleString()}`;
 }
 
-// 🎯 ডাইনামিক রিসেন্ট অ্যাক্টিভিটি জেনারেটর (১ নম্বরে ইনস্ট্যান্ট সর্টিং মেকানিজম)
+// 🎯 ডাইনামিক রিসেন্ট অ্যাক্টিভিটি জেনারেটর
 function generateRecentActivities() {
   let activities = [];
 
-  // ১. নতুন মেম্বার প্রসেসিং
   if (rawMembers) {
     Object.keys(rawMembers).forEach(key => {
       const m = rawMembers[key];
       activities.push({
         id: key,
-        time: m.date || m.timestamp || key, // তারিখ বা আইডি ট্র্যাক
+        time: m.date || m.timestamp || key, 
         text: `👤 New Member Joined: <strong>${m.name || 'Unknown'}</strong> (${m.phone || 'No Phone'})`
       });
     });
   }
 
-  // ২. ইনকাম এন্ট্রি প্রসেসিং
   if (rawIncome) {
     Object.keys(rawIncome).forEach(key => {
       const inc = rawIncome[key];
@@ -348,7 +352,6 @@ function generateRecentActivities() {
     });
   }
 
-  // ৩. এক্সপেন্স এন্ট্রি প্রসেসিং
   if (rawExpense) {
     if (rawExpense.general || rawExpense.tour) {
       Object.keys(rawExpense.general || {}).forEach(key => {
@@ -379,13 +382,10 @@ function generateRecentActivities() {
     }
   }
 
-  // 🌟 আলটিমেট হাইব্রিড সর্টিং: ডেটের টেক্সট ভ্যালু এবং ফায়ারবেজ জেনারেটেড ক্রনোলজিক্যাল কী একসাথে সর্ট হবে
-  // এর ফলে ভিন্ন নোড থেকে আসলেও লেটেস্ট ২০ টাকা বা নতুন মেম্বার সবসময় ১ নম্বরে পুশ হবে।
   activities.sort((a, b) => {
     return b.time.localeCompare(a.time) || b.id.localeCompare(a.id);
   });
 
-  // শীর্ষ ৫টি ফিল্টারিং
   const latestFive = activities.slice(0, 5);
 
   const activityDiv = document.getElementById('activityList');
@@ -406,12 +406,10 @@ function generateRecentActivities() {
 db.ref().on('value', (snapshot) => {
   const rootData = snapshot.val() || {};
   
-  // ১. মেম্বার সিঙ্ক
   rawMembers = rootData.members || {};
   const count = Object.keys(rawMembers).length;
   document.getElementById('totalMembers').innerText = count;
 
-  // ২. ইনকাম সিঙ্ক
   rawIncome = rootData.income || {};
   let totalInc = 0;
   Object.keys(rawIncome).forEach(key => {
@@ -419,7 +417,6 @@ db.ref().on('value', (snapshot) => {
   });
   globalIncome = totalInc;
 
-  // ৩. এক্সপেন্স সিঙ্ক
   rawExpense = rootData.expense || {};
   let totalExp = 0;
   if(rawExpense.general || rawExpense.tour) {
@@ -430,7 +427,6 @@ db.ref().on('value', (snapshot) => {
   }
   globalExpense = totalExp;
 
-  // ডাইনামিক রেন্ডারিং ট্রিগার
   updateFinancials();
   generateRecentActivities();
 });
@@ -474,6 +470,12 @@ function closeMenu(){
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity = '1';
   document.getElementById('menuBtn').style.pointerEvents = 'auto';
+}
+
+// 🚪 লগআউট ফাংশন
+function logoutUser() {
+  localStorage.clear(); // সেশন মেমরি ক্লিয়ার করা হলো
+  window.location.href = "login.html"; // লগইন পেজে ফিরিয়ে দেওয়া হলো
 }
 </script>
 
