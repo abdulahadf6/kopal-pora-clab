@@ -7,7 +7,6 @@
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <style>
 *{
@@ -22,33 +21,18 @@ min-height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-/* 🟢 অ্যাডমিন প্যানেলের জন্য প্রিমিয়াম ডার্ক গ্রিন গ্লোয়িং ব্যাকগ্রাউন্ড */
 background:linear-gradient(135deg,#030611,#064e3b,#10b981);
 overflow:hidden;
 position:relative;
 }
 
-body::before{
+body::before, body::after{
 content:"";
 position:absolute;
-width:500px;
-height:500px;
-background:rgba(255,255,255,.05);
 border-radius:50%;
-top:-200px;
-left:-200px;
 }
-
-body::after{
-content:"";
-position:absolute;
-width:400px;
-height:400px;
-background:rgba(255,255,255,.03);
-border-radius:50%;
-bottom:-150px;
-right:-150px;
-}
+body::before{ width:500px; height:500px; background:rgba(255,255,255,.05); top:-200px; left:-200px; }
+body::after{ width:400px; height:400px; background:rgba(255,255,255,.03); bottom:-150px; right:-150px; }
 
 .card{
 width:90%;
@@ -73,12 +57,7 @@ filter: drop-shadow(0 0 20px rgba(16, 185, 129, 0.4));
 animation:float 4s ease-in-out infinite;
 }
 
-.club{
-font-size:14px;
-opacity:.8;
-margin-bottom:5px;
-}
-
+.club{ font-size:14px; opacity:.8; margin-bottom:5px; }
 .badge {
   display: inline-block;
   margin-bottom: 15px;
@@ -92,20 +71,9 @@ margin-bottom:5px;
   letter-spacing: 1px;
 }
 
-h1{
-font-size:30px;
-margin-bottom:10px;
-}
-
-.subtitle{
-opacity:.8;
-margin-bottom:25px;
-}
-
-.input-box{
-position:relative;
-margin-bottom:20px;
-}
+h1{ font-size:30px; margin-bottom:10px; }
+.subtitle{ opacity:.8; margin-bottom:25px; }
+.input-box{ margin-bottom:15px; position: relative; }
 
 input{
 width:100%;
@@ -117,7 +85,31 @@ font-size:16px;
 color: #000;
 text-align: center;
 font-weight: 600;
-margin-bottom: 12px; /* দুটি ইনপুটের মাঝে স্পেস */
+}
+
+/* 👁️ চোখের আইকন পজিশন করার জন্য কন্টেইনার ফিক্স */
+.pass-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* পাসওয়ার্ড ইনপুট ফিল্ডের দুই পাশে স্পেস রাখা হলো */
+.pass-wrapper input {
+  padding-right: 50px;
+  padding-left: 50px;
+}
+
+/* চোখের আইকনকে ইনপুট বক্সের ভেতরে ডান পাশে ফিক্স করা হলো */
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  cursor: pointer;
+  color: #333;
+  font-size: 22px;
+  user-select: none;
+  z-index: 10;
 }
 
 button{
@@ -125,107 +117,84 @@ width:100%;
 padding:15px;
 border:none;
 border-radius:14px;
-background:#10b981; /* 🟢 অ্যাডমিন সিগনেচার বাটন */
+background:#10b981;
 color:white;
 font-size:17px;
 font-weight:600;
 cursor:pointer;
 transition:.3s;
 box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+margin-top: 10px;
 }
+button:hover{ transform:translateY(-3px); box-shadow:0 10px 25px rgba(16, 185, 129, .5); }
 
-button:hover{
-transform:translateY(-3px);
-box-shadow:0 10px 25px rgba(16, 185, 129, .5);
-}
+.back{ display:inline-block; margin-top:20px; color:white; text-decoration:none; opacity:.8; }
+.back:hover{ opacity:1; }
+.footer{ margin-top:25px; font-size:12px; opacity:.7; }
+.error-text { color: #f87171; font-size: 14px; margin-bottom: 15px; display: none; font-weight: 500; }
 
-.back{
-display:inline-block;
-margin-top:20px;
-color:white;
-text-decoration:none;
-opacity:.8;
-}
-
-.back:hover{
-opacity:1;
-}
-
-.footer{
-margin-top:25px;
-font-size:12px;
-opacity:.7;
-}
-
-.error-text {
-color: #f87171;
-font-size: 14px;
-margin-bottom: 15px;
-display: none;
-font-weight: 500;
-}
-
-@keyframes float{
-0%,100%{transform:translateY(0);}
-50%{transform:translateY(-10px);}
-}
-
-@keyframes fadeUp{
-from{
-opacity:0;
-transform:translateY(30px);
-}
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
+@keyframes float{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(30px); } to{ opacity:1; transform:translateY(0); } }
 </style>
 </head>
 
 <body>
 
 <div class="card">
-
 <img src="Logo.png" class="logo" alt="Logo">
-
 <div class="club">কপাল পোড়া ট্রাভেলার্স ক্লাব</div>
 <div class="badge">ADMIN PANEL</div>
 
 <h1>Admin Login</h1>
-
 <div class="subtitle">Firebase Console Authentication</div>
 
 <div class="input-box">
-  <input type="email" id="adminEmailInput" placeholder="axxxxxxx@kptc.com">
-  <input type="password" id="adminPasswordInput" placeholder="xxxxxxxxx">
+  <input type="email" id="adminEmailInput" placeholder="admin@kptc.com">
+</div>
+
+<div class="input-box">
+  <div class="pass-wrapper">
+    <input type="password" id="adminPasswordInput" placeholder="••••••••">
+    <span class="toggle-password" onclick="togglePass()">👁️</span>
+  </div>
 </div>
 
 <div class="error-text" id="errorBlock">ভুল ইমেইল বা পাসওয়ার্ড!</div>
 
-<button onclick="validateAdmin()">
- Sign In as Admin
-</button>
+<button onclick="validateAdmin()">Sign In as Admin</button>
 
-<a href="index.ad.html" class="back">
-← Back to Main Home
-</a>
-
-<div class="footer">
-Kopal Pora Travelers Club © 2026
-</div>
-
+<a href="index.html" class="back">← Back to Main Home</a>
+<div class="footer">Kopal Pora Travelers Club © 2026</div>
 </div>
 
 <script>
-// আপনার ফায়ারবেজ ডাটাবেজ এবং অ্যাপ কনফিগারেশন লিংক
+// আপনার নিজস্ব ফায়ারবেজ কনফিগারেশন কীসমূহ
 const firebaseConfig = {
+  apiKey: "AIzaSyBDeCnZysIu3_H162qMsWZaZ3Ba09Hwhxg", 
+  authDomain: "kopal-pora-travelers-club.firebaseapp.com",
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 // ফায়ারবেজ ইনিশিয়ালাইজ করা
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 
+// পাসওয়ার্ড শো এবং হাইড করার ফাংশন
+function togglePass() {
+  const passInput = document.getElementById('adminPasswordInput');
+  const eyeIcon = document.querySelector('.toggle-password');
+  
+  if (passInput.type === "password") {
+    passInput.type = "text";
+    eyeIcon.innerText = "🔒"; // পাসওয়ার্ড দেখতে চাইলে লক আইকন শো করবে
+  } else {
+    passInput.type = "password";
+    eyeIcon.innerText = "👁️"; // হাইড থাকলে চোখ আইকন শো করবে
+  }
+}
+
+// ফায়ারবেজ অথেন্টিকেশন চেক করার ফাংশন
 function validateAdmin() {
   const email = document.getElementById('adminEmailInput').value.trim();
   const password = document.getElementById('adminPasswordInput').value;
@@ -239,17 +208,14 @@ function validateAdmin() {
     return;
   }
 
-  // 🔒 ফায়ারবেজ অথেন্টিকেশন (Firebase Auth Console) মেকানিজম
   firebase.auth().signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
-      // লগইন সফল হলে সেশনে 'admin' রোল সেট হবে 
+      // লগইন সফল হলে সেশনে 'admin' রোল সেভ হবে 
       sessionStorage.setItem('userRole', 'admin');
-      
-      // সফল লগইনের পর সরাসরি dashboard.ad.html-এ নিয়ে যাবে
+      // সফল লগইনের পর সরাসরি dashboard.ad.html-এ রিডাইরেক্ট করবে
       window.location.href = "dashboard.ad.html"; 
     })
     .catch((error) => {
-      // পাসওয়ার্ড ভুল হলে বা কোনো সমস্যা থাকলে এরর মেসেজ দেখাবে
       console.error(error);
       errorBlock.innerText = "ভুল ইমেইল অথবা পাসওয়ার্ড! আবার চেষ্টা করুন।";
       errorBlock.style.display = "block";
