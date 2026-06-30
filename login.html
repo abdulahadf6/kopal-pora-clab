@@ -1,10 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Member Login</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
 <style>
 *{
@@ -94,6 +96,9 @@ border:none;
 outline:none;
 border-radius:14px;
 font-size:16px;
+color: #000;
+text-align: center;
+font-weight: 600;
 }
 
 button{
@@ -132,6 +137,14 @@ font-size:12px;
 opacity:.7;
 }
 
+.error-text {
+color: #f87171;
+font-size: 14px;
+margin-bottom: 15px;
+display: none;
+font-weight: 500;
+}
+
 @keyframes float{
 0%,100%{transform:translateY(0);}
 50%{transform:translateY(-10px);}
@@ -167,12 +180,12 @@ Enter your Member ID
 </div>
 
 <div class="input-box">
-<input type="text" placeholder="AX001">
+<input type="text" id="memberIdInput" placeholder="AX001" oninput="this.value = this.value.toUpperCase()">
 </div>
 
-<button
- onclick="location.href='dashboard.html'"
-  >
+<div class="error-text" id="errorBlock">Invalid Member ID!</div>
+
+<button onclick="validateMember()">
  Sign In
 </button>
 
@@ -185,6 +198,57 @@ Kopal Pora Travelers Club © 2026
 </div>
 
 </div>
+
+<script>
+// আপনার ফায়ারবেজ ডাটাবেজ লিংক কনফিগারেশন
+const firebaseConfig = {
+  databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+
+// ফায়ারবেজ ইনিশিয়ালাইজ করা
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+function validateMember() {
+  const inputID = document.getElementById('memberIdInput').value.trim();
+  const errorBlock = document.getElementById('errorBlock');
+  
+  errorBlock.style.display = "none";
+
+  if(!inputID) {
+    errorBlock.innerText = "Please enter your Member ID!";
+    errorBlock.style.display = "block";
+    return;
+  }
+
+  // ফায়ারবেজের 'members' নোড থেকে রিয়েল-টাইম ভ্যালিডেশন
+  database.ref('members').once('value', (snapshot) => {
+    const membersData = snapshot.val() || {};
+    let isAccessGranted = false;
+
+    // ডাটাবেজের ভেতরে থাকা প্রতিটা মেম্বারের আইডি মিলানো হচ্ছে
+    Object.keys(membersData).forEach(key => {
+      // আপনার ডাটাবেজের ফিল্ডের নাম যদি 'id' বা 'phone' হয়, কোডটি দুটিই চেক করবে
+      if(membersData[key].id === inputID || membersData[key].phone === inputID) {
+        isAccessGranted = true;
+      }
+    });
+
+    if(isAccessGranted) {
+      // ব্রাউজারের লোকাল মেমরিতে মেম্বার পারমিশন লক সেট করা হলো
+      localStorage.setItem('userRole', 'member');
+      window.location.href = "dashboard.html";
+    } else {
+      // আইডি না মিললে এরর মেসেজ শো করবে
+      errorBlock.innerText = "ভুল মেম্বার আইডি! আবার চেষ্টা করুন।";
+      errorBlock.style.display = "block";
+    }
+  }).catch((error) => {
+    errorBlock.innerText = "Network error! Try again.";
+    errorBlock.style.display = "block";
+  });
+}
+</script>
 
 </body>
 </html>
