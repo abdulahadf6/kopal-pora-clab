@@ -87,21 +87,27 @@ text-align: center;
 font-weight: 600;
 }
 
+/* 👁️ চোখের আইকন পজিশন করার জন্য কন্টেইনার ফিক্স */
 .pass-wrapper {
   position: relative;
   width: 100%;
+  display: flex;
+  align-items: center;
 }
+
+/* পাসওয়ার্ড ইনপুট ফিল্ডের দুই পাশে স্পেস রাখা হলো */
 .pass-wrapper input {
   padding-right: 50px;
+  padding-left: 50px;
 }
+
+/* চোখের আইকনকে ইনপুট বক্সের ভেতরে ডান পাশে ফিক্স করা হলো */
 .toggle-password {
   position: absolute;
   right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
   cursor: pointer;
   color: #333;
-  font-size: 20px;
+  font-size: 22px;
   user-select: none;
   z-index: 10;
 }
@@ -162,7 +168,7 @@ button:hover{ transform:translateY(-3px); box-shadow:0 10px 25px rgba(16, 185, 1
 </div>
 
 <script>
-// আপনার প্রজেক্টের আসল ফায়ারবেজ কনফিগারেশন কীসমূহ বসানো হয়েছে
+// আপনার নিজস্ব ফায়ারবেজ কনফিগারেশন কীসমূহ
 const firebaseConfig = {
   apiKey: "AIzaSyBDeCnZysIu3_H162qMsWZaZ3Ba09Hwhxg", 
   authDomain: "kopal-pora-travelers-club.firebaseapp.com",
@@ -174,21 +180,21 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// পাসওয়ার্ড শো/হাইড করার লজিক
+// পাসওয়ার্ড শো এবং হাইড করার ফাংশন
 function togglePass() {
   const passInput = document.getElementById('adminPasswordInput');
   const eyeIcon = document.querySelector('.toggle-password');
   
   if (passInput.type === "password") {
     passInput.type = "text";
-    eyeIcon.innerText = "🔒"; 
+    eyeIcon.innerText = "🔒"; // পাসওয়ার্ড দেখতে চাইলে লক আইকন শো করবে
   } else {
     passInput.type = "password";
-    eyeIcon.innerText = "👁️"; 
+    eyeIcon.innerText = "👁️"; // হাইড থাকলে চোখ আইকন শো করবে
   }
 }
 
-// ফায়ারবেজ অথ দিয়ে ড্যাশবোর্ডে রিডাইরেক্টের লজিক
+// ফায়ারবেজ অথেন্টিকেশন চেক করার ফাংশন
 function validateAdmin() {
   const email = document.getElementById('adminEmailInput').value.trim();
   const password = document.getElementById('adminPasswordInput').value;
@@ -204,9 +210,9 @@ function validateAdmin() {
 
   firebase.auth().signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
-      // সেশনে অ্যাডমিন রোল সেট হলো
+      // লগইন সফল হলে সেশনে 'admin' রোল সেভ হবে 
       sessionStorage.setItem('userRole', 'admin');
-      // সঠিক হলে সরাসরি dashboard.ad.html-এ নিয়ে যাবে
+      // সফল লগইনের পর সরাসরি dashboard.ad.html-এ রিডাইরেক্ট করবে
       window.location.href = "dashboard.ad.html"; 
     })
     .catch((error) => {
