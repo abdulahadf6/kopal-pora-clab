@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC Collection</title>
 
+<script>
+if (localStorage.getItem('userRole') !== 'member') {
+    window.location.href = "login.html"; 
+}
+</script>
+
 <style>
 *{
 margin:0;
@@ -14,7 +20,9 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 🔒 ডিফল্টভাবে পুরো বডি হাইড করা, সেশন ভ্যালিড থাকলে কেবল তখনই স্ক্রিপ্ট দিয়ে একবারে অন হবে */
 body{
+display: none;
 background:#081018;
 color:#fff;
 min-height:100vh;
@@ -258,7 +266,7 @@ font-size:18px;
 <a href="expense.html"> Expense</a>
 <a href="reports.html"> Reports</a>
 <a href="about.html"> About</a>
-<a href="index.html"> Logout</a>
+<a href="#" onclick="logoutUser()"> Logout</a>
 </div>
 
 <div class="container">
@@ -318,6 +326,11 @@ KPTC Collection V1.3
 </div>
 
 <script>
+  // 🔒 সেশন ভ্যালিড থাকলে কেবল তখনই পেজটি ডিসপ্লে (Show) করবে
+  if (localStorage.getItem('userRole') === 'member') {
+      document.body.style.display = "block";
+  }
+
   const firebaseConfig = {
     databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
   };
@@ -429,7 +442,6 @@ KPTC Collection V1.3
     document.getElementById('monthCollectionFunds').innerText = `৳${totalCalculatedMonthFunds.toLocaleString()}`;
     document.getElementById('yearCollectionFunds').innerText = `৳${totalCalculatedYearFunds.toLocaleString()}`;
 
-    // 🌟 [ম্যাজিক কোড আপডেট] ডাটাবেজের গ্লোবাল নোডে ডেটা অটো পুশ করা
     db.ref('global_totals/collection_income').set({
       thisMonth: totalCalculatedMonthFunds,
       thisYear: totalCalculatedYearFunds,
@@ -462,6 +474,12 @@ KPTC Collection V1.3
     document.getElementById('overlay').classList.remove('show');
     document.getElementById('menuBtn').style.opacity = '1';
     document.getElementById('menuBtn').style.pointerEvents = 'auto';
+  }
+
+  // 🚪 লগআউট ফাংশন
+  function logoutUser() {
+    localStorage.clear();
+    window.location.href = "login.html";
   }
 </script>
 
