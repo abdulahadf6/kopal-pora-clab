@@ -15,7 +15,6 @@ transition: .4s;
 }
 
 body{
-/* 🟢 এখানে display: none; তুলে সরাসরি block করা হয়েছে যেন পেজে আসলেই সবকিছু দেখা যায় */
 display: block;
 min-height:100vh;
 background:#030611;
@@ -55,73 +54,33 @@ position:relative;
   100% { transform: rotate(360deg) scale(1); }
 }
 
-/* Menu Button */
-.menu-btn{
-  position:fixed;
-  top:20px;
-  left:20px;
-  z-index:1002;
-  background:rgba(255,255,255,.08);
-  backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,.15);
-  padding:12px 18px;
-  border-radius:15px;
-  cursor:pointer;
-  font-size:24px;
-}
-.menu-btn:hover{ transform:scale(1.05); }
-
-/* Sidebar */
-.sidebar{
-  position:fixed;
-  left:-320px;
-  top:0;
-  width:300px;
-  height:100%;
-  padding:25px;
-  background:rgba(255,255,255,.05);
-  backdrop-filter:blur(30px);
-  border-right:1px solid rgba(255,255,255,.1);
-  z-index:1001;
-}
-.sidebar.show{ transform:translateX(320px); }
-
-.close-btn { 
-  font-size: 26px; 
-  cursor: pointer; 
-  margin-bottom: 25px; 
-  color: #94a3b8; 
-  display: inline-block;
-}
-.close-btn:hover { 
-  color: #fff; 
-  transform: rotate(90deg); 
+/* 🟢 প্রিমিয়াম অ্যাডমিন লগইন বাটন */
+.admin-login-btn {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10b981;
+  color: #10b981;
+  padding: 10px 20px;
+  border-radius: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+  z-index: 10;
 }
 
-.sidebar a{
-  display:block;
-  text-decoration:none;
-  color:white;
-  padding:14px;
-  margin-bottom:10px;
-  border-radius:14px;
-  background:rgba(255,255,255,.05);
+.admin-login-btn:hover {
+  background: #10b981;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
-.sidebar a:hover{ transform:translateX(6px); background:rgba(16, 185, 129, 0.2); }
-
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.4);
-  backdrop-filter:blur(10px);
-  opacity:0;
-  visibility:hidden;
-  z-index:1000;
-}
-.overlay.show{ opacity:1; visibility:visible; }
 
 /* Entrance Animation */
-.hero img, .hero h1, .hero p, .cards, .badge {
+.hero img, .hero h1, .hero p, .cards, .badge, .admin-login-btn {
   opacity: 0;
   animation: iphoneUnlock 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -139,6 +98,7 @@ position:relative;
   }
 }
 
+.admin-login-btn { animation-delay: 0.05s; }
 .hero img  { animation-delay: 0.1s; }
 .hero h1   { animation-delay: 0.25s; }
 .badge     { animation-delay: 0.3s; }
@@ -148,7 +108,7 @@ position:relative;
 /* হিরো সেকশন */
 .hero{
 text-align:center;
-padding:80px 20px 20px;
+padding:90px 20px 20px;
 }
 
 .hero img{
@@ -186,7 +146,7 @@ font-size:18px;
 opacity:.7;
 }
 
-/* কার্ড গ্রিড */
+/* カードグリッド */
 .cards{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
@@ -279,19 +239,7 @@ font-size: 14px;
   <div class="bg-wave"></div>
 </div>
 
-<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
-<div class="overlay" id="overlay" onclick="closeMenu()"></div>
-
-<div class="sidebar" id="sidebar">
-  <div class="close-btn" onclick="closeMenu()">✕</div>
-  <a href="index.ad.html">Dashboard</a>
-  <a href="members.ad.html">Manage Members</a>
-  <a href="collection.ad.html">Update Collection</a>
-  <a href="income.ad.html">Add Income</a>
-  <a href="expense.ad.html">Add Expense</a>
-  <a href="reports.ad.html">View Reports</a>
-  <a href="#" onclick="logoutAdmin()">Logout</a>
-</div>
+<a href="login.ad.html" class="admin-login-btn">Admin Login</a>
 
 <section class="hero">
   <img src="Logo.png" alt="Logo">
@@ -320,27 +268,6 @@ font-size: 14px;
 <div class="footer">
 © 2026 Kopal Pora Travelers Club | Core Admin V4.0
 </div>
-
-<script>
-// 🟢 অটো-রিডাইরেক্ট স্ক্রিপ্টগুলো রিমুভ করা হয়েছে যাতে পেজ লোড হলেই সরাসরি ওপেন হয়।
-
-function openMenu(){
-  document.getElementById('sidebar').classList.add('show');
-  document.getElementById('overlay').classList.add('show');
-  document.getElementById('menuBtn').style.opacity='0';
-}
-
-function closeMenu(){
-  document.getElementById('sidebar').classList.remove('show');
-  document.getElementById('overlay').classList.remove('show');
-  document.getElementById('menuBtn').style.opacity='1';
-}
-
-function logoutAdmin() {
-  sessionStorage.clear(); 
-  window.location.href = "login.ad.html";
-}
-</script>
 
 </body>
 </html>
