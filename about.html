@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC - About, Policies & Tech</title>
+
+<script>
+if (localStorage.getItem('userRole') !== 'member') {
+    window.location.href = "login.html"; 
+}
+</script>
+
 <style>
 *{
   margin:0;
@@ -13,7 +20,9 @@
   transition:.4s;
 }
 
+/* 🔒 ডিফল্টভাবে পুরো বডি হাইড করা, সেশন ভ্যালিড থাকলে কেবল তখনই স্ক্রিপ্ট দিয়ে অন হবে */
 body{
+  display: none;
   background:#020617;
   color:white;
   min-height:100vh;
@@ -214,7 +223,7 @@ body{
 .text-bn {
   left: 14px;
   opacity: 0;
-  transform: translateY(20px); /* নিচে লুকিয়ে থাকবে */
+  transform: translateY(20px);
 }
 
 /* --- অ্যাক্টিভ বাংলা মোড স্টেট --- */
@@ -224,16 +233,13 @@ body{
   color: #10b981;
   box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
 }
-/* ইমোজি বাম থেকে ডান পাশে যাবে (১২ পিক্সেল থেকে সরিয়ে ডানে নেওয়া) */
 .translate-btn.active-bn .btn-emoji {
   transform: translateX(82px);
 }
-/* ইংরেজি টেক্সট নিচে নেমে অদৃশ্য হবে */
 .translate-btn.active-bn .text-en {
   opacity: 0;
   transform: translateY(20px);
 }
-/* বাংলা টেক্সট নিচ থেকে উঠে সামনে আসবে */
 .translate-btn.active-bn .text-bn {
   opacity: 1;
   transform: translateY(0);
@@ -263,6 +269,7 @@ body{
   <a href="expense.html"> Expense</a>
   <a href="reports.html"> Reports</a>
   <a href="about.html">About</a>
+  <a href="#" onclick="logoutUser()">Logout</a>
 </div>
 
 <div class="container">
@@ -315,6 +322,11 @@ body{
 <div class="footer">KPTC Core System V4.0</div>
 
 <script>
+// 🔒 সেশন ভ্যালিড থাকলে কেবল তখনই পেজটি ডিসপ্লে করবে
+if (localStorage.getItem('userRole') === 'member') {
+    document.body.style.display = "block";
+}
+
 const contents = {
   about: {
     en: {
@@ -342,7 +354,7 @@ const contents = {
       title: "📜 ক্লাবের নীতিমালা",
       html: `<ul>
               <li><strong>বাধ্যতামূলক চাঁদা কাঠামো:</strong> ক্লাবের প্রতিটি সদস্যকে নির্ধারিত সময়সীমার মধ্যে মাসিক চাঁদা পরিশোধ করতে হবে, যা ক্লাবের জরুরি প্রয়োজনে তহবিল সচল রাখে।</li>
-              <li><strong>আর্থিক স্বচ্ছতা:</strong> আর্থিক সততাই আমাদের মূল ভিত্তি। প্রতিটি একক লেনদেন এবং ব্যয় রিয়েল-টাইম ক্লাউড লেজারে ডাইনামিকভাবে নথিবদ্ধ করা হয়।</li>
+              <li><strong>আর্থিক স্বচ্ছতা:</strong> আর্থিক সততাই আমাদের মূল ভিত্তি। প্রতিটি একক লেনদেন এবং ব্যয় রিয়েল-টাইম ক্লাউড লেজারে ডাইনামিকভাবে নثিবদ্ধ করা হয়।</li>
               <li><strong>তহবিলের সুরক্ষানীতি:</strong> ক্লাবের অর্থ শুধুমাত্র যৌথ ট্যুর ও প্রাতিষ্ঠানিক উন্নয়নে ব্যবহৃত হয়। ব্যক্তিগত কাজে ক্লাবের কোনো ফান্ড ব্যবহার করা হয় না।</li>
               <li><strong>গণতান্ত্রিক পদ্ধতি:</strong> ভ্রমণের পরিকল্পনা, বাজেট এবং নতুন সদস্য অন্তর্ভুক্তির মতো সিদ্ধান্তগুলো গণতান্ত্রিক ভোটাভুটি বা যৌথ মতামতের ভিত্তিতে নেওয়া হয়।</li>
              </ul>`
@@ -359,7 +371,7 @@ const contents = {
       title: "🌐 ক্লাব ও ওয়েব আর্কিটেকচার",
       html: `<p><strong>কপাল পোড়া ট্রাভেলার্স ক্লাব (KPTC)</strong> আনুষ্ঠানিকভাবে প্রতিষ্ঠিত হয় <strong>৫ই জুন, ২০২৬</strong> তারিখে। একদল ঘনিষ্ঠ বন্ধুর দীর্ঘদিনের যৌথ স্বপ্ন, প্রকৃতিপ্রেম এবং ভ্রমণের প্রতি গভীর আসক্তির ফসল হিসেবে এই ক্লাবের আত্মপ্রকাশ। বন্ধুদের আড্ডায় শুরু হওয়া সাধারণ কিছু ভ্রমণ পরিকল্পনা ও চিন্তা ভাবনা দ্রুত একটি সুসংগঠিত প্রাতিষ্ঠানিক রূপ লাভ করে, যার মূল উদ্দেশ্য ছিল সব ভ্রমণপ্রেমীদের এক ছাতার নিচে নিয়ে আসা এবং অজানাকে উন্মোচন করা।</p>
              <p>KPTC-এর মূল উদ্দেশ্য কেবল সাধারণ বিনোদনমূলক ভ্রমণের মধ্যে সীমাবদ্ধ নয়। এই ক্লাবটি মূলত পরিবেশ-বান্ধব পর্যটন (Eco-Tourism) প্রসার, বিভিন্ন অঞ্চলের বৈচিত্র্যময় সংস্কৃতির প্রতি শ্রদ্ধা জাগানো এবং রোমাঞ্চকর অভিযানের মাধ্যমে সদস্যদের ব্যক্তিগত ও মানসিক বিকাশ নিশ্চিত করার লক্ষ্যে কাজ করে। আমাদের লক্ষ্য এমন একটি টেকসই প্ল্যাটফর্ম তৈরি করা, যেখানে সদস্যরা দৈনন্দিন যান্ত্রিকতা থেকে মুক্তি পেয়ে নতুন অভিজ্ঞতা অর্জন করে এবং ভবিষ্যতে বড় কোনো ট্যুর পরিচালনার জন্য একটি সুসংহত আর্থিক তহবিল বজায় রাখে।</p>
-             <p>এই উদ্দেশ্যকে বাস্তবে রূপ দিতে এবং সনাতন খাতা-কলমের হিসাবের অব্যবস্থাপনা দূর করতে এই উন্নত ওয়েব টার্মিনালটি তৈরি করা হয়েছে। <strong>Abdul Ahad</strong> এখানে প্রধান <strong>Executive</strong> হিসেবে এর প্রাতিষ্ঠানিক ও ফুল-স্ট্যাক ওয়েব সিস্টেম অপারেশনাল কার্যাবলী দেখাশোনা করেন। এই প্ল্যাটফর্মটি একটি সুরক্ষিত ক্লাউড ডাটাবেজ আর্কিটেকচারের ওপর ভিত্তি করে রিয়েল-টাইম ডাটা ফ্লো নিশ্চিত করে, যা হিসাবের নির্ভুলতা, দ্রুততম আপডেট এবং ডাইনামিক অ্যানালিটিক্যাল রিপোর্ট তৈরি করতে সক্ষম। সম্পূর্ণ ওয়েব আর্কিটেকচারটিকে একটি দূরদর্শী ডিজিটাল ইকোসিস্টেম হিসেবে ডিজাইন করা হয়েছে, যা আগামী বহু বছর ধরে ক্লাবের সর্বোচ্চ স্বচ্ছতা ও প্রাতিষ্ঠানিক শৃঙ্খলা বজায় রাখবে।</p>`
+             <p>এই উদ্দেশ্যকে বাস্তবে রূপ দিতে এবং সনাতন খাতা-কলমের হিসাবের অব্যবস্থাপনা দূর করতে এই উন্নত ওয়েব টার্মিনালটি তৈরি করা হয়েছে। <strong>Abdul Ahad</strong> এখানে প্রধান <strong>Executive</strong> হিসেবে এর প্রাতিষ্ঠানিক ও ফুল-স্ট্যাক ওয়েব সিস্টেম অপারেশনাল কার্যাবলী দেখাশোনা করেন। এই প্ল্যাটফর্মটি একটি সুরক্ষিত ক্লাউড ডাটাবেজ আর্কিটেকচারের ওপর ভিত্তি করে রিয়েল-টাইম ডাটা ফ্লো নিশ্চিত করে, যা হিসাবের নির্ভুলতা, দ্রুততম আপডেট এবং ডাইনামিক অ্যানালিটিক্যাল রিপোর্ট তৈরি করতে সক্ষম। সম্পূর্ণ ওয়েব আর্কিটেকচারটিকে একটি দূরदर्शी ডিজিটাল ইকোসিস্টেম হিসেবে ডিজাইন করা হয়েছে, যা আগামী বহু বছর ধরে ক্লাবের সর্বোচ্চ স্বচ্ছতা ও প্রাতিষ্ঠানিক শৃঙ্খলা বজায় রাখবে।</p>`
     }
   }
 };
@@ -377,7 +389,6 @@ function toggleTranslation(section) {
   const lang = currentLang[section];
   const btn = document.getElementById(section + 'Btn');
   
-  // টেক্সট ও টাইটেল আপডেট
   if (section === 'about') {
     document.getElementById('aboutTitle').innerHTML = contents.about[lang].title;
     document.getElementById('aboutContent').innerHTML = contents.about[lang].html;
@@ -389,7 +400,6 @@ function toggleTranslation(section) {
     document.getElementById('clubWebContent').innerHTML = contents.clubWeb[lang].html;
   }
 
-  // বাটন অ্যানিমেশন ক্লাস টগল
   if (lang === 'bn') {
     btn.classList.add('active-bn');
   } else {
@@ -408,6 +418,12 @@ function closeMenu(){
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity='1';
+}
+
+// 🚪 লগআউট ফাংশন
+function logoutUser() {
+  localStorage.clear();
+  window.location.href = "login.html";
 }
 </script>
 
