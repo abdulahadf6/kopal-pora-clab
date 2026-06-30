@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC Reports</title>
+
+<script>
+if (localStorage.getItem('userRole') !== 'member') {
+    window.location.href = "login.html"; 
+}
+</script>
+
 <style>
 *{
   margin:0;
@@ -13,7 +20,9 @@
   transition:.4s;
 }
 
+/* 🔒 ডিফল্টভাবে পুরো বডি হাইড করা, সেশন ভ্যালিড থাকলে কেবল তখনই স্ক্রিপ্ট দিয়ে অন হবে */
 body{
+  display: none;
   background:#020617;
   color:white;
   min-height:100vh;
@@ -203,6 +212,7 @@ tr:hover { background: rgba(255,255,255,.04); }
   <a href="expense.html">Expense</a>
   <a href="reports.html">Reports</a>
   <a href="about.html">About</a>
+  <a href="#" onclick="logoutUser()">Logout</a>
 </div>
 
 <div class="container">
@@ -265,6 +275,11 @@ tr:hover { background: rgba(255,255,255,.04); }
 <div class="footer">KPTC Reports V1.1</div>
 
 <script>
+// 🔒 সেশন ভ্যালিড থাকলে কেবল তখনই পেজটি ডিসপ্লে করবে
+if (localStorage.getItem('userRole') === 'member') {
+    document.body.style.display = "block";
+}
+
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
@@ -284,7 +299,7 @@ function processReports() {
   
   const reportTree = {};
 
-  // ১. ইনকাম ডাটা প্রসেস (কালেকশনের টাকাগুলো নিজস্ব ডেট অনুযায়ী এখানে অটোমেটিক ভাগ হয়ে যাবে)
+  // ১. ইনকাম ডাটা প্রসেস
   Object.keys(incomeData).forEach(key => {
     const item = incomeData[key];
     const amount = parseFloat(item.amount) || 0;
@@ -341,7 +356,6 @@ function processReports() {
     }
   });
 
-  // কার্ড ভ্যালু আপডেট (কোনো জগাখিচুড়ি বা ডাবল এন্ট্রি ছাড়াই ডিরেক্ট ক্যালকুলেশন)
   document.getElementById('totalIncome').innerText = `৳${totalIncome.toLocaleString()}`;
   document.getElementById('totalExpense').innerText = `৳${totalExpense.toLocaleString()}`;
   document.getElementById('currentBalance').innerText = `৳${(totalIncome - totalExpense).toLocaleString()}`;
@@ -421,6 +435,12 @@ function closeMenu(){
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity='1';
+}
+
+// 🚪 লগআউট ফাংশন
+function logoutUser() {
+  localStorage.clear();
+  window.location.href = "login.html";
 }
 </script>
 </body>
