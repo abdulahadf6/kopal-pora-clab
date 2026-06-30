@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC Dashboard V3 - Ultra Premium Liquid</title>
+
+<script>
+if (localStorage.getItem('userRole') !== 'member') {
+    window.location.href = "login.html"; 
+}
+</script>
+
 <style>
 /* গ্লোবাল স্টাইল */
 *{
@@ -14,7 +21,9 @@
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 🔒 ডিফল্টভাবে বডি লুকিয়ে রাখা হয়েছে, সেশন ভ্যালিড হলে স্ক্রিপ্ট দিয়ে অন করা হবে */
 body {
+  display: none;
   background: #030611;
   color: #f5f5f7;
   min-height: 100vh;
@@ -297,10 +306,9 @@ tr:hover { background: rgba(255, 255, 255, 0.03); }
 <div class="footer">KPTC Dashboard V3.6</div>
 
 <script>
-// 🔒 মেম্বার সিকিউরিটি লক (স্ক্রিপ্টের শুরুতেই চেক করবে)
-if (localStorage.getItem('userRole') !== 'member') {
-    // লগইন ছাড়া সরাসরি বা চালাকি করে ঢুকতে চাইলে মেইন লগইন পেজে কিক আউট করবে
-    window.location.href = "login.html"; 
+// 🔒 সেশন ভ্যালিড থাকলে কেবল তখনই পেজটি ডিসপ্লে (Show) করবে
+if (localStorage.getItem('userRole') === 'member') {
+    document.body.style.display = "block";
 }
 
 // ফায়ারবেজ কনফিগারেশন
@@ -326,7 +334,6 @@ function updateFinancials() {
   document.getElementById('currentBalance').innerText = `৳${balance.toLocaleString()}`;
 }
 
-// 🎯 ডাইনামিক রিসেন্ট অ্যাক্টিভিটি জেনারেটর
 function generateRecentActivities() {
   let activities = [];
 
@@ -402,7 +409,6 @@ function generateRecentActivities() {
   });
 }
 
-// ফায়ারবেজ রুট নোড একীভূত রিয়েল-টাইম ট্র্যাকার
 db.ref().on('value', (snapshot) => {
   const rootData = snapshot.val() || {};
   
@@ -431,7 +437,6 @@ db.ref().on('value', (snapshot) => {
   generateRecentActivities();
 });
 
-// ৪. স্ট্যাটিক ট্যুর হিস্ট্রি লোডার
 db.ref('tour_history').on('value', (snapshot) => {
   const tbody = document.getElementById('tourHistoryBody');
   tbody.innerHTML = "";
@@ -458,7 +463,6 @@ db.ref('tour_history').on('value', (snapshot) => {
   });
 });
 
-// মেনু স্ক্রিপ্ট
 function openMenu(){
   document.getElementById('sidebar').classList.add('show');
   document.getElementById('overlay').classList.add('show');
@@ -472,10 +476,9 @@ function closeMenu(){
   document.getElementById('menuBtn').style.pointerEvents = 'auto';
 }
 
-// 🚪 লগআউট ফাংশন
 function logoutUser() {
-  localStorage.clear(); // সেশন মেমরি ক্লিয়ার করা হলো
-  window.location.href = "login.html"; // লগইন পেজে ফিরিয়ে দেওয়া হলো
+  localStorage.clear();
+  window.location.href = "login.html";
 }
 </script>
 
