@@ -236,7 +236,7 @@ function validateMember() {
 
     if(isAccessGranted) {
       // ব্রাউজারের লোকাল মেমরিতে মেম্বার পারমিশন লক সেট করা হলো
-      localStorage.setItem('userRole', 'member');
+      sessionStorage.setItem('userRole', 'member');
       window.location.href = "dashboard.html";
     } else {
       // আইডি না মিললে এরর মেসেজ শো করবে
