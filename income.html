@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC - Income Dashboard (Member Panel)</title>
+
+<script>
+if (localStorage.getItem('userRole') !== 'member') {
+    window.location.href = "login.html"; 
+}
+</script>
+
 <style>
 /* গ্লোবাল স্টাইল */
 *{
@@ -14,7 +21,9 @@
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 🔒 ডিফল্টভাবে পুরো বডি হাইড করা, সেশন ভ্যালিড থাকলে কেবল তখনই স্ক্রিপ্ট দিয়ে একবারে অন হবে */
 body {
+  display: none;
   background: #030611;
   color: #f5f5f7;
   min-height: 100vh;
@@ -149,7 +158,7 @@ body {
   transform: translateX(6px);
 }
 
-/*カード グリッド*/
+/*카드 グリッド*/
 .cards {
   max-width: 1200px;
   margin: auto;
@@ -216,7 +225,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <a href="expense.html"> Expense</a>
 <a href="reports.html"> Reports</a>
 <a href="about.html"> About</a>
-<a href="index.html"> Logout</a>
+<a href="#" onclick="logoutUser()"> Logout</a>
 </div>
 
 <div class="filter-container">
@@ -260,6 +269,11 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <div class="footer">KPTC Income Dashboard V3.3</div>
 
 <script>
+// 🔒 সেশন ভ্যালিড থাকলে কেবল তখনই পেজটি ডিসপ্লে করবে
+if (localStorage.getItem('userRole') === 'member') {
+    document.body.style.display = "block";
+}
+
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
@@ -310,7 +324,6 @@ function renderIncomeDashboard() {
     document.getElementById('yearCardTitle').innerText = `Year ${selectedYearStr} Income`;
   }
 
-  // ডাটাবেজের রিয়েল ইনকাম ডেটা প্রসেস ও টেবিল জেনারেট (কোনো ডাবল ডুপ্লিকেট কাউন্টিং ছাড়া)
   Object.keys(globalIncomeData).forEach(key => {
     const item = globalIncomeData[key];
     const amount = parseFloat(item.amount) || 0;
@@ -370,7 +383,6 @@ function renderIncomeDashboard() {
     tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a;">No income records found for ${scopeText}!</td></tr>`;
   }
 
-  // স্ক্রিনের মেইন কার্ড আপডেট (সম্পূর্ণ ডাবল যোগ বন্ধ)
   document.getElementById('monthIncome').innerText = `৳${totalMonth.toLocaleString()}`;
   document.getElementById('yearIncome').innerText = `৳${totalYearOrAll.toLocaleString()}`;
 }
@@ -381,10 +393,15 @@ function openMenu(){
   document.getElementById('menuBtn').style.opacity = '0';
 }
 function closeMenu(){
-  document.getElementById('sidebar').classList.remove('remove');
   document.getElementById('sidebar').classList.remove('show');
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity = '1';
+}
+
+// 🚪 লগআউট ফাংশন
+function logoutUser() {
+  localStorage.clear();
+  window.location.href = "login.html";
 }
 </script>
 </body>
