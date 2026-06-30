@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC Dashboard V3 - Ultra Premium Liquid</title>
+
+<script>
+if (localStorage.getItem('userRole') !== 'member') {
+    window.location.href = "login.html"; 
+}
+</script>
+
 <style>
 /* গ্লোবাল স্টাইল */
 *{
@@ -14,7 +21,9 @@
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 🔒 ডিফল্টভাবে পুরো বডি হাইড করা, সেশন ঠিক থাকলে স্ক্রিপ্ট দিয়ে একবারে অন হবে */
 body {
+  display: none;
   background: #030611;
   color: #f5f5f7;
   min-height: 100vh;
@@ -219,7 +228,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <a href="expense.html"> Expense</a>
 <a href="reports.html"> Reports</a>
 <a href="about.html"> About</a>
-<a href="index.html"> Logout</a>
+<a href="#" onclick="logoutUser()"> Logout</a>
 </div>
 
 <div class="filter-container">
@@ -283,6 +292,11 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <div class="footer">KPTC Dashboard V3</div>
 
 <script>
+// 🔒 মেম্বার সেশন ট্রাস্টেড হলে কেবল তখনই পেজটি বডি আনহাইড হবে
+if (localStorage.getItem('userRole') === 'member') {
+    document.body.style.display = "block";
+}
+
 // ফায়ারবেজে কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
@@ -294,8 +308,7 @@ const db = firebase.database();
 
 let globalExpenseData = {};
 
-// ড্রপডাউন জেনারেটর (২০২৬ থেকে শুরু করে পরবর্তী ৪ বছর)
-const currentYear = new Date().getFullYear(); // 2026
+const currentYear = new Date().getFullYear(); 
 const yearFilterSelect = document.getElementById('yearFilter');
 
 for (let y = currentYear; y <= currentYear + 4; y++) {
@@ -315,7 +328,7 @@ expenseRef.on('value', (snapshot) => {
 
 // ফিল্টারিং এবং রেন্ডারিং মেইন ফাংশন
 function renderExpenseDashboard() {
-  const selectedYearStr = document.getElementById('yearFilter').value; // 'all' অথবা কোনো সাল
+  const selectedYearStr = document.getElementById('yearFilter').value; 
   const shortYearStr = selectedYearStr !== 'all' ? selectedYearStr.slice(-2) : ''; 
 
   const catTbody = document.getElementById('categoryTableBody');
@@ -333,7 +346,6 @@ function renderExpenseDashboard() {
 
   const summaryMap = {};
 
-  // কার্ড টাইটেল পরিবর্তন লজিক
   if (selectedYearStr === 'all') {
     document.getElementById('monthCardTitle').innerText = "Current Month Expense";
     document.getElementById('yearCardTitle').innerText = "Total Lifetime Expense";
@@ -349,7 +361,6 @@ function renderExpenseDashboard() {
     const dateStr = item.date || "N/A"; 
     let shouldInclude = false;
 
-    // All Years সিলেক্ট করা থাকলে
     if (selectedYearStr === 'all') {
       shouldInclude = true;
       hasData = true;
@@ -362,7 +373,6 @@ function renderExpenseDashboard() {
         }
       }
     } 
-    // নির্দিষ্ট কোনো সাল সিলেক্ট করা থাকলে
     else if (dateStr && dateStr !== "N/A") {
       const parts = dateStr.split('-');
       if (parts.length === 3) {
@@ -454,6 +464,12 @@ function closeMenu(){
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('menuBtn').style.opacity = '1';
   document.getElementById('menuBtn').style.pointerEvents = 'auto';
+}
+
+// 🚪 লগআউট ফাংশন
+function logoutUser() {
+  localStorage.clear();
+  window.location.href = "login.html";
 }
 </script>
 
