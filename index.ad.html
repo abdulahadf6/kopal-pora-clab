@@ -1,1 +1,353 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPTC - অ্যাডমিন প্যানেল</title>
 
+<script>
+if (sessionStorage.getItem('userRole') !== 'admin') {
+    window.location.href = "login.ad.html"; 
+}
+</script>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+transition: .4s;
+}
+
+body{
+display: none;
+min-height:100vh;
+background:#030611;
+color:#f5f5f7;
+overflow-x:hidden;
+position:relative;
+}
+
+/* আল্ট্রা প্রিমিয়াম এনিমেটেড ব্যাকগ্রাউন্ড */
+.bg-container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #02040a;
+}
+
+.bg-wave {
+  position: absolute;
+  width: 150vw;
+  height: 150vh;
+  top: -50vh;
+  left: -25vw;
+  background: 
+    radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.4) 0%, transparent 40%), 
+    radial-gradient(circle at 80% 40%, rgba(124, 58, 237, 0.415) 0%, transparent 40%),
+    radial-gradient(circle at 40% 80%, rgba(14, 116, 144, 0.45) 0%, transparent 45%),
+    radial-gradient(circle at 70% 10%, rgba(29, 78, 216, 0.35) 0%, transparent 35%);
+  filter: blur(60px);
+  animation: fastLiquid 15s infinite linear;
+  will-change: transform;
+}
+
+@keyframes fastLiquid {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+/* Menu Button */
+.menu-btn{
+  position:fixed;
+  top:20px;
+  left:20px;
+  z-index:1002;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.15);
+  padding:12px 18px;
+  border-radius:15px;
+  cursor:pointer;
+  font-size:24px;
+}
+.menu-btn:hover{ transform:scale(1.05); }
+
+/* Sidebar */
+.sidebar{
+  position:fixed;
+  left:-320px;
+  top:0;
+  width:300px;
+  height:100%;
+  padding:25px;
+  background:rgba(255,255,255,.05);
+  backdrop-filter:blur(30px);
+  border-right:1px solid rgba(255,255,255,.1);
+  z-index:1001;
+}
+.sidebar.show{ transform:translateX(320px); }
+
+.close-btn { 
+  font-size: 26px; 
+  cursor: pointer; 
+  margin-bottom: 25px; 
+  color: #94a3b8; 
+  display: inline-block;
+}
+.close-btn:hover { 
+  color: #fff; 
+  transform: rotate(90deg); 
+}
+
+.sidebar a{
+  display:block;
+  text-decoration:none;
+  color:white;
+  padding:14px;
+  margin-bottom:10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.05);
+}
+.sidebar a:hover{ transform:translateX(6px); background:rgba(16, 185, 129, 0.2); }
+
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(10px);
+  opacity:0;
+  visibility:hidden;
+  z-index:1000;
+}
+.overlay.show{ opacity:1; visibility:visible; }
+
+/* Entrance Animation */
+.hero img, .hero h1, .hero p, .cards, .badge {
+  opacity: 0;
+  animation: iphoneUnlock 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes iphoneUnlock {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.hero img  { animation-delay: 0.1s; }
+.hero h1   { animation-delay: 0.25s; }
+.badge     { animation-delay: 0.3s; }
+.hero p    { animation-delay: 0.35s; }
+.cards     { animation-delay: 0.5s; }
+
+/* হিরো সেকশন */
+.hero{
+text-align:center;
+padding:80px 20px 20px;
+}
+
+.hero img{
+width:180px;
+max-width:80%;
+filter: drop-shadow(0 0 30px rgba(16, 185, 129, 0.4));
+}
+
+.hero h1{
+font-size:clamp(32px,6vw,52px);
+font-weight: 700;
+margin-top:20px;
+background: linear-gradient(180deg, #ffffff 40%, #d4d4d8 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+letter-spacing: -0.5px;
+}
+
+.badge {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 6px 16px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10b981;
+  color: #10b981;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.hero p{
+margin-top:15px;
+font-size:18px;
+opacity:.7;
+}
+
+/* কার্ড গ্রিড */
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:25px;
+padding:40px 25px;
+max-width:1200px;
+margin:auto;
+}
+
+.card{
+text-decoration: none;
+background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+backdrop-filter: blur(40px);
+-webkit-backdrop-filter: blur(40px);
+border: 1px solid rgba(255, 255, 255, 0.1);
+padding:30px;
+border-radius:28px;
+box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.15), 
+            0 15px 35px rgba(0, 0, 0, 0.4);
+position: relative;
+overflow: hidden;
+display: block;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  bottom: -100%;
+  left: -10%;
+  width: 120%;
+  height: 100%;
+  background: linear-gradient(0deg, rgba(16, 185, 129, 0.08) 0%, rgba(255, 255, 255, 0.01) 70%, transparent 100%);
+  border-radius: 40% 40% 0 0;
+  transition: transform 1.2s cubic-bezier(0.1, 0.8, 0.2, 1), bottom 1.2s cubic-bezier(0.1, 0.8, 0.2, 1);
+  pointer-events: none;
+  transform: translateY(0) rotate(0deg);
+}
+
+.card:hover::after {
+  bottom: 0%;
+  transform: translateY(0) rotate(6deg);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  transform: rotate(45deg);
+  transition: 0.8s ease;
+  pointer-events: none;
+}
+.card:hover::before { transform: translate(50%, 50%) rotate(45deg); }
+
+.card:hover{
+transform:translateY(-6px);
+border-color: rgba(16, 185, 129, 0.4);
+box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.3),
+            0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.card h3{
+font-size: 22px;
+margin-bottom:12px;
+font-weight: 600;
+color: #10b981; 
+}
+
+.card p {
+font-size: 15px;
+color: #a1a1aa;
+line-height: 1.5;
+}
+
+.footer{
+text-align:center;
+padding:40px;
+color: #71717a;
+font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="bg-container">
+  <div class="bg-wave"></div>
+</div>
+
+<div class="menu-btn" id="menuBtn" onclick="openMenu()">☰</div>
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
+
+<div class="sidebar" id="sidebar">
+  <div class="close-btn" onclick="closeMenu()">✕</div>
+  <a href="index.ad.html">Dashboard</a>
+  <a href="members.ad.html">Manage Members</a>
+  <a href="collection.ad.html">Update Collection</a>
+  <a href="income.ad.html">Add Income</a>
+  <a href="expense.ad.html">Add Expense</a>
+  <a href="reports.ad.html">View Reports</a>
+  <a href="#" onclick="logoutAdmin()">Logout</a>
+</div>
+
+<section class="hero">
+  <img src="Logo.png" alt="Logo">
+  <h1>কপাল পোড়া ট্রাভেলার্স ক্লাব</h1>
+  <div class="badge">ADMIN PANEL</div>
+  <p id="slogan">অ্যাডমিন ড্যাশবোর্ড: ক্লাবের আর্থিক ও সাংগঠনিক মেকানিজম নিয়ন্ত্রণ করুন।</p>
+</section>
+
+<section class="cards">
+  <a href="members.ad.html" class="card">
+    <h3>সদস্য ম্যানেজমেন্ট</h3>
+    <p>নতুন মেম্বার যুক্ত করুন, মেম্বারদের প্রোফাইল এডিট করুন এবং তাদের অ্যাক্টিভেশন স্ট্যাটাস পরিবর্তন করুন।</p>
+  </a>
+
+  <a href="collection.ad.html" class="card">
+    <h3>তহবিল ও কালেকশন এন্ট্রি</h3>
+    <p>সদস্যদের মাসিক চাঁদার হিসাব আপডেট করুন, বকেয়া তালিকা তৈরি করুন এবং রিয়েল-টাইম ডাটাবেজে ডাটা সেভ করুন।</p>
+  </a>
+
+  <a href="expense.ad.html" class="card">
+    <h3>খরচ ও বাজেট নিয়ন্ত্রণ</h3>
+    <p>ট্যুরের যাবতীয় খরচ ও প্রাতিষ্ঠানিক খাতের ডেটা এডিট অথবা ডিলিট করার মাধ্যমে সম্পূর্ণ স্বচ্ছতা বজায় রাখুন।</p>
+  </a>
+</section>
+
+<div class="footer">
+© 2026 Kopal Pora Travelers Club | Core Admin V4.0
+</div>
+
+<script>
+if (sessionStorage.getItem('userRole') === 'admin') {
+    document.body.style.display = "block";
+}
+
+function openMenu(){
+  document.getElementById('sidebar').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+  document.getElementById('menuBtn').style.opacity='0';
+}
+
+function closeMenu(){
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('menuBtn').style.opacity='1';
+}
+
+function logoutAdmin() {
+  sessionStorage.clear(); 
+  window.location.href = "login.ad.html";
+}
+</script>
+
+</body>
+</html>
