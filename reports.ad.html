@@ -4,21 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC Reports</title>
+
+<script>
+if (sessionStorage.getItem('userRole') !== 'admin') {
+    window.location.href = "index.ad.html"; 
+}
+</script>
+
 <style>
+/* 🔒 ২য় সিকিউরিটি লক: ডিফল্টভাবে পুরো বডি হাইড থাকবে */
+body {
+  display: none;
+  background:#020617;
+  color:white;
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
   transition:.4s;
-}
-
-body{
-  background:#020617;
-  color:white;
-  min-height:100vh;
-  overflow-x:hidden;
-  position:relative;
 }
 
 /* Animated Background */
@@ -182,13 +191,13 @@ tr:hover { background: rgba(255,255,255,.04); }
 
 <div class="sidebar" id="sidebar">
   <div style="font-size: 26px; cursor: pointer; margin-bottom: 30px; color: #a1a1aa;" onclick="closeMenu()">✕</div>
-  <a href="dashboard.html">Dashboard</a>
-  <a href="members.html">Members</a>
-  <a href="collection.html">Collection</a>
-  <a href="income.html">Income</a>
-  <a href="expense.html">Expense</a>
-  <a href="reports.html">Reports</a>
-  <a href="about.html">About</a>
+  <a href="adminF6.html">Admin Dashboard</a>
+  <a href="members.ad.html">Members</a>
+  <a href="collection.ad.html">Collection</a>
+  <a href="income.ad.html">Income</a>
+  <a href="expense.ad.html">Expense</a>
+  <a href="reports.ad.html">Reports</a>
+  <a href="javascript:void(0)" onclick="logoutAdmin()" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);">🚪 Exit Admin</a>
 </div>
 
 <div class="container">
@@ -251,6 +260,17 @@ tr:hover { background: rgba(255,255,255,.04); }
 <div class="footer">KPTC Reports V3.2</div>
 
 <script>
+// 🔒 ৩য় সিকিউরিটি লক: সেশন চেক সাকসেসফুল হলে বডি রেন্ডার হবে
+if (sessionStorage.getItem('userRole') === 'admin') {
+    document.body.style.display = "block";
+}
+
+// 🚪 লগআউট হ্যান্ডলার
+function logoutAdmin() {
+    sessionStorage.clear();
+    window.location.href = "index.ad.html";
+}
+
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
@@ -327,7 +347,7 @@ function processReports() {
     }
   });
 
-  // ড্যাশবোর্ড কার্ড কার্ড সিঙ্ক
+  // ড্যাশবোর্ড কার্ড সিঙ্ক
   document.getElementById('totalIncome').innerText = `৳${totalIncome.toLocaleString()}`;
   document.getElementById('totalExpense').innerText = `৳${totalExpense.toLocaleString()}`;
   document.getElementById('currentBalance').innerText = `৳${(totalIncome - totalExpense).toLocaleString()}`;
@@ -381,7 +401,7 @@ function processReports() {
   });
 }
 
-// ফায়ারবেজ লাইভ সিঙ্ক লিসেনার্স
+// ফায়ারবেজে লাইভ লিসেনার্স
 db.ref('income').on('value', (snapshot) => {
   incomeData = snapshot.val() || {};
   processReports();
