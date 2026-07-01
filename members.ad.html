@@ -7,7 +7,7 @@
 
 <script>
 if (sessionStorage.getItem('userRole') !== 'admin') {
-    window.location.href = "index.ad.html"; 
+    window.location.href = "index.html"; 
 }
 </script>
 
@@ -332,7 +332,7 @@ if (sessionStorage.getItem('userRole') === 'admin') {
 // 🚪 লগআউট ফাংশন (ক্লিক করলে সেশন মুছে মেইন হোমপেজে নিয়ে যাবে)
 function logoutAdmin() {
     sessionStorage.clear();
-    window.location.href = "index.ad.html";
+    window.location.href = "index.html";
 }
 
 // ফায়ারবেজ কনফিগারেশন
