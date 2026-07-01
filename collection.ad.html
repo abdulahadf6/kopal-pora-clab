@@ -5,21 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC Admin - Collection Management</title>
 
+<script>
+if (sessionStorage.getItem('userRole') !== 'admin') {
+    window.location.href = "index.ad.html"; 
+}
+</script>
+
 <style>
+/* 🔒 ২য় সিকিউরিটি লক: ডিফল্টভাবে পুরো বডি হাইড থাকবে */
+body{
+  display: none;
+  background:#081018;
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+}
+
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-body{
-  background:#081018;
-  color:#fff;
-  min-height:100vh;
-  overflow-x:hidden;
-  position:relative;
 }
 
 .bg-container{
@@ -255,7 +263,7 @@ tr:hover{
 <a href="income.ad.html"> Manage Income</a>
 <a href="expense.ad.html"> Manage Expense</a>
 <a href="reports.ad.html"> View Reports</a>
-<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);"> Exit Admin</a>
+<a href="javascript:void(0)" onclick="logoutAdmin()" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);"> Exit Admin</a>
 </div>
 
 <div class="container">
@@ -352,6 +360,17 @@ tr:hover{
 <div style="text-align:center; padding:40px; color:#94a3b8;">KPTC Collection Admin Core V2.5</div>
 
 <script>
+  // 🔒 ৩য় সিকিউরিটি লক: সেশন চেক কনফার্ম হলে তবেই বডি ডিসপ্লে করা হবে
+  if (sessionStorage.getItem('userRole') === 'admin') {
+      document.body.style.display = "block";
+  }
+
+  // 🚪 লগআউট ফাংশন
+  function logoutAdmin() {
+      sessionStorage.clear();
+      window.location.href = "index.ad.html";
+  }
+
   const firebaseConfig = {
     databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
   };
@@ -359,8 +378,8 @@ tr:hover{
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  let activeMembersList = []; // 🌟 ডাটাবেজ থেকে আসা রিয়েল মেম্বারদের অ্যারে
-  let allCollectionsData = {}; // কালেকশন হিস্ট্রি অবজেক্ট
+  let activeMembersList = []; 
+  let allCollectionsData = {}; 
   let globalRatesSchema = {};
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -398,7 +417,6 @@ tr:hover{
     setTimeout(() => { t.style.display = 'none'; }, 3000);
   }
 
-  // 🌟 [ম্যাজিক লিসেনার] - 'members' নোড থেকে রিয়েল-টাইম মাস্টার মেম্বার লিস্ট রিড করা
   db.ref('members').on('value', (snapshot) => {
     const membersData = snapshot.val() || {};
     activeMembersList = [];
@@ -414,18 +432,15 @@ tr:hover{
         activeMembersList.push(mName);
       }
 
-      // ড্রপডাউন বক্সে নাম পুশ
       const opt = document.createElement('option');
       opt.value = mName; 
       opt.innerText = mName;
       selectDrop.appendChild(opt);
     });
 
-    // মেম্বার লিস্ট আপডেট হওয়া মাত্র টেবিল রি-রেন্ডার হবে (অটো অ্যাড/ডিলিট সিঙ্ক)
     renderUnifiedTable();
   });
 
-  // ১. ডাইনামিক মাসিক ফি রেট ডাটাবেজে সংরক্ষণ করা
   function saveMonthlyRate() {
     const year = document.getElementById('rateYear').value;
     const month = document.getElementById('rateMonth').value;
@@ -443,7 +458,6 @@ tr:hover{
     });
   }
 
-  // ২. লাইভ ফি স্ট্রাকচার স্কিমা লোড করা 
   db.ref('kptc_settings/fee_structure').on('value', (snapshot) => {
     globalRatesSchema = snapshot.val() || {};
     updateNoticeText();
@@ -459,7 +473,6 @@ tr:hover{
     document.getElementById('activeRateNotice').innerText = `Active Configuration Rule: Year ${yr} (${mo}) = ৳${activeRate}`;
   }
 
-  // ৩. মূল কালেকশন স্ট্যাটাস আপডেট + মেম্বার ইনকাম ড্যাশবোর্ডের সাথে লাইভ সিঙ্ক
   function updateCollectionStatus() {
     const year = document.getElementById('inputYear').value;
     const mId = document.getElementById('inputMemberId').value.trim();
@@ -515,7 +528,6 @@ tr:hover{
     });
   }
 
-  // ৪. নির্দিষ্ট বছরের কালেকশন ডাটা রিড করা
   function loadCollectionData(year) {
     db.ref('collections/' + year).on('value', (snapshot) => {
       allCollectionsData = snapshot.val() || {};
@@ -523,7 +535,6 @@ tr:hover{
     });
   }
 
-  // 🌟 [মাস্টার রেন্ডারার] - মেম্বার ও কালেকশন ডাটা মার্জ করে টেবিল জেনারেট করা
   function renderUnifiedTable() {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = "";
@@ -534,24 +545,17 @@ tr:hover{
     let paid = 0;
     let pending = 0;
 
-    // ডাটাবেজের রিয়েল মেম্বার লিস্ট ধরে লুপ চলবে
     activeMembersList.forEach(memberName => {
-      
-      // সার্চ ফিল্টারিং 
       if (filterText && !memberName.toLowerCase().includes(filterText)) {
         return;
       }
 
       total++;
-
-      // কালেকশন নোডে এই মেম্বারের পেইড ডাটা আছে কিনা চেক করা
       const memberRecord = allCollectionsData[memberName] || {};
-
       let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
       
       months.forEach((month, idx) => {
         const isPaid = memberRecord[month] === true || memberRecord[month] === "Paid" || memberRecord[month.toLowerCase()] === true || memberRecord[month.toLowerCase()] === "Paid";
-        
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
         if (idx === currentMonthIdx) {
@@ -578,7 +582,6 @@ tr:hover{
 
   document.getElementById('searchInput').addEventListener('input', renderUnifiedTable);
 
-  // ইনিশিয়াল কল
   loadCollectionData(yearSelect.value);
 
   function openMenu(){
