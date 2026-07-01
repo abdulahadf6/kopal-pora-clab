@@ -4,7 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KPTC Admin - Expense & Tour Management</title>
+
+<script>
+if (sessionStorage.getItem('userRole') !== 'admin') {
+    window.location.href = "index.ad.html"; 
+}
+</script>
+
 <style>
+/* 🔒 ২য় সিকিউরিটি লক: ডিফল্টভাবে পুরো বডি হাইড থাকবে */
+body {
+  display: none;
+  background: #030611;
+  color: #f5f5f7;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
 /* গ্লোবাল স্টাইল */
 *{
   margin: 0;
@@ -12,14 +29,6 @@
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-body {
-  background: #030611;
-  color: #f5f5f7;
-  min-height: 100vh;
-  overflow-x: hidden;
-  position: relative;
 }
 
 /* অরোরা ওয়েভ ইফেক্ট ব্যাকগ্রাউন্ড */
@@ -278,7 +287,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <a href="income.ad.html"> Manage Income</a>
 <a href="expense.ad.html"> Manage Expense</a>
 <a href="reports.ad.html"> View Reports</a>
-<a href="dashboard.html" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);">🚪 Exit Admin</a>
+<a href="javascript:void(0)" onclick="logoutAdmin()" style="margin-top: 30px; border-color: rgba(248, 113, 113, 0.3);">🚪 Exit Admin</a>
 </div>
 
 <div class="filter-container">
@@ -360,6 +369,17 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 <div class="footer">KPTC Expense Admin V3.1</div>
 
 <script>
+// 🔒 ৩য় সিকিউরিটি লক: সেশন চেক কনফার্ম হলে তবেই বডি ডিসপ্লে করা হবে
+if (sessionStorage.getItem('userRole') === 'admin') {
+    document.body.style.display = "block";
+}
+
+// 🚪 লগআউট ফাংশন
+function logoutAdmin() {
+    sessionStorage.clear();
+    window.location.href = "index.ad.html";
+}
+
 // ফায়ারবেজ কনফিগারেশন
 const firebaseConfig = {
   databaseURL: "https://kopal-pora-travelers-club-default-rtdb.asia-southeast1.firebasedatabase.app/"
@@ -373,7 +393,7 @@ let globalGeneralData = {};
 let globalTourData = {};
 
 // ড্রপডাউন জেনারেটর (২০২৬ থেকে শুরু)
-const currentYear = new Date().getFullYear(); // 2026
+const currentYear = new Date().getFullYear(); 
 const yearFilterSelect = document.getElementById('yearFilter');
 
 for (let y = currentYear; y <= currentYear + 4; y++) {
@@ -571,7 +591,6 @@ function renderExpenseAdminDashboard() {
   if(!hasGeneralData) catTbody.innerHTML = `<tr><td colspan="3" style="text-align: center; color: #71717a;">No general expenses found for ${scopeText}!</td></tr>`;
   if(!hasTourData) detailsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #71717a;">No tour records found for ${scopeText}!</td></tr>`;
 
-  // টোটাল কার্ডের ভ্যালু রিয়েল-টাইমে সেট করা
   document.getElementById('monthExpense').innerText = `৳${totalMonth.toLocaleString()}`;
   document.getElementById('yearExpense').innerText = `৳${totalYearOrAll.toLocaleString()}`;
 }
