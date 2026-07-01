@@ -7,7 +7,7 @@
 
 <script>
 if (sessionStorage.getItem('userRole') !== 'admin') {
-    window.location.href = "index.ad.html"; 
+    window.location.href = "index.html"; 
 }
 </script>
 
@@ -268,7 +268,7 @@ if (sessionStorage.getItem('userRole') === 'admin') {
 // 🚪 লগআউট হ্যান্ডলার
 function logoutAdmin() {
     sessionStorage.clear();
-    window.location.href = "index.ad.html";
+    window.location.href = "index.html";
 }
 
 const firebaseConfig = {
