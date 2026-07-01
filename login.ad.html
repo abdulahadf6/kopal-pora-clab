@@ -8,6 +8,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 
+<script>
+  if (sessionStorage.getItem('userRole') === 'admin') {
+      window.location.href = "adminF6.html"; 
+  }
+</script>
+
 <style>
 *{
 margin:0;
@@ -154,7 +160,7 @@ button:hover{ transform:translateY(-3px); box-shadow:0 10px 25px rgba(16, 185, 1
 <div class="badge">ADMIN PANEL</div>
 
 <h1>Admin Login</h1>
-
+<div class="subtitle">Firebase Console Authentication</div>
 
 <div class="input-box">
   <input type="email" id="adminEmailInput" placeholder="admin@kptc.com">
@@ -164,8 +170,7 @@ button:hover{ transform:translateY(-3px); box-shadow:0 10px 25px rgba(16, 185, 1
   <div class="pass-wrapper">
     <input type="password" id="adminPasswordInput" placeholder="••••••••">
     <div class="toggle-password" id="eyeToggleButton" onclick="togglePass()">
-      <svg id="eyeIconSvg" viewBox="0 0 24 24"><path d="M12 19c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm0-16c-3.86 0-7 3.14-7 7s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm0 11c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm-7-5c0 .55-.45 1-1 1s-1-.45-1-1 .45-1 1-1 1 .45 1 1zm15 0c0 .55-.45 1-1 1s-1-.45-1-1 .45-1 1-1 1 .45 1 1z"/></svg>
-    </div>
+      </div>
   </div>
 </div>
 
@@ -226,8 +231,10 @@ function validateAdmin() {
 
   firebase.auth().signInWithEmailAndPassword(email, password)
     .then((userCredential) => {
+      // সেশনে অ্যাডমিন রোল সেট করা হলো
       sessionStorage.setItem('userRole', 'admin');
-      window.location.href = "dashboard.ad.html"; 
+      // সঠিক লগইনে কাঙ্খিত পেজে রিডাইরেক্ট হবে
+      window.location.href = "adminF6.html"; 
     })
     .catch((error) => {
       console.error(error);
