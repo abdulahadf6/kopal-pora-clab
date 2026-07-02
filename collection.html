@@ -241,17 +241,17 @@ color:#ef4444;
 font-size:18px;
 }
 
-/* 🔄 ইন-একটিভ মেম্বারদের রো হালকা আবছা দেখানোর স্টাইল */
 .inactive-row {
-  opacity: 0.5;
+  opacity: 0.45;
 }
 .inactive-tag {
   font-size: 11px;
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.18);
   color: #f87171;
-  padding: 2px 6px;
-  border-radius: 6px;
-  margin-left: 5px;
+  padding: 2px 7px;
+  border-radius: 7px;
+  margin-left: 6px;
+  font-weight: normal;
 }
 </style>
 
@@ -411,30 +411,40 @@ KPTC Collection V1.4
     const activeYear = yearSelect.value;
 
     Object.keys(data).forEach(memberId => {
-      // 🔒 ১ম সিকিউরিটি ফিল্টার: মেম্বারটি যদি মূল 'members' নোড থেকে পুরোপুরি ডিলিট হয়ে থাকে তবে তাকে একদমই দেখাবে না।
-      if (!globalMembersList[memberId]) {
+      const memberCollectionData = data[memberId];
+      const memberName = memberCollectionData.name || memberId;
+
+      // 🔍 ডাইনামিক আইডি এবং নাম সার্চিং ফিল্টার লজিক
+      let memberMeta = globalMembersList[memberId]; 
+      
+      if (!memberMeta) {
+        const foundKey = Object.keys(globalMembersList).find(key => 
+          key.toLowerCase() === memberId.toLowerCase() || 
+          key.toLowerCase() === memberName.toLowerCase() ||
+          (globalMembersList[key].name && globalMembersList[key].name.toLowerCase() === memberName.toLowerCase())
+        );
+        if (foundKey) {
+          memberMeta = globalMembersList[foundKey];
+        }
+      }
+
+      // 🔒 সিকিউরিটি লক: মেম্বার যদি মূল মেম্বার নোডে না থাকে (যেমন ডিলিট হওয়া ডেমো ডাটা), তবে টেবিল থেকে হাইড থাকবে
+      if (!memberMeta) {
         return; 
       }
 
-      // 🔄 ইন-একটিভ স্ট্যাটাস চেক লজিক
-      const memberMeta = globalMembersList[memberId];
       const isInactive = memberMeta.status === "inactive" || memberMeta.status === "Inactive";
-
-      const memberCollectionData = data[memberId];
-      const memberName = memberCollectionData.name || memberId;
 
       if (filterText && !memberName.toLowerCase().includes(filterText.toLowerCase())) {
         return;
       }
 
-      // শুধু একটিভ মেম্বারদের মূল সংখ্যায় গণনা করবে
       if (!isInactive) {
         totalActiveCount++;
       }
 
-      // ইন-একটিভ মেম্বার হলে রো-তে স্পেশাল ক্লাস এবং ট্যাগ যুক্ত হবে
       let rowHtml = isInactive ? '<tr class="inactive-row">' : '<tr>';
-      rowHtml += '<td><strong>' + memberName + '</strong>' + (isInactive ? '<span class="inactive-tag">Inactive</span>' : '') + '</td>';
+      rowHtml += '<td>document.write<strong>' + memberName + '</strong>' + (isInactive ? '<span class="inactive-tag">Inactive</span>' : '') + '</td>';
       
       months.forEach((month, idx) => {
         const mVal = memberCollectionData[month];
@@ -445,21 +455,15 @@ KPTC Collection V1.4
         
         const monthFeeRate = (globalRatesSchema[activeYear] && globalRatesSchema[activeYear][month]) !== undefined ? globalRatesSchema[activeYear][month] : 100;
 
-        // ইন-একটিভ হোক বা একটিভ, অতীতে যদি সে টাকা দিয়ে থাকে (✅), তবে তা টোটাল বার্ষিক ফান্ডে যুক্ত থাকবে (রেকর্ড নষ্ট হবে না)
         if (isPaid) {
           totalCalculatedYearFunds += monthFeeRate; 
         }
 
-        // কারেন্ট মাসের পেন্ডিং ও পেড সামারি হিসাব লজিক
         if (idx === currentMonthIdx) {
           if (isPaid) {
-            // যদি ইন-একটিভ মেম্বারও কারেন্ট মাসের টাকা দিয়ে থাকে, তবেই সে ফান্ডে যোগ হবে
-            if (isPaid) {
-              totalCalculatedMonthFunds += monthFeeRate;
-              if (!isInactive) paidThisMonthCount++; // শুধু একটিভ হলে 'Paid' কাউন্টে দেখাবে
-            }
+            totalCalculatedMonthFunds += monthFeeRate;
+            if (!isInactive) paidThisMonthCount++;
           } else {
-            // 💡 কাস্টম লজিক: মেম্বার যদি একটিভ থাকে কেবল তখনই কারেন্ট মাসে তাকে 'Pending' গণনা করবে। ইন-একটিভদের চার্জ বা পেন্ডিং করবে না।
             if (!isInactive) {
               pendingThisMonthCount++;
             }
