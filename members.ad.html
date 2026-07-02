@@ -217,7 +217,26 @@ h1 {
 /* টেবিল ও অ্যাকশন বাটন */
 table { width: 100%; border-collapse: collapse; text-align: left; }
 th, td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+/* 🔄 ইন-একটিভ মেম্বার রো আবছা করার জন্য স্পেশাল ক্লাস */
+.inactive-row td { 
+  opacity: 0.45; 
+}
+
+.table-select {
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 8px;
+  outline: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+.table-select option {
+  background: #0c111d;
+  color: #fff;
+}
 
 .btn-delete {
   background: rgba(239, 68, 68, 0.15);
@@ -230,6 +249,7 @@ tr:hover td { background: rgba(255, 255, 255, 0.02); }
 .btn-delete:hover {
   background: #ef4444;
   color: #fff;
+  opacity: 1 !important;
 }
 
 /* ফুটার */
@@ -365,6 +385,15 @@ function pushMember() {
   });
 }
 
+// 🔄 রিয়েল-টাইমে ডাটাবেজের স্ট্যাটাস পরিবর্তন করার ফাংশন
+function updateStatusInRealtime(key, newStatus) {
+  db.ref(`members/${key}`).update({ status: newStatus }, (error) => {
+    if (error) {
+      alert('স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে!');
+    }
+  });
+}
+
 // ডাটাবেজ থেকে মেম্বার ডিলিট করা
 function deleteMember(key) {
   if(confirm('আপনি কি নিশ্চিতভাবে এই সদস্যের ডাটা মুছে ফেলতে চান?')) {
@@ -387,7 +416,8 @@ membersRef.on('value', (snapshot) => {
     const member = data[memberKey];
     memberCount++;
 
-    if(member.status === "Active" || member.status === "active") {
+    const isCurrentActive = member.status === "Active" || member.status === "active";
+    if(isCurrentActive) {
       activeCount++;
     }
 
@@ -396,11 +426,21 @@ membersRef.on('value', (snapshot) => {
     }
 
     const tr = document.createElement('tr');
+    // মেম্বার ইন-একটিভ হলে রো-তে স্পেশাল ক্লাস অ্যাড হবে
+    if (!isCurrentActive) {
+      tr.classList.add('inactive-row');
+    }
+
     tr.innerHTML = `
       <td>${member.id || 'N/A'}</td>
-      <td>${member.name || 'N/A'}</td>
+      <td><strong>${member.name || 'N/A'}</strong></td>
       <td>${member.location || 'N/A'}</td>
-      <td style="color: ${member.status === 'Active' ? '#22c55e' : '#ef4444'}">${member.status || 'Inactive'}</td>
+      <td>
+        <select class="table-select" style="color: ${isCurrentActive ? '#22c55e' : '#ef4444'}" onchange="updateStatusInRealtime('${memberKey}', this.value)">
+          <option value="Active" ${isCurrentActive ? 'selected' : ''}>Active</option>
+          <option value="Inactive" ${!isCurrentActive ? 'selected' : ''}>Inactive</option>
+        </select>
+      </td>
       <td>
         <button class="btn-delete" onclick="deleteMember('${memberKey}')">Delete</button>
       </td>
