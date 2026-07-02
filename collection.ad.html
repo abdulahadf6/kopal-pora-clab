@@ -216,6 +216,21 @@ th, td{
   padding:18px;
   text-align:center;
 }
+
+/* 🔄 ইন-একটিভ মেম্বারদের রো আবছা দেখানোর স্টাইল */
+.inactive-row td {
+  opacity: 0.45;
+}
+.inactive-tag {
+  font-size: 11px;
+  background: rgba(239, 68, 68, 0.18);
+  color: #f87171;
+  padding: 2px 7px;
+  border-radius: 7px;
+  margin-left: 6px;
+  font-weight: normal;
+}
+
 tr{
   border-bottom:1px solid rgba(255,255,255,.08);
 }
@@ -349,9 +364,9 @@ tr:hover{
 
 <div class="glass" style="margin-top:25px; padding:25px;">
   <h3 style="margin-bottom:15px;"> Summary</h3>
-  <p>Total Members : <span id="totalMembers">0</span></p><br>
+  <p>Total Active Members : <span id="totalMembers">0</span></p><br>
   <p>Paid This Month (<span id="currentMonthName">Month</span>) : <span id="paidMembers">0</span></p><br>
-  <p>Pending Members : <span id="pendingMembers">0</span></p>
+  <p>Pending Active Members : <span id="pendingMembers">0</span></p>
 </div>
 </div>
 
@@ -378,6 +393,7 @@ tr:hover{
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
+  let globalMembersObject = {}; // 💾 মেম্বার মেটাডাটা অবজেক্ট (স্ট্যাটাস ট্র্যাক করার জন্য)
   let activeMembersList = []; 
   let allCollectionsData = {}; 
   let globalRatesSchema = {};
@@ -419,6 +435,7 @@ tr:hover{
 
   db.ref('members').on('value', (snapshot) => {
     const membersData = snapshot.val() || {};
+    globalMembersObject = membersData; // স্টোর করে রাখা হলো
     activeMembersList = [];
     
     const selectDrop = document.getElementById('inputMemberId');
@@ -427,6 +444,7 @@ tr:hover{
     Object.keys(membersData).forEach(key => {
       const member = membersData[key];
       const mName = (member.name || key).trim(); 
+      const isInactive = member.status === "inactive" || member.status === "Inactive";
       
       if(!activeMembersList.includes(mName)) {
         activeMembersList.push(mName);
@@ -434,7 +452,15 @@ tr:hover{
 
       const opt = document.createElement('option');
       opt.value = mName; 
-      opt.innerText = mName;
+      
+      // 🏷️ যদি মেম্বার ইন-একটিভ থাকে তবে ড্রপডাউনে ইন-একটিভ ট্যাগ যুক্ত হবে
+      if (isInactive) {
+        opt.innerText = `${mName} (Inactive)`;
+        opt.style.color = '#f87171'; // লালচে রঙের টেক্সট
+      } else {
+        opt.innerText = mName;
+      }
+      
       selectDrop.appendChild(opt);
     });
 
@@ -480,6 +506,21 @@ tr:hover{
     const status = document.getElementById('inputStatus').value === "true";
 
     if(!mId) return alert('অনুগ্রহ করে তালিকা থেকে একজন মেম্বার সিলেক্ট করুন!');
+
+    // 🔒 ১ম স্ট্রং সিকিউরিটি লক: ইন-একটিভ মেম্বারদের জন্য চাঁদা এন্ট্রি ব্লক করার লজিক
+    let isSelectedMemberInactive = false;
+    Object.keys(globalMembersObject).forEach(key => {
+      const m = globalMembersObject[key];
+      if ((m.name && m.name.trim() === mId) || key === mId) {
+        if (m.status === "inactive" || m.status === "Inactive") {
+          isSelectedMemberInactive = true;
+        }
+      }
+    });
+
+    if (isSelectedMemberInactive && status === true) {
+      return alert('This member is inactive! Cannot entry collection for inactive members.');
+    }
 
     const targetFee = (globalRatesSchema[year] && globalRatesSchema[year][month]) !== undefined ? globalRatesSchema[year][month] : 100;
     const transactionKey = `AUTO_COLL_${year}_${month}_${mId}`.replace(/[.#$\[\]]/g, "_");
@@ -541,7 +582,7 @@ tr:hover{
 
     const filterText = document.getElementById('searchInput').value.trim().toLowerCase();
 
-    let total = 0;
+    let totalActiveCount = 0;
     let paid = 0;
     let pending = 0;
 
@@ -550,16 +591,37 @@ tr:hover{
         return;
       }
 
-      total++;
+      // 🔍 ব্যাকএন্ড থেকে মেম্বারের রিয়েল-টাইম স্ট্যাটাস নির্ধারণ করা
+      let isCurrentInactive = false;
+      Object.keys(globalMembersObject).forEach(key => {
+        const m = globalMembersObject[key];
+        if ((m.name && m.name.trim() === memberName) || key === memberName) {
+          if (m.status === "inactive" || m.status === "Inactive") {
+            isCurrentInactive = true;
+          }
+        }
+      });
+
+      if (!isCurrentInactive) {
+        totalActiveCount++;
+      }
+
       const memberRecord = allCollectionsData[memberName] || {};
-      let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
+      
+      // 🔄 ইন-একটিভ মেম্বার হলে রো হালকা আবছা (CSS ক্লাস) দেখাবে
+      let rowHtml = isCurrentInactive ? '<tr class="inactive-row">' : '<tr>';
+      rowHtml += '<td><strong>' + memberName + '</strong>' + (isCurrentInactive ? '<span class="inactive-tag">Inactive</span>' : '') + '</td>';
       
       months.forEach((month, idx) => {
         const isPaid = memberRecord[month] === true || memberRecord[month] === "Paid" || memberRecord[month.toLowerCase()] === true || memberRecord[month.toLowerCase()] === "Paid";
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
         if (idx === currentMonthIdx) {
-          if (isPaid) paid++; else pending++;
+          if (isPaid) {
+            if (!isCurrentInactive) paid++; 
+          } else {
+            if (!isCurrentInactive) pending++;
+          }
         }
       });
       
@@ -567,11 +629,11 @@ tr:hover{
       tbody.innerHTML += rowHtml;
     });
 
-    if (total === 0) {
+    if (activeMembersList.length === 0) {
       tbody.innerHTML = '<tr><td colspan="13" style="padding:30px; color:#94a3b8;">No active member found!</td></tr>';
     }
 
-    document.getElementById('totalMembers').innerText = total;
+    document.getElementById('totalMembers').innerText = totalActiveCount;
     document.getElementById('paidMembers').innerText = paid;
     document.getElementById('pendingMembers').innerText = pending;
   }
