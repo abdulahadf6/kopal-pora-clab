@@ -20,7 +20,6 @@ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 🔒 ডিফল্টভাবে পুরো বডি হাইড করা, সেশন ভ্যালিড থাকলে কেবল তখনই স্ক্রিপ্ট দিয়ে একবারে অন হবে */
 body{
 display: none;
 background:#081018;
@@ -241,6 +240,19 @@ font-size:18px;
 color:#ef4444;
 font-size:18px;
 }
+
+/* 🔄 ইন-একটিভ মেম্বারদের রো হালকা আবছা দেখানোর স্টাইল */
+.inactive-row {
+  opacity: 0.5;
+}
+.inactive-tag {
+  font-size: 11px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  padding: 2px 6px;
+  border-radius: 6px;
+  margin-left: 5px;
+}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -315,18 +327,17 @@ font-size:18px;
 
 <div class="glass" style="margin-top:25px; padding:25px;">
 <h3 style="margin-bottom:15px;"> Summary</h3>
-<p>Total Members : <span id="totalMembers">0</span></p><br>
+<p>Total Active Members : <span id="totalMembers">0</span></p><br>
 <p>Paid This Month (<span id="currentMonthName">Month</span>) : <span id="paidMembers">0</span></p><br>
-<p>Pending Members : <span id="pendingMembers">0</span></p>
+<p>Pending Active Members : <span id="pendingMembers">0</span></p>
 </div>
 </div>
 
 <div style="text-align:center; padding:40px; color:#94a3b8;">
-KPTC Collection V1.3
+KPTC Collection V1.4
 </div>
 
 <script>
-  // 🔒 সেশন ভ্যালিড থাকলে কেবল তখনই পেজটি ডিসপ্লে (Show) করবে
   if (sessionStorage.getItem('userRole') === 'member') {
       document.body.style.display = "block";
   }
@@ -338,7 +349,8 @@ KPTC Collection V1.3
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  let allMembersData = {}; 
+  let globalMembersList = {}; 
+  let allCollectionData = {}; 
   let globalRatesSchema = {}; 
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -362,6 +374,11 @@ KPTC Collection V1.3
     yearSelect.selectedIndex = 0;
   }
 
+  db.ref('members').on('value', (snapshot) => {
+    globalMembersList = snapshot.val() || {};
+    renderTable(allCollectionData, document.getElementById('searchInput').value);
+  });
+
   db.ref('kptc_settings/fee_structure').on('value', (snapshot) => {
     globalRatesSchema = snapshot.val() || {};
     
@@ -375,8 +392,8 @@ KPTC Collection V1.3
   function loadCollectionData(year) {
     const dbRef = db.ref('collections/' + year);
     dbRef.on('value', (snapshot) => {
-      allMembersData = snapshot.val() || {};
-      renderTable(allMembersData, document.getElementById('searchInput').value);
+      allCollectionData = snapshot.val() || {};
+      renderTable(allCollectionData, document.getElementById('searchInput').value);
     });
   }
 
@@ -384,7 +401,7 @@ KPTC Collection V1.3
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = "";
 
-    let total = 0;
+    let totalActiveCount = 0;
     let paidThisMonthCount = 0;
     let pendingThisMonthCount = 0;
     
@@ -394,36 +411,58 @@ KPTC Collection V1.3
     const activeYear = yearSelect.value;
 
     Object.keys(data).forEach(memberId => {
-      const member = data[memberId];
-      const memberName = member.name || memberId;
+      // 🔒 ১ম সিকিউরিটি ফিল্টার: মেম্বারটি যদি মূল 'members' নোড থেকে পুরোপুরি ডিলিট হয়ে থাকে তবে তাকে একদমই দেখাবে না।
+      if (!globalMembersList[memberId]) {
+        return; 
+      }
+
+      // 🔄 ইন-একটিভ স্ট্যাটাস চেক লজিক
+      const memberMeta = globalMembersList[memberId];
+      const isInactive = memberMeta.status === "inactive" || memberMeta.status === "Inactive";
+
+      const memberCollectionData = data[memberId];
+      const memberName = memberCollectionData.name || memberId;
 
       if (filterText && !memberName.toLowerCase().includes(filterText.toLowerCase())) {
         return;
       }
 
-      total++;
+      // শুধু একটিভ মেম্বারদের মূল সংখ্যায় গণনা করবে
+      if (!isInactive) {
+        totalActiveCount++;
+      }
 
-      let rowHtml = '<tr><td><strong>' + memberName + '</strong></td>';
+      // ইন-একটিভ মেম্বার হলে রো-তে স্পেশাল ক্লাস এবং ট্যাগ যুক্ত হবে
+      let rowHtml = isInactive ? '<tr class="inactive-row">' : '<tr>';
+      rowHtml += '<td><strong>' + memberName + '</strong>' + (isInactive ? '<span class="inactive-tag">Inactive</span>' : '') + '</td>';
       
       months.forEach((month, idx) => {
-        const mVal = member[month];
-        const mValLower = member[month.toLowerCase()];
+        const mVal = memberCollectionData[month];
+        const mValLower = memberCollectionData[month.toLowerCase()];
         const isPaid = mVal === true || mVal === "Paid" || mValLower === true || mValLower === "Paid";
         
         rowHtml += isPaid ? '<td class="ok">✅</td>' : '<td class="no">-</td>';
         
         const monthFeeRate = (globalRatesSchema[activeYear] && globalRatesSchema[activeYear][month]) !== undefined ? globalRatesSchema[activeYear][month] : 100;
 
+        // ইন-একটিভ হোক বা একটিভ, অতীতে যদি সে টাকা দিয়ে থাকে (✅), তবে তা টোটাল বার্ষিক ফান্ডে যুক্ত থাকবে (রেকর্ড নষ্ট হবে না)
         if (isPaid) {
           totalCalculatedYearFunds += monthFeeRate; 
         }
 
+        // কারেন্ট মাসের পেন্ডিং ও পেড সামারি হিসাব লজিক
         if (idx === currentMonthIdx) {
           if (isPaid) {
-            paidThisMonthCount++;
-            totalCalculatedMonthFunds += monthFeeRate;
+            // যদি ইন-একটিভ মেম্বারও কারেন্ট মাসের টাকা দিয়ে থাকে, তবেই সে ফান্ডে যোগ হবে
+            if (isPaid) {
+              totalCalculatedMonthFunds += monthFeeRate;
+              if (!isInactive) paidThisMonthCount++; // শুধু একটিভ হলে 'Paid' কাউন্টে দেখাবে
+            }
           } else {
-            pendingThisMonthCount++;
+            // 💡 কাস্টম লজিক: মেম্বার যদি একটিভ থাকে কেবল তখনই কারেন্ট মাসে তাকে 'Pending' গণনা করবে। ইন-একটিভদের চার্জ বা পেন্ডিং করবে না।
+            if (!isInactive) {
+              pendingThisMonthCount++;
+            }
           }
         }
       });
@@ -431,11 +470,11 @@ KPTC Collection V1.3
       tbody.innerHTML += rowHtml;
     });
 
-    if (total === 0) {
+    if (tbody.innerHTML === "") {
       tbody.innerHTML = '<tr><td colspan="13" style="padding:30px; color:#94a3b8;">No data found in database!</td></tr>';
     }
 
-    document.getElementById('totalMembers').innerText = total;
+    document.getElementById('totalMembers').innerText = totalActiveCount;
     document.getElementById('paidMembers').innerText = paidThisMonthCount;
     document.getElementById('pendingMembers').innerText = pendingThisMonthCount;
 
@@ -460,7 +499,7 @@ KPTC Collection V1.3
 
   const searchInput = document.getElementById('searchInput');
   searchInput.addEventListener('input', (e) => {
-    renderTable(allMembersData, e.target.value);
+    renderTable(allCollectionData, e.target.value);
   });
 
   function openMenu(){
@@ -476,7 +515,6 @@ KPTC Collection V1.3
     document.getElementById('menuBtn').style.pointerEvents = 'auto';
   }
 
-  // 🚪 লগআউট ফাংশন
   function logoutUser() {
     sessionStorage.clear();
     window.location.href = "index.html";
