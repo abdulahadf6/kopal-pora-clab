@@ -385,13 +385,24 @@ function pushMember() {
   });
 }
 
-// 🔄 রিয়েল-টাইমে ডাটাবেজের স্ট্যাটাস পরিবর্তন করার ফাংশন
-function updateStatusInRealtime(key, newStatus) {
-  db.ref(`members/${key}`).update({ status: newStatus }, (error) => {
-    if (error) {
-      alert('স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে!');
-    }
-  });
+// 🔄 রিয়েল-টাইমে ডাটাবেজের স্ট্যাটাস পরিবর্তন করার ফাংশন (ডাবল কনফার্মেশন প্রম্পট সহ)
+function updateStatusInRealtime(key, selectElement, newStatus) {
+  const msg = `আপনি কি নিশ্চিতভাবে এই সদস্যের স্ট্যাটাস পরিবর্তন করে "${newStatus}" করতে চান?`;
+  
+  if (confirm(msg)) {
+    db.ref(`members/${key}`).update({ status: newStatus }, (error) => {
+      if (error) {
+        alert('স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে!');
+      } else {
+        alert(`স্ট্যাটাস সফলভাবে "${newStatus}" করা হয়েছে!`);
+      }
+    });
+  } else {
+    // 🔙 যদি অ্যাডমিন 'Cancel' করে, তবে ড্রপডাউন মেনুটি সাথে সাথে তার আগের ব্যাকএন্ডের মানে ফিরে যাবে
+    const oldStatus = newStatus === 'Active' ? 'Inactive' : 'Active';
+    selectElement.value = oldStatus;
+    selectElement.style.color = oldStatus === 'Active' ? '#22c55e' : '#ef4444';
+  }
 }
 
 // ডাটাবেজ থেকে মেম্বার ডিলিট করা
@@ -436,7 +447,7 @@ membersRef.on('value', (snapshot) => {
       <td><strong>${member.name || 'N/A'}</strong></td>
       <td>${member.location || 'N/A'}</td>
       <td>
-        <select class="table-select" style="color: ${isCurrentActive ? '#22c55e' : '#ef4444'}" onchange="updateStatusInRealtime('${memberKey}', this.value)">
+        <select class="table-select" style="color: ${isCurrentActive ? '#22c55e' : '#ef4444'}" onchange="updateStatusInRealtime('${memberKey}', this, this.value)">
           <option value="Active" ${isCurrentActive ? 'selected' : ''}>Active</option>
           <option value="Inactive" ${!isCurrentActive ? 'selected' : ''}>Inactive</option>
         </select>
