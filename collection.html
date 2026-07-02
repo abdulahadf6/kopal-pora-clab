@@ -444,7 +444,7 @@ KPTC Collection V1.4
       }
 
       let rowHtml = isInactive ? '<tr class="inactive-row">' : '<tr>';
-      rowHtml += '<td>document.write<strong>' + memberName + '</strong>' + (isInactive ? '<span class="inactive-tag">Inactive</span>' : '') + '</td>';
+      rowHtml += '<td><strong>' + memberName + '</strong>' + (isInactive ? '<span class="inactive-tag">Inactive</span>' : '') + '</td>';
       
       months.forEach((month, idx) => {
         const mVal = memberCollectionData[month];
